@@ -9,6 +9,7 @@ using namespace std;
 #define MAX_TUBES 100
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
+#define BACKGROUND "../../resources/world/World_1_1.png"
 
 enum Powers {
     BASE = 0,
@@ -59,10 +60,12 @@ public:
 // Global Variables Declaration
 //------------------------------------------------------------------------------------
 static const int screenWidth = 800;
-static const int screenHeight = 450;
+static const int screenHeight = 480;
 
 static bool gameOver = false;
 static int score = 0;
+
+Texture2D background;
 
 //------------------------------------------------------------------------------------
 // Module Functions Declaration (local)
@@ -80,8 +83,8 @@ int main(void)
 {
     // Initialization
     //---------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "classic game: floppy");
-
+    InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
+    background = LoadTexture(BACKGROUND);
     InitGame();
 
 
@@ -113,10 +116,11 @@ int main(void)
 // Initialize game variables
 void InitGame(void)
 {
-
     score = 0;
-
     gameOver = false;
+
+
+
 }
 
 // Update game (one frame)
@@ -143,19 +147,14 @@ void DrawGame(void)
 
     ClearBackground(RAYWHITE);
 
-    if (!gameOver)
-    {
-        
-    }
-    else 
+    /* Dibujado del Background */
+    Rectangle initial_position = {0, 0, background.width, background.height };
+    Rectangle final_position = { 0, screenHeight / 2, background.width*2, background.height*2 };
+    DrawTexturePro(background, initial_position, final_position, { 0, (float)(background.height / 2) }, 0, WHITE);
+    /***************************/
 
+    
     EndDrawing();
-}
-
-// Unload game variables
-void UnloadGame(void)
-{
-    // TODO: Unload all dynamic loaded data (textures, sounds, models...)
 }
 
 // Update and Draw (one frame)
@@ -163,4 +162,11 @@ void UpdateDrawFrame(void)
 {
     UpdateGame();
     DrawGame();
+}
+
+// Unload game variables
+void UnloadGame(void)
+{
+    UnloadTexture(background);
+    // TODO: Unload all dynamic loaded data (textures, sounds, models...)
 }
