@@ -531,7 +531,7 @@
     <ClInclude Include="..\..\include\resource_dir.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\main.c" />
+    <ClCompile Include="..\..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="raylib.vcxproj">
