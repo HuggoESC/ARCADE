@@ -134,9 +134,17 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
 
     if (!gameOver)
     {
-        if (IsKeyDown(KEY_RIGHT)) mario->position.x += 5;
-        else if (IsKeyDown(KEY_LEFT)) mario->position.x -= 5;
+        /* Movimiento de Mario */
+        if (IsKeyDown(KEY_RIGHT)) {
+            mario->position.x += 5;
 
+        }
+        else if (IsKeyDown(KEY_LEFT)) {
+            mario->position.x -= 5;
+
+        }
+
+        /* Salto */
         if (IsKeyDown(KEY_SPACE) ) {
             mario->position.y -= 10;
         }
