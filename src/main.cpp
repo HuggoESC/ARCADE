@@ -61,6 +61,13 @@ Texture2D background;
 Texture2D spriteSheet;
 
 
+static int tiempo = 400;   // Tiempo en cuenta regresiva
+static int monedas = 0;    // Contador de monedas
+static int vidas = 3;      // Número de vidas de Mario
+static int world = 1;
+static int level = 1;
+
+
 //------------------------------------------------------------------------------------
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
@@ -163,6 +170,20 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
             gameOver = false;
         }
     }
+
+    static float tiempoAcumulado = 0;
+
+    tiempoAcumulado += delta;
+    if (tiempoAcumulado >= 1.0f) {
+        tiempo -= 1;
+        tiempoAcumulado = 0;  // Reiniciamos el acumulador
+    }
+
+    if (tiempo <= 0) {
+        tiempo = 0;
+        gameOver = true;  // Termina el juego si el tiempo llega a 0
+    }
+
 }
 
 // Draw game (one frame)
@@ -193,7 +214,23 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
 
     EndMode2D();
 
+    /*Hud draw*/
+   /* DrawRectangle(0, 0, screenWidth, 50, Fade(BLACK, 0.5f)); /*transparent background*/
+
+    DrawText("MARIO", 20, 10, 20, WHITE);
+    DrawText(TextFormat("%06i", score), 20, 30, 20, WHITE);
+
+    
+    DrawText(TextFormat("x %02i", monedas), 180, 30, 20, YELLOW);
+
+    DrawText("TIME", screenWidth - 100, 10, 20, WHITE);
+    DrawText(TextFormat("%03i", tiempo), screenWidth - 100, 30, 20, WHITE);
+
+    DrawText("WORLD", screenWidth / 2 - 40, 10, 20, WHITE);
+    DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
+
     EndDrawing();
+
 }
 
 void UpdateCameraCenter(Camera2D* camera, Mario* mario, Hitbox* envItems, int envItemsLength, float delta, int width, int height)
