@@ -205,8 +205,9 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
     Vector2 marioIni={mario->position.x, mario->position.y};
     Rectangle marioRecorte = { 0, 8, 16, 16 };
     Rectangle marioResized = { marioIni.x, marioIni.y, marioRecorte.width * 2, marioRecorte.height * 2 }; // Escalado
-    Vector2 origen = {0,0};
-    DrawTexturePro(spriteSheet, marioRecorte,marioResized,origen,0, WHITE);
+    Vector2 MarioOrigen = {0,0};
+    DrawTexturePro(spriteSheet, marioRecorte,marioResized,MarioOrigen,0, WHITE);
+
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < 1; i++) 
@@ -215,8 +216,6 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
     EndMode2D();
 
     /*Hud draw*/
-   /* DrawRectangle(0, 0, screenWidth, 50, Fade(BLACK, 0.5f)); /*transparent background*/
-
     DrawText("MARIO", 20, 10, 20, WHITE);
     DrawText(TextFormat("%06i", score), 20, 30, 20, WHITE);
 
@@ -228,6 +227,8 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
 
     DrawText("WORLD", screenWidth / 2 - 40, 10, 20, WHITE);
     DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
+
+    
 
     EndDrawing();
 
