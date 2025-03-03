@@ -7,7 +7,7 @@ using namespace std;
 //----------------------------------------------------------------------------------
 // Some Defines y ENUMS
 //----------------------------------------------------------------------------------
-#define BACKGROUND "../../resources/world/World_1_1.png"
+#define BACKGROUND "resources/world/World_1_1.png"
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
 
@@ -58,6 +58,8 @@ static int score = 0;
 
 Camera2D camera = { 0 };
 Texture2D background;
+Texture2D spriteSheet;
+
 
 //------------------------------------------------------------------------------------
 // Module Functions Declaration (local)
@@ -76,6 +78,7 @@ int main(void)
     //---------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
+    spriteSheet = LoadTexture("resources/sprites/NES - Super Mario Bros - Mario & Luigi.png");
 
     Mario mario(380, 380); //Creo el objeto de Mario
     Hitbox lista_hitboxes[] = {
@@ -178,7 +181,11 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
     /***************************/
 
     /* Dibujado de Mario */
-    DrawRectangleRec(mario->position, RED);
+    Vector2 marioIni={mario->position.x, mario->position.y};
+    Rectangle marioRecorte = { 0, 8, 16, 16 };
+    Rectangle marioResized = { marioIni.x, marioIni.y, marioRecorte.width * 2, marioRecorte.height * 2 }; // Escalado
+    Vector2 origen = {0,0};
+    DrawTexturePro(spriteSheet, marioRecorte,marioResized,origen,0, WHITE);
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < 1; i++) 
@@ -198,6 +205,7 @@ void UpdateCameraCenter(Camera2D* camera, Mario* mario, Hitbox* envItems, int en
 // Unload game variables
 void UnloadGame(void)
 {
+    UnloadTexture(spriteSheet);
     UnloadTexture(background);
     // TODO: Unload all dynamic loaded data (textures, sounds, models...)
 }
