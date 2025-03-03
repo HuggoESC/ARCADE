@@ -53,6 +53,7 @@ static const int screenHeight = 480;
 
 static bool gameOver = false;
 static int score = 0;
+static float worldPosition = 0;
 
 
 
@@ -100,7 +101,7 @@ int main(void)
 
 
     camera.target = { mario.position.x + 20.0f, mario.position.y + 20.0f };
-    camera.offset = { mario.position.x, mario.position.y };
+    camera.offset = { mario.position.x, mario.position.y + 20.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
@@ -128,6 +129,8 @@ int main(void)
 //------------------------------------------------------------------------------------
 // Module Functions Definitions (local)
 //------------------------------------------------------------------------------------
+void UpdateCameraCenterInsideMap(Camera2D* camera, Mario* mario, Hitbox* envItems, int envItemsLength, float delta, int width, int height);
+void UpdateCameraCenter(Camera2D* camera, Mario* mario, Hitbox* envItems, int envItemsLength, float delta, int width, int height);
 
 // Initialize game variables
 void InitGame(void)
@@ -141,17 +144,26 @@ void InitGame(void)
 // Update game (one frame)
 void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
 {
-
+    cout << worldPosition << endl;
     if (!gameOver)
     {
         /* Movimiento de Mario */
         if (IsKeyDown(KEY_RIGHT)) {
             mario->position.x += 5;
+            
+            if (mario->position.x >= (screenWidth / 2) - 12) {
+                worldPosition = mario->position.x;
+                
+            }
 
         }
         else if (IsKeyDown(KEY_LEFT)) {
-            mario->position.x -= 5;
+            //Esto es para que mario no pueda salirse del mapa por la izquierda
+            if (mario->position.x >= 30) {
+                mario->position.x -= 5;
+            }
 
+            
         }
 
         /* Salto */
@@ -160,7 +172,8 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
         }
       
         // Camera target follows player
-        camera.target = { mario->position.x + 20, mario->position.y + 20 };
+        //camera.target = { mario->position.x + 20, mario->position.y + 20 };
+        UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
     }
     else
     {
@@ -199,6 +212,8 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
     Rectangle initial_position = {0, 0, background.width, background.height };
     Rectangle final_position = { 0, screenHeight / 2, background.width*2, background.height*2 };
     DrawTexturePro(background, initial_position, final_position, { 0, (float)(background.height / 2) }, 0, WHITE);
+
+
     /***************************/
 
     /* Dibujado de Mario */
@@ -236,8 +251,40 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
 
 void UpdateCameraCenter(Camera2D* camera, Mario* mario, Hitbox* envItems, int envItemsLength, float delta, int width, int height)
 {
-    camera->offset = { width / 2.0f, height / 2.0f };
+    camera->target = { mario->position.x + 20, mario->position.y + 20 };
+
+    if (mario->position.x < (width / 2) - 12) {
+        camera->offset = { mario->position.x, mario->position.y + 20 };
+    }
+   
+    
+  
+   
+   
+}
+
+void UpdateCameraCenterInsideMap(Camera2D* camera, Mario* mario, Hitbox* envItems, int envItemsLength, float delta, int width, int height)
+{
     camera->target = { mario->position.x, mario->position.y };
+    camera->offset = { width / 2.0f, height / 2.0f };
+    float minX = 1000, minY = 1000, maxX = -1000, maxY = -1000;
+
+    for (int i = 0; i < envItemsLength; i++)
+    {
+        Hitbox* ei = envItems + i;
+        minX = fminf(ei->rect.x, minX);
+        maxX = fmaxf(ei->rect.x + ei->rect.width, maxX);
+        minY = fminf(ei->rect.y, minY);
+        maxY = fmaxf(ei->rect.y + ei->rect.height, maxY);
+    }
+
+    Vector2 max = GetWorldToScreen2D({ maxX, maxY }, * camera);
+    Vector2 min = GetWorldToScreen2D({ minX, minY }, * camera);
+
+    if (max.x < width) camera->offset.x = width - (max.x - width / 2);
+    if (max.y < height) camera->offset.y = height - (max.y - height / 2);
+    if (min.x > 0) camera->offset.x = width / 2 - min.x;
+    if (min.y > 0) camera->offset.y = height / 2 - min.y;
 }
 
 // Unload game variables
