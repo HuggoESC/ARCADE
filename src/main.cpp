@@ -60,7 +60,7 @@ static float worldPosition = 0;
 Camera2D camera = { 0 };
 Texture2D background;
 Texture2D spriteSheet;
-
+Texture2D MonedaHUD;
 
 static int tiempo = 400;   // Tiempo en cuenta regresiva
 static int monedas = 0;    // Contador de monedas
@@ -87,6 +87,7 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture("resources/sprites/NES - Super Mario Bros - Mario & Luigi.png");
+    MonedaHUD = LoadTexture("resources/sprites/NES - Super Mario Bros - Items Objects and NPCs.png");
 
     Mario mario(380, 380); //Creo el objeto de Mario
     Hitbox lista_hitboxes[] = {
@@ -238,11 +239,16 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
     DrawText(TextFormat("x %02i", monedas), 180, 30, 20, YELLOW);
 
     DrawText("TIME", screenWidth - 100, 10, 20, WHITE);
-    DrawText(TextFormat("%03i", tiempo), screenWidth - 100, 30, 20, WHITE);
+    DrawText(TextFormat("%03i", tiempo), screenWidth - 90, 30, 20, WHITE);
 
     DrawText("WORLD", screenWidth / 2 - 40, 10, 20, WHITE);
     DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
 
+    Rectangle MonedaHUD2 = {180, 36, 8, 16};
+    Vector2 MonedaHUD3 = {160, 30};
+    Rectangle MonedaHUDresized = { MonedaHUD3.x,MonedaHUD3.y,MonedaHUD2.width * 1.2,MonedaHUD2.height* 1.2 };
+    Vector2 MonedaOrigen = { 0,0 };
+    DrawTexturePro (MonedaHUD, MonedaHUD2, MonedaHUDresized,MonedaOrigen,0, WHITE);
     
 
     EndDrawing();
