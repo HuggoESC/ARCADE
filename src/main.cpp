@@ -18,6 +18,15 @@ enum Powers {
     ESTRELLA = 3
 };
 
+enum GameState {
+    INTRO,
+    PLAYING
+};
+
+static GameState gameState = INTRO;
+static float introTimer = 2.0f;
+
+
 //----------------------------------------------------------------------------------
 // Class Definition
 //----------------------------------------------------------------------------------
@@ -77,6 +86,32 @@ static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta);       // Up
 static void DrawGame(Mario* mario, Hitbox* hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
+void DrawIntroScreen() {
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    DrawText("MARIO", 20, 10, 20, WHITE);
+    DrawText(TextFormat("%06i", score), 20, 30, 20, WHITE);
+    DrawText("WORLD", screenWidth / 2 - 40, 10, 20, WHITE);
+    DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
+    DrawText("x", screenWidth / 2 - 20, screenHeight / 2, 20, WHITE);
+    DrawText(TextFormat("%i", vidas), screenWidth / 2 + 10, screenHeight / 2, 20, WHITE);
+
+    Rectangle marioRecorte = { 0, 8, 16, 16 };
+    Rectangle marioResized = { screenWidth / 2 - 50, screenHeight / 2, marioRecorte.width * 2, marioRecorte.height * 2 };
+    DrawTexturePro(spriteSheet, marioRecorte, marioResized, { 0, 0 }, 0, WHITE);
+    EndDrawing();
+}
+
+void UpdateGameState(float delta) {
+    if (gameState == INTRO) {
+        introTimer -= delta;
+        if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
+            gameState = PLAYING;
+        }
+    }
+}
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -84,7 +119,10 @@ int main(void)
 {
     // Initialization
     //---------------------------------------------------------
+
     InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
+    InitGame();
+
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture("resources/sprites/NES - Super Mario Bros - Mario & Luigi.png");
     MonedaHUD = LoadTexture("resources/sprites/NES - Super Mario Bros - Items Objects and NPCs.png");
@@ -108,16 +146,30 @@ int main(void)
 
     SetTargetFPS(60);
 
+
+
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
-    {
-        float deltaTime = GetFrameTime();
+while (!WindowShouldClose())    // Detect window close button or ESC key
+{
+    float deltaTime = GetFrameTime();
+    UpdateGameState(deltaTime);
 
+    ClearBackground(RAYWHITE);
+
+    if (gameState == INTRO) {
+        //BeginDrawing();
+        DrawIntroScreen();
+        //EndDrawing();
+
+    }
+    else {
         UpdateGame(&mario, lista_hitboxes, deltaTime);
         DrawGame(&mario, lista_hitboxes);
     }
+}
+
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
@@ -168,8 +220,18 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
         }
 
         /* Salto */
-        if (IsKeyDown(KEY_SPACE) ) {
-            mario->position.y -= 10;
+        if (IsKeyDown(KEY_SPACE) && mario->canJump ) {
+            mario->velocidad = -PLAYER_JUMP_SPD;
+            mario->canJump = false;
+        }
+
+        mario->velocidad += GRAVEDAD * delta;
+        mario->position.y += mario->velocidad * delta;
+
+        if (mario->position.y >= 380) {
+            mario->position.y = 380;
+            mario->velocidad = 0;
+            mario->canJump = true;
         }
       
         // Camera target follows player
@@ -201,6 +263,7 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
 }
 
 // Draw game (one frame)
+
 void DrawGame(Mario* mario, Hitbox* hitboxes)
 {
     BeginDrawing();
