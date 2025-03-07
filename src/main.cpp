@@ -24,6 +24,8 @@ enum Powers {
 
 class Mario {
 public:
+    bool mirando_derecha = true;
+    int sprite_status = 0;
     Rectangle position;
     bool canJump = true;
     float velocidad;
@@ -95,8 +97,7 @@ int main(void)
     }; // Creo la lista de todas las colisiones
 
     int envItemsLength = 1;
-
-
+   
     score = 0;
     gameOver = false;
 
@@ -105,6 +106,7 @@ int main(void)
     camera.offset = { mario.position.x, mario.position.y + 20.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
+
 
     SetTargetFPS(60);
 
@@ -154,7 +156,15 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
             
             if (mario->position.x >= (screenWidth / 2) - 12) {
                 worldPosition = mario->position.x;
-                
+                mario->mirando_derecha = true;
+                if (mario->sprite_status >= 56)
+                {
+                    mario->sprite_status = 20;
+                }
+                else
+                {
+                    mario->sprite_status += 18;
+                }
             }
 
         }
@@ -162,9 +172,22 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
             //Esto es para que mario no pueda salirse del mapa por la izquierda
             if (mario->position.x >= 30) {
                 mario->position.x -= 5;
+                mario->mirando_derecha = false;
+                if (mario->sprite_status >= 56)
+                {
+                    mario->sprite_status = 20;
+                }
+                else
+                {
+                    mario->sprite_status += 18;
+                }
             }
 
             
+        }
+        else
+        {
+            mario->sprite_status = 0;
         }
 
         /* Salto */
@@ -172,6 +195,9 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
             mario->position.y -= 10;
         }
       
+
+        
+
         // Camera target follows player
         //camera.target = { mario->position.x + 20, mario->position.y + 20 };
         UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
@@ -219,11 +245,27 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
 
     /* Dibujado de Mario */
     Vector2 marioIni={mario->position.x, mario->position.y};
-    Rectangle marioRecorte = { 0, 8, 16, 16 };
-    Rectangle marioResized = { marioIni.x, marioIni.y, marioRecorte.width * 2, marioRecorte.height * 2 }; // Escalado
+    Rectangle marioRecorte = { mario->sprite_status, 8, 16, 16 };
+
+        //*Cambio de derecha a izquierda
+    int mariowidth;
+    if (mario->mirando_derecha == true)
+    {
+        marioRecorte.width = 16;
+    }
+    else
+    {
+        marioRecorte.width = -16;
+    }
+
+    Rectangle marioResized = { marioIni.x, marioIni.y, marioRecorte.width*2, marioRecorte.height * 2 }; // Escalado
     Vector2 MarioOrigen = {0,0};
+        
+    
+
     DrawTexturePro(spriteSheet, marioRecorte,marioResized,MarioOrigen,0, WHITE);
 
+    
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < 1; i++) 
