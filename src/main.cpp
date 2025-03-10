@@ -131,10 +131,11 @@ int main(void)
 
     Mario mario(380, 380); //Creo el objeto de Mario
     Hitbox lista_hitboxes[] = {
-        { {0, 416, 1000, 400}, 1, BLUE }
+        { {0, 410, 1000, 400}, 1, BLUE },
+        {{512,288,32,32},1,BLUE}
     }; // Creo la lista de todas las colisiones
 
-    int envItemsLength = 1;
+    int envItemsLength = 2;
    
     score = 0;
     gameOver = false;
@@ -250,16 +251,47 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
             mario->canJump = false;
         }
 
-        mario->velocidad += GRAVEDAD * delta;
-        mario->position.y += mario->velocidad * delta;
+        bool hitObstacle = false;
+       
+        for (int i = 0; i < 2; i++)
+        {
+            Hitbox* ei = hitboxes + i;
+            Rectangle* p = &(mario->position);
+            if (ei->blocking &&
+                ei->rect.x <= p->x &&
+                ei->rect.x + ei->rect.width >= p->x &&
+                ei->rect.y >= p->y &&
+                ei->rect.y <= p->y + mario->velocidad * delta)
+            {
+                hitObstacle = true;
+                mario->velocidad = 0.0f;
+                p->y = ei->rect.y;
+                break;
+            }
+        }
 
-        if (mario->position.y >= 380) {
+        if (!hitObstacle)
+        {
+            mario->velocidad += GRAVEDAD * delta;
+            mario->position.y += mario->velocidad * delta;
+            mario->canJump = false;
+        }
+        else
+        {
+            mario->canJump = true;
+        }
+       
+
+
+        //he puesto la funcion de gravedad y para que funcione he quitado esto:
+
+        /*if (mario->position.y >= 380) {
             mario->position.y = 380;
             mario->velocidad = 0;
             mario->canJump = true;
-        }
+        }*/
       
-
+        
         
 
         // Camera target follows player
@@ -323,19 +355,20 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
         marioRecorte.width = -16;
     }
 
-    Rectangle marioResized = { marioIni.x, marioIni.y, marioRecorte.width*2, marioRecorte.height * 2 }; // Escalado
+    Rectangle marioResized = { marioIni.x, marioIni.y - 32, 16 * 2, 16 * 2 }; // Escalado
     Vector2 MarioOrigen = {0,0};
-        
+   
     
 
     DrawTexturePro(spriteSheet, marioRecorte,marioResized,MarioOrigen,0, WHITE);
 
-    
+    //Hitbox de mario
+    DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
     /* Dibujado de Hitbox */
-    for (int i = 0; i < 1; i++) 
+    for (int i = 0; i < 2; i++) 
         DrawRectangleRec(hitboxes[i].rect, hitboxes[i].color);
-
+    
     EndMode2D();
 
     /*Hud draw*/
@@ -386,6 +419,3 @@ void UnloadGame(void)
     UnloadTexture(background);
     // TODO: Unload all dynamic loaded data (textures, sounds, models...)
 }
-
-
-// 
