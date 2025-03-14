@@ -11,6 +11,7 @@ using namespace std;
 #define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
+#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 enum Powers {
     BASE = 0,
@@ -20,11 +21,12 @@ enum Powers {
 };
 
 enum GameState {
+    INICIAL,
     INTRO,
     PLAYING
 };
 
-static GameState gameState = INTRO;
+static GameState gameState = INICIAL;
 static float introTimer = 2.0f;
 
 
@@ -66,6 +68,8 @@ static const int screenHeight = 480;
 static bool gameOver = false;
 static int score = 0;
 static float worldPosition = 0;
+static int selectedOption = 0;  // 0 para 1 jugador, 1 para 2 jugadores
+
 
 
 
@@ -89,6 +93,23 @@ static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta);       // Up
 static void DrawGame(Mario* mario, Hitbox* hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
+void DrawIntro() {
+
+    BeginDrawing();
+
+    Texture2D backgroundInicial = LoadTexture(INICIALPAGE);
+
+    /* Dibujado del Background */
+    Rectangle initial_position = { 0, 0, backgroundInicial.width, backgroundInicial.height };
+    Rectangle final_position = { 0, screenHeight / 2, backgroundInicial.width * 2, backgroundInicial.height * 2 };
+    DrawTexturePro(backgroundInicial, initial_position, final_position, { 0, (float)(backgroundInicial.height / 2) }, 0, WHITE);
+
+    DrawText("1 Player Game", screenWidth / 2 - 80, screenHeight / 2 - 40, 20, (selectedOption == 0) ? YELLOW : WHITE);
+    DrawText("2 Player Game", screenWidth / 2 - 80, screenHeight / 2 - 10, 20, (selectedOption == 1) ? YELLOW : WHITE);
+
+    EndDrawing();
+}
+
 void DrawIntroScreen() {
     BeginDrawing();
     ClearBackground(BLACK);
@@ -97,6 +118,7 @@ void DrawIntroScreen() {
     DrawText(TextFormat("%06i", score), 20, 30, 20, WHITE);
     DrawText("WORLD", screenWidth / 2 - 40, 10, 20, WHITE);
     DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
+   
     DrawText("x", screenWidth / 2 - 20, screenHeight / 2, 20, WHITE);
     DrawText(TextFormat("%i", vidas), screenWidth / 2 + 10, screenHeight / 2, 20, WHITE);
 
@@ -107,9 +129,15 @@ void DrawIntroScreen() {
 }
 
 void UpdateGameState(float delta) {
-    if (gameState == INTRO) {
-        introTimer -= delta;
-        if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
+    if (gameState == INICIAL) {
+       
+        if (IsKeyPressed(KEY_DOWN)) selectedOption = 1;
+        if (IsKeyPressed(KEY_UP)) selectedOption = 0;
+        if (IsKeyPressed(KEY_ENTER)) gameState = INTRO;
+    }
+    else if (gameState==INTRO) {
+         introTimer -= delta; //COMENTADO PARA PROBAR SELECCION PERSONAJE
+       if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
             gameState = PLAYING;
         }
     }
@@ -165,6 +193,10 @@ while (!WindowShouldClose())    // Detect window close button or ESC key
         //BeginDrawing();
         DrawIntroScreen();
         //EndDrawing();
+
+    }
+    else if (gameState == INICIAL) {
+        DrawIntro();
 
     }
     else {
