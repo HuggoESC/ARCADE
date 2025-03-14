@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <iostream>
-
+#include <vector>
 using namespace std;
 
 //----------------------------------------------------------------------------------
@@ -9,6 +9,7 @@ using namespace std;
 //----------------------------------------------------------------------------------
 #define BACKGROUND "resources/world/World_1_1.png"
 #define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
 #define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
@@ -89,8 +90,8 @@ static int level = 1;
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
 static void InitGame(void);         // Initialize game
-static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta);       // Update game (one frame)
-static void DrawGame(Mario* mario, Hitbox* hitboxes);         // Draw game (one frame)
+static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envHitboxes);       // Update game (one frame)
+static void DrawGame(Mario* mario,vector<Hitbox> hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
 void DrawIntro() {
@@ -157,13 +158,28 @@ int main(void)
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
 
-    Mario mario(380, 380); //Creo el objeto de Mario
-    Hitbox lista_hitboxes[] = {
-        { {0, 410, 1000, 400}, 1, BLUE },
-        {{512,288,32,32},1,BLUE}
-    }; // Creo la lista de todas las colisiones
+    Mario mario(2290, 380); //Creo el objeto de Mario
+    vector <Hitbox> lista_hitboxes = {
+        { {0, 414, 2208, 400}, 1, BLUE },
+        {{512,288,32,32},1,BROWN},
+        {{640,288,32,32},1,BROWN},
+        {{672,288,32,32},1,YELLOW},
+        {{704,288,32,32},1,BROWN},
+        {{736,288,32,32},1,YELLOW},
+        {{768,288,32,32},1, BROWN},
+        {{704,160,32,32},1,YELLOW},
+        {{896,352,96,62},1,GREEN},
+        {{1216,320,96,94},1,GREEN},
+        {{1472,288,96,126},1,GREEN},
+        {{1824,288,64,126},1,GREEN},
+        { {2272, 414, 500, 400}, 1, BLUE },
+        {{2464,288,32,32},1,BROWN},
+        {{2496,288,32,32},1,YELLOW},
+        {{2528,288,32,32},1,BROWN},
+        {{2560,160,32,32},1,BROWN},
+    };
 
-    int envItemsLength = 2;
+    int envItemsLength = lista_hitboxes.size();
    
     score = 0;
     gameOver = false;
@@ -200,7 +216,7 @@ while (!WindowShouldClose())    // Detect window close button or ESC key
 
     }
     else {
-        UpdateGame(&mario, lista_hitboxes, deltaTime);
+        UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
         DrawGame(&mario, lista_hitboxes);
     }
 }
@@ -230,7 +246,7 @@ void InitGame(void)
 }
 
 // Update game (one frame)
-void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
+void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
 {
     if (!gameOver)
     {
@@ -285,10 +301,14 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
 
         bool hitObstacle = false;
        
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < envItems; i++)
         {
             Hitbox* ei = hitboxes + i;
             Rectangle* p = &(mario->position);
+
+            bool colisionX = p->x + p->width > ei->rect.x && p->x < ei->rect.x + ei->rect.width; //colision en izq, der
+            bool colisionY = p->y + p->height > ei->rect.y && p->y < ei->rect.y + ei->rect.height; //colision en arriba, abajo
+
             if (ei->blocking &&
                 ei->rect.x <= p->x &&
                 ei->rect.x + ei->rect.width >= p->x &&
@@ -356,7 +376,7 @@ void UpdateGame(Mario *mario, Hitbox *hitboxes, float delta)
 
 // Draw game (one frame)
 
-void DrawGame(Mario* mario, Hitbox* hitboxes)
+void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
 {
     BeginDrawing();
 
@@ -398,7 +418,7 @@ void DrawGame(Mario* mario, Hitbox* hitboxes)
     DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
     /* Dibujado de Hitbox */
-    for (int i = 0; i < 2; i++) 
+    for (int i = 0; i < hitboxes.size(); i++) 
         DrawRectangleRec(hitboxes[i].rect, hitboxes[i].color);
     
     EndMode2D();
