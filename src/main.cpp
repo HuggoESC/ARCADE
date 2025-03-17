@@ -9,6 +9,7 @@ using namespace std;
 //----------------------------------------------------------------------------------
 #define BACKGROUND "resources/world/World_1_1.png"
 #define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "resources/sprites/NES - NES - Super Mario Bros - Enemies & Bosses.png"
 
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
@@ -34,6 +35,20 @@ static float introTimer = 2.0f;
 //----------------------------------------------------------------------------------
 // Class Definition
 //----------------------------------------------------------------------------------
+
+class Goomba {
+public:
+    bool mirando_derecha = true;
+    int sprite_status = 0;
+    Rectangle position;
+    float velocidad;
+
+    Goomba();
+
+    Goomba(float x, float y) {
+        position = { x, y };
+    }
+};
 
 class Mario {
 public:
@@ -86,6 +101,8 @@ static int world = 1;
 static int level = 1;
 
 
+
+
 //------------------------------------------------------------------------------------
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
@@ -101,7 +118,7 @@ void DrawIntro() {
     Texture2D backgroundInicial = LoadTexture(INICIALPAGE);
 
     /* Dibujado del Background */
-    Rectangle initial_position = { 0, 0, backgroundInicial.width, backgroundInicial.height };
+    Rectangle initial_position = { 0,0, backgroundInicial.width, backgroundInicial.height };
     Rectangle final_position = { 0, screenHeight / 2, backgroundInicial.width * 2, backgroundInicial.height * 2 };
     DrawTexturePro(backgroundInicial, initial_position, final_position, { 0, (float)(backgroundInicial.height / 2) }, 0, WHITE);
 
@@ -159,6 +176,7 @@ int main(void)
     spriteSheet = LoadTexture(SPRITESHEET);
 
     Mario mario(2290, 380); //Creo el objeto de Mario
+
     vector <Hitbox> lista_hitboxes = {
         { {0, 414, 2208, 400}, 1, BLUE },
         {{512,288,32,32},1,BROWN},
@@ -416,6 +434,12 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
 
     //Hitbox de mario
     DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
+
+    //Goomba
+    Goomba Goomba1(338, 382);//PrimerGoomba
+
+    Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
+    Rectangle Goomba1Recorte = {Goomba1.sprite_status, ,16,16} //FALTA POSICION SPRITE GOOMBA
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < hitboxes.size(); i++) 
