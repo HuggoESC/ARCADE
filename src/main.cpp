@@ -175,6 +175,7 @@ int main(void)
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
 
+<<<<<<< HEAD
    
     Mario mario(316, 414); //Creo el objeto de Mario
 
