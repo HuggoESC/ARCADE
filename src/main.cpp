@@ -175,12 +175,9 @@ int main(void)
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
 
-<<<<<<< HEAD
-    Mario mario(2290, 380); //Creo el objeto de Mario
 
-=======
     Mario mario(4200, 380); //Creo el objeto de Mario
->>>>>>> 2cef80797c2c14eea7cb96f290039afb280ee797
+
     vector <Hitbox> lista_hitboxes = {
         { {0, 414, 2208, 400}, 1, BLUE },
         {{512,288,32,32},1,BROWN},
@@ -482,7 +479,7 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
     Goomba Goomba1(338, 382);//PrimerGoomba
 
     Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
-    Rectangle Goomba1Recorte = {Goomba1.sprite_status, ,16,16} //FALTA POSICION SPRITE GOOMBA
+    Rectangle Goomba1Recorte = { Goomba1.sprite_status, 16,16,16 }; //FALTA POSICION SPRITE GOOMBA
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < hitboxes.size(); i++) 
