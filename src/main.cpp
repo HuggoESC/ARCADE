@@ -96,7 +96,7 @@ Texture2D spriteSheet;
 
 static int tiempo = 400;   // Tiempo en cuenta regresiva
 static int monedas = 0;    // Contador de monedas
-static int vidas = 3;      // Número de vidas de Mario
+static int vidas = 3;      // Nï¿½mero de vidas de Mario
 static int world = 1;
 static int level = 1;
 
@@ -175,12 +175,13 @@ int main(void)
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
 
+  
+    Mario mario(316, 414); //Creo el objeto de Mario
 
-    Mario mario(4200, 380); //Creo el objeto de Mario
 
     vector <Hitbox> lista_hitboxes = {
-        { {0, 414, 2208, 400}, 1, BLUE },
-        {{512,288,32,32},1,BROWN},
+        { {0, 414, 2208, 400}, 1, BLUE }, 
+        {{512,288,32,32},1,BROWN}, 
         {{640,288,32,32},1,BROWN},
         {{672,288,32,32},1,YELLOW},
         {{704,288,32,32},1,BROWN},
@@ -235,6 +236,58 @@ int main(void)
         {{4352,318,32,32},1,ORANGE},
         {{4384,318,32,32},1,ORANGE},
         {{4384,286,32,32},1,ORANGE},
+        {{4480,286,32,32},1,ORANGE},
+        {{4480,318,32,32},1,ORANGE},
+        {{4512,318,32,32},1,ORANGE},
+        {{4480,350,32,32},1,ORANGE},
+        {{4512,350,32,32},1,ORANGE},
+        {{4544,350,32,32},1,ORANGE},
+        {{4480,382,32,32},1,ORANGE},
+        {{4512,382,32,32},1,ORANGE},
+        {{4544,382,32,32},1,ORANGE},
+        {{4576,382,32,32},1,ORANGE},
+        {{4736,382,32,32},1,ORANGE},
+        {{4768,382,32,32},1,ORANGE},
+        {{4800,382,32,32},1,ORANGE},
+        {{4832,382,32,32},1,ORANGE},
+        {{4864,382,32,32},1,ORANGE},
+        {{4768,350,32,32},1,ORANGE},
+        {{4800,350,32,32},1,ORANGE},
+        {{4832,350,32,32},1,ORANGE},
+        {{4864,350,32,32},1,ORANGE},
+        {{4800,318,32,32},1,ORANGE},
+        {{4832,318,32,32},1,ORANGE},
+        {{4864,318,32,32},1,ORANGE},
+        {{4832,286,32,32},1,ORANGE},
+        {{4864,286,32,32},1,ORANGE},
+        {{4960,414,2000,400},1,BLUE},
+        {{4960,382,32,32},1,ORANGE},
+        {{4992,382,32,32},1,ORANGE},
+        {{5024,382,32,32},1,ORANGE},
+        {{5056,382,32,32},1,ORANGE},
+        {{4960,350,32,32},1,ORANGE},
+        {{4992,350,32,32},1,ORANGE},
+        {{5024,350,32,32},1,ORANGE},
+        {{4960,318,32,32},1,ORANGE},
+        {{4992,318,32,32},1,ORANGE},
+        {{4960,286,32,32},1,ORANGE},
+        {{5216,352,64,62},1,GREEN},
+        {{5376,288,32,32},1,ORANGE},
+        {{5408,288,32,32},1,ORANGE},
+        {{5440,288,32,32},1,YELLOW},
+        {{5472,288,32,32},1,ORANGE},
+        {{5728,352,64,62},1,GREEN},
+        {{5792,382,288,32},1,ORANGE},
+        {{5824,350,256,32},1,ORANGE},
+        {{5856,318,224,32},1,ORANGE},
+        {{5888,288,192,32},1,ORANGE},
+        {{5920,256,160,32},1,ORANGE},
+        {{5952,224,128,32},1,ORANGE},
+        {{5984,192,96,32},1,ORANGE},
+        {{6016,160,64,32},1,ORANGE},
+        {{6336,382,32,32},1,BROWN},
+        {{6348,80,8,302},1,GREEN},
+        //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
 
     int envItemsLength = lista_hitboxes.size();
@@ -475,11 +528,16 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
     //Hitbox de mario
     DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
-    //Goomba
-    Goomba Goomba1(338, 382);//PrimerGoomba
+    ////Goomba
+    //Goomba Goomba1(338, 382);//PrimerGoomba
+
 
     Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
     Rectangle Goomba1Recorte = { Goomba1.sprite_status, 16,16,16 }; //FALTA POSICION SPRITE GOOMBA
+
+    //Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
+    //Rectangle Goomba1Recorte = { Goomba1.sprite_status, ,16,16 }; //FALTA POSICION SPRITE GOOMBA
+
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < hitboxes.size(); i++) 
