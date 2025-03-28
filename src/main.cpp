@@ -169,8 +169,20 @@ int main(void)
     // Initialization
     //---------------------------------------------------------
 
-    InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
-    InitGame();
+    //InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
+    //InitGame();
+
+    //InitAudioDevice();
+
+    //vector <Sound> lista_Sounds;
+    //Sound Folderpath = "GitHub/ARCADE/Sound Effects/Super Mario Bros Efects";
+
+    //for (const auto& entry : directory_iterator(Folderpath)) {
+    //    if (entry.path().extension() == ".wav") { // Filtra por extensión
+    //        lista_Sounds.push_back(entry.path().string());
+    //    }
+    //}
+    //       
 
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
@@ -316,6 +328,7 @@ while (!WindowShouldClose())    // Detect window close button or ESC key
 
     ClearBackground(RAYWHITE);
 
+
     if (gameState == INTRO) {
         //BeginDrawing();
         DrawIntroScreen();
@@ -327,7 +340,7 @@ while (!WindowShouldClose())    // Detect window close button or ESC key
 
     }
     else {
-        UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
+        UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength,&lista_Sounds[0]);
         DrawGame(&mario, lista_hitboxes);
     }
 }
@@ -357,7 +370,7 @@ void InitGame(void)
 }
 
 // Update game (one frame)
-void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
+void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems, Sound* sounds)
 {
     if (!gameOver)
     {
@@ -408,6 +421,8 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
         if (IsKeyDown(KEY_SPACE) && mario->canJump ) {
             mario->velocidad = -PLAYER_JUMP_SPD;
             mario->canJump = false;
+            PlaySound(sounds[0]);      // Play WAV Jump sound
+            
         }
 
         bool hitObstacle = false;
