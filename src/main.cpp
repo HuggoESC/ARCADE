@@ -109,8 +109,11 @@ static int level = 1;
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
 static void InitGame(void);         // Initialize game
+<<<<<<< HEAD
 static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
+=======
 static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envItems);       // Update game (one frame)
+>>>>>>> 2e7f1ae43546d7563bf8c16fa1d89610705316ea
 static void DrawGame(Mario* mario,vector<Hitbox> hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
@@ -169,17 +172,23 @@ void UpdateGameState(float delta) {
 //------------------------------------------------------------------------------------
 int main(void)
 {
+<<<<<<< HEAD
     // Initialization
     //---------------------------------------------------------
 
+=======
+>>>>>>> 2e7f1ae43546d7563bf8c16fa1d89610705316ea
     InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
     InitGame();
 
     InitAudioDevice();
 
+<<<<<<< HEAD
     vector <Sound> lista_Sounds = {
+=======
     //vector <Sound> lista_Sounds;
     //string Folderpath = "GitHub/ARCADE/Sound Effects/Super Mario Bros Efects";
+>>>>>>> 2e7f1ae43546d7563bf8c16fa1d89610705316ea
 
      LoadSound("ARCADE/Sound Effects/Super Mario Bros Efects/1up.wav"),
 
