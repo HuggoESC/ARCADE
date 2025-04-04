@@ -2,7 +2,9 @@
 #include "raymath.h"
 #include <iostream>
 #include <vector>
+#include <filesystem>
 using namespace std;
+namespace fs = filesystem;
 
 //----------------------------------------------------------------------------------
 // Some Defines y ENUMS
@@ -10,6 +12,7 @@ using namespace std;
 #define BACKGROUND "resources/world/World_1_1.png"
 #define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES "resources/sprites/NES - NES - Super Mario Bros - Enemies & Bosses.png"
+#define SOUNDS "ARCADE/Sound Effects/Super Mario Bros Efects"
 
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
@@ -107,7 +110,7 @@ static int level = 1;
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
 static void InitGame(void);         // Initialize game
-static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envHitboxes);       // Update game (one frame)
+static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
 static void DrawGame(Mario* mario,vector<Hitbox> hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
@@ -169,20 +172,23 @@ int main(void)
     // Initialization
     //---------------------------------------------------------
 
-    //InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
-    //InitGame();
+    InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
+    InitGame();
 
-    //InitAudioDevice();
+    InitAudioDevice();
 
-    //vector <Sound> lista_Sounds;
-    //Sound Folderpath = "GitHub/ARCADE/Sound Effects/Super Mario Bros Efects";
+    vector <Sound> lista_Sounds = {
 
-    //for (const auto& entry : directory_iterator(Folderpath)) {
-    //    if (entry.path().extension() == ".wav") { // Filtra por extensión
-    //        lista_Sounds.push_back(entry.path().string());
-    //    }
-    //}
-    //       
+     LoadSound("ARCADE/Sound Effects/Super Mario Bros Efects/1up.wav"),
+
+
+    };
+   
+    
+
+
+   
+           
 
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
