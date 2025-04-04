@@ -91,7 +91,6 @@ static int selectedOption = 0;  // 0 para 1 jugador, 1 para 2 jugadores
 
 
 
-
 Camera2D camera = { 0 };
 Texture2D background;
 Texture2D spriteSheet;
@@ -111,6 +110,7 @@ static int level = 1;
 //------------------------------------------------------------------------------------
 static void InitGame(void);         // Initialize game
 static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
+static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envItems);       // Update game (one frame)
 static void DrawGame(Mario* mario,vector<Hitbox> hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
@@ -121,12 +121,12 @@ void DrawIntro() {
     Texture2D backgroundInicial = LoadTexture(INICIALPAGE);
 
     /* Dibujado del Background */
-    Rectangle initial_position = { 0,0, backgroundInicial.width, backgroundInicial.height };
+    Rectangle initial_position = { 0,15, backgroundInicial.width - 282, backgroundInicial.height };
     Rectangle final_position = { 0, screenHeight / 2, backgroundInicial.width * 2, backgroundInicial.height * 2 };
     DrawTexturePro(backgroundInicial, initial_position, final_position, { 0, (float)(backgroundInicial.height / 2) }, 0, WHITE);
 
-    DrawText("1 Player Game", screenWidth / 2 - 80, screenHeight / 2 - 40, 20, (selectedOption == 0) ? YELLOW : WHITE);
-    DrawText("2 Player Game", screenWidth / 2 - 80, screenHeight / 2 - 10, 20, (selectedOption == 1) ? YELLOW : WHITE);
+    DrawText("1 Player Game", screenWidth / 2 - 80, screenHeight / 2 + 60, 20, (selectedOption == 0) ? YELLOW : WHITE);
+    DrawText("2 Player Game", screenWidth / 2 - 80, screenHeight / 2 + 100, 20, (selectedOption == 1) ? YELLOW : WHITE);
 
     EndDrawing();
 }
@@ -178,6 +178,8 @@ int main(void)
     InitAudioDevice();
 
     vector <Sound> lista_Sounds = {
+    //vector <Sound> lista_Sounds;
+    //string Folderpath = "GitHub/ARCADE/Sound Effects/Super Mario Bros Efects";
 
      LoadSound("ARCADE/Sound Effects/Super Mario Bros Efects/1up.wav"),
 
@@ -346,7 +348,7 @@ while (!WindowShouldClose())    // Detect window close button or ESC key
 
     }
     else {
-        UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength,&lista_Sounds[0]);
+        UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
         DrawGame(&mario, lista_hitboxes);
     }
 }
@@ -376,7 +378,7 @@ void InitGame(void)
 }
 
 // Update game (one frame)
-void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems, Sound* sounds)
+void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
 {
     if (!gameOver)
     {
@@ -427,32 +429,12 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems, Sound* 
         if (IsKeyDown(KEY_SPACE) && mario->canJump ) {
             mario->velocidad = -PLAYER_JUMP_SPD;
             mario->canJump = false;
-            PlaySound(sounds[0]);      // Play WAV Jump sound
+            //PlaySound(sounds[0]);      // Play WAV Jump sound
             
         }
 
         bool hitObstacle = false;
-       
-        for (int i = 0; i < envItems; i++)
-        {
-            Hitbox* ei = hitboxes + i;
-            Rectangle* p = &(mario->position);
-
-            bool colisionX = p->x + p->width > ei->rect.x && p->x < ei->rect.x + ei->rect.width; //colision en izq, der
-            bool colisionY = p->y + p->height > ei->rect.y && p->y < ei->rect.y + ei->rect.height; //colision en arriba, abajo
-
-            if (ei->blocking &&
-                ei->rect.x <= p->x &&
-                ei->rect.x + ei->rect.width >= p->x &&
-                ei->rect.y >= p->y &&
-                ei->rect.y <= p->y + mario->velocidad * delta)
-            {
-                hitObstacle = true;
-                mario->velocidad = 0.0f;
-                p->y = ei->rect.y;
-                break;
-            }
-        }
+        
 
         if (!hitObstacle)
         {
