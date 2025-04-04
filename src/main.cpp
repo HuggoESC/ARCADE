@@ -532,8 +532,8 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
     //Goomba Goomba1(338, 382);//PrimerGoomba
 
 
-    Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
-    Rectangle Goomba1Recorte = { Goomba1.sprite_status, 16,16,16 }; //FALTA POSICION SPRITE GOOMBA
+    //Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
+    //Rectangle Goomba1Recorte = { Goomba1.sprite_status, 16,16,16 }; //FALTA POSICION SPRITE GOOMBA
 
     //Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
     //Rectangle Goomba1Recorte = { Goomba1.sprite_status, ,16,16 }; //FALTA POSICION SPRITE GOOMBA
