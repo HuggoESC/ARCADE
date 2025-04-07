@@ -3,6 +3,9 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
+#include "Mario.h"
+
+
 using namespace std;
 namespace fs = filesystem;
 
@@ -18,12 +21,6 @@ namespace fs = filesystem;
 #define GRAVEDAD 400
 #define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
-enum Powers {
-    BASE = 0,
-    SETA = 1,
-    FLOR = 2,
-    ESTRELLA = 3
-};
 
 enum GameState {
     INICIAL,
@@ -53,24 +50,24 @@ public:
     }
 };
 
-class Mario {
-public:
-    bool mirando_derecha = true;
-    int sprite_status = 0;
-    Rectangle position;
-    bool canJump = true;
-    float velocidad;
-    Powers poder;
-
-    /* Constructores */
-    Mario();
-    
-    Mario(float posX, float posY) {
-        position = { posX, posY, 24, 32 };
-        velocidad = 0;
-        poder = BASE;
-    }
-};
+//class Mario {
+//public:
+//    bool mirando_derecha = true;
+//    int sprite_status = 0;
+//    Rectangle position;
+//    bool canJump = true;
+//    float velocidad;
+//    Powers poder;
+//
+//    /* Constructores */
+//    Mario();
+//    
+//    Mario(float posX, float posY) {
+//        position = { posX, posY, 24, 32 };
+//        velocidad = 0;
+//        poder = BASE;
+//    }
+//};
 
 struct Hitbox {
     Rectangle rect;
