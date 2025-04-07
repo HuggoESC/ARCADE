@@ -59,6 +59,8 @@ public:
     int sprite_status = 0;
     Rectangle position;
     bool canJump = true;
+    bool canMoveLeft = true;
+    bool canMoveRight = true;
     float velocidad;
     Powers poder;
 
@@ -337,29 +339,29 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-while (!WindowShouldClose())    // Detect window close button or ESC key
-{
-    float deltaTime = GetFrameTime();
-    UpdateGameState(deltaTime);
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
+        float deltaTime = GetFrameTime();
+        UpdateGameState(deltaTime);
 
-    ClearBackground(RAYWHITE);
+        ClearBackground(RAYWHITE);
 
 
-    if (gameState == INTRO) {
-        //BeginDrawing();
-        DrawIntroScreen();
-        //EndDrawing();
+        if (gameState == INTRO) {
+            //BeginDrawing();
+            DrawIntroScreen();
+            //EndDrawing();
 
+        }
+        else if (gameState == INICIAL) {
+            DrawIntro();
+
+        }
+        else {
+            UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
+            DrawGame(&mario, lista_hitboxes);
+        }
     }
-    else if (gameState == INICIAL) {
-        DrawIntro();
-
-    }
-    else {
-        UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
-        DrawGame(&mario, lista_hitboxes);
-    }
-}
 
 
     // De-Initialization
@@ -390,8 +392,36 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
 {
     if (!gameOver)
     {
+        //colisions
+        bool hitObstacle = false;
+
+        for (int i = 0; i < envItems; i++)
+        {
+            if (mario->position.x == (hitboxes + i)->rect.width + (hitboxes + i)->rect.x + 1 && 
+                mario->position.y + 32 <= (hitboxes + i)->rect.y)
+                /*mario->position.y >= (hitboxes+i)->rect.y + (hitboxes+i)->rect.height*/
+                /*&&
+                mario->position.x + 24 < (hitboxes + i)->rect.x)*/
+                /*mario->position.y + 32 <= (hitboxes + i)->rect.y) &&
+                mario->position.y >= (hitboxes + i)->rect.y - 5)*/
+            {
+                mario->canMoveLeft = false;   
+            }
+            else if (mario->position.x + 24 == (hitboxes + i)->rect.x - 1 &&
+                mario->position.y + 32 <= (hitboxes + i)->rect.y)
+                /*mario->position.y >= (hitboxes + i)->rect.y + (hitboxes + i)->rect.height*/
+            {
+                mario->canMoveRight = false;
+            }
+            else
+            {
+                mario->canMoveLeft = true;
+                mario->canMoveRight = true;
+            }
+        }
+
         /* Movimiento de Mario */
-        if (IsKeyDown(KEY_RIGHT)) {
+        if (IsKeyDown(KEY_RIGHT)&&mario->canMoveRight) {
             mario->position.x += 5;
             
             if (mario->sprite_status == 56)
@@ -413,7 +443,7 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
             }
 
         }
-        else if (IsKeyDown(KEY_LEFT)) {
+        else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
             //Esto es para que mario no pueda salirse del mapa por la izquierda
             if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
                 mario->position.x -= 5;
@@ -440,36 +470,7 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
             //PlaySound(sounds[0]);      // Play WAV Jump sound
             
         }
-
-        bool hitObstacle = false;
-        
-
-        if (!hitObstacle)
-        {
-            mario->velocidad += GRAVEDAD * delta;
-            mario->position.y += mario->velocidad * delta;
-            mario->canJump = false;
-        }
-        else
-        {
-            mario->canJump = true;
-        }
-       
-
-
-        //he puesto la funcion de gravedad y para que funcione he quitado esto:
-
-        /*if (mario->position.y >= 380) {
-            mario->position.y = 380;
-            mario->velocidad = 0;
-            mario->canJump = true;
-        }*/
       
-        
-        
-
-        // Camera target follows player
-        //camera.target = { mario->position.x + 20, mario->position.y + 20 };
         UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
     }
     else
