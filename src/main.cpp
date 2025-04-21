@@ -12,14 +12,14 @@ namespace fs = filesystem;
 //----------------------------------------------------------------------------------
 // Some Defines y ENUMS
 //----------------------------------------------------------------------------------
-#define BACKGROUND "resources/world/World_1_1.png"
-#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES "resources/sprites/NES - NES - Super Mario Bros - Enemies & Bosses.png"
-#define SOUNDS "ARCADE/Sound Effects/Super Mario Bros Efects"
+#define BACKGROUND "../../resources/world/World_1_1.png"
+#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "../../resources/sprites/NES - NES - Super Mario Bros - Enemies & Bosses.png"
+#define SOUNDS "../../ARCADE/Sound Effects/Super Mario Bros Efects"
 
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
-#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
 enum GameState {
@@ -200,18 +200,10 @@ int main(void)
 
     };
    
-    
-
-
-   
-           
-
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
 
-  
     Mario mario(316, 414); //Creo el objeto de Mario
-
 
     vector <Hitbox> lista_hitboxes = {
         { {0, 414, 2208, 400}, 1, BLUE }, 
@@ -401,31 +393,45 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
 
         for (int i = 0; i < envItems; i++)
         {
-            if (mario->position.x == (hitboxes + i)->rect.width + (hitboxes + i)->rect.x + 1 && 
-                mario->position.y + 32 <= (hitboxes + i)->rect.y)
-                /*mario->position.y >= (hitboxes+i)->rect.y + (hitboxes+i)->rect.height*/
-                /*&&
-                mario->position.x + 24 < (hitboxes + i)->rect.x)*/
-                /*mario->position.y + 32 <= (hitboxes + i)->rect.y) &&
-                mario->position.y >= (hitboxes + i)->rect.y - 5)*/
+            //if (mario->position.x == (hitboxes + i)->rect.width + (hitboxes + i)->rect.x + 1 && 
+            //    mario->position.y + 32 <= (hitboxes + i)->rect.y)
+            //    /*mario->position.y >= (hitboxes+i)->rect.y + (hitboxes+i)->rect.height*/
+            //    /*&&
+            //    mario->position.x + 24 < (hitboxes + i)->rect.x)*/
+            //    /*mario->position.y + 32 <= (hitboxes + i)->rect.y) &&
+            //    mario->position.y >= (hitboxes + i)->rect.y - 5)*/
+            //{
+            //    mario->canMoveLeft = false;   
+            //}
+            //else if (mario->position.x + 24 == (hitboxes + i)->rect.x - 1 &&
+            //    mario->position.y + 32 <= (hitboxes + i)->rect.y)
+            //    /*mario->position.y >= (hitboxes + i)->rect.y + (hitboxes + i)->rect.height*/
+            //{
+            //    mario->canMoveRight = false;
+            //}
+            //else
+            //{
+            //    mario->canMoveLeft = true;
+            //    mario->canMoveRight = true;
+            //}
+
+            Hitbox* ei = hitboxes + i;
+
+            if (ei->blocking &&
+                ei->rect.x <= mario->position.x &&
+                ei->rect.x + ei->rect.width >= mario->position.x &&
+                ei->rect.y >= mario->position.y &&
+                ei->rect.y <= mario->position.y + mario->velocidad * delta)
             {
-                mario->canMoveLeft = false;   
-            }
-            else if (mario->position.x + 24 == (hitboxes + i)->rect.x - 1 &&
-                mario->position.y + 32 <= (hitboxes + i)->rect.y)
-                /*mario->position.y >= (hitboxes + i)->rect.y + (hitboxes + i)->rect.height*/
-            {
-                mario->canMoveRight = false;
-            }
-            else
-            {
-                mario->canMoveLeft = true;
-                mario->canMoveRight = true;
+                hitObstacle = true;
+                mario->velocidad = 0.0f;
+                mario->position.y = ei->rect.y;
+                break;
             }
         }
 
         /* Movimiento de Mario */
-        if (IsKeyDown(KEY_RIGHT)&&mario->canMoveRight) {
+        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
             mario->position.x += 5;
             
             if (mario->sprite_status == 56)
@@ -434,8 +440,10 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
                 mario->sprite_status += 18;
 
             if (mario->position.x >= (screenWidth / 2) - 12) {
+                
                 worldPosition = mario->position.x;
                 mario->mirando_derecha = true;
+                
                 if (mario->sprite_status >= 56)
                 {
                     mario->sprite_status = 20;
@@ -476,6 +484,14 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
         }
       
         UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
+
+        if (!hitObstacle)
+        {
+            mario->position.y += mario->velocidad * delta;
+            mario->velocidad += GRAVEDAD * delta;
+            mario->canJump = false;
+        }
+        else mario->canJump = true;
     }
     else
     {
@@ -498,6 +514,8 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
         tiempo = 0;
         gameOver = true;  // Termina el juego si el tiempo llega a 0
     }
+
+    
 
 }
 
@@ -537,8 +555,6 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
     Rectangle marioResized = { marioIni.x, marioIni.y - 32, 16 * 2, 16 * 2 }; // Escalado
     Vector2 MarioOrigen = {0,0};
    
-    
-
     DrawTexturePro(spriteSheet, marioRecorte,marioResized,MarioOrigen,0, WHITE);
 
     //Hitbox de mario
