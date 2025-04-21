@@ -24,7 +24,7 @@ namespace fs = filesystem;
 
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
-#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
 enum GameState {
