@@ -1,17 +1,15 @@
 # ARCADE
 
-# Copyright (c) 2025 [unicef]
-
-# All rights reserved.
-
-# This source code is made available for viewing and educational purposes only. No part of this software may be used, copied, modified, or distributed in any form without explicit, prior written permission from the copyright holder.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 
 Documento para Proyecto 1; Arcade
 
 List Members: Abel Nuñez; Alejandro Rodriguez; Hugo Escobar.
+
+Abel Nuñez: https://github.com/abelnunez5
+
+Alejandro Rodiguez: https://github.com/Alejandrorg5
+
+Hugo Escobar: https://github.com/HuggoESC
 
 Este proyecto es una recreación del primer nivel del clásico Super Mario Bros de la NES, desarrollado en C++ por un equipo de tres entusiastas del desarrollo de videojuegos.
 La idea es capturar la esencia retro del juego original, respetando su estética, mecánicas y feeling, pero aprovechando lo que hemos aprendido de programación moderna.
