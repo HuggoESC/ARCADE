@@ -121,11 +121,11 @@ static int level = 1;
 //------------------------------------------------------------------------------------
 static void InitGame(void);         // Initialize game
 
-static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
+static void UpdateGame(Mario* mario, Goomba* goomba1,Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
 
-static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envItems);       // Update game (one frame)
+static void UpdateGame(Mario* mario, Goomba* goomba1 ,Hitbox* hitboxes, float delta, int envItems);       // Update game (one frame)
 
-static void DrawGame(Mario* mario,vector<Hitbox> hitboxes);         // Draw game (one frame)
+static void DrawGame(Mario* mario,Goomba* goomba1,vector<Hitbox> hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
 void DrawIntro() {
@@ -361,8 +361,8 @@ int main(void)
 
         }
         else {
-            UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
-            DrawGame(&mario, lista_hitboxes);
+            UpdateGame(&mario,&goomba1 ,&lista_hitboxes[0], deltaTime,envItemsLength);
+            DrawGame(&mario,&goomba1, lista_hitboxes);
         }
     }
 
@@ -391,7 +391,7 @@ void InitGame(void)
 }
 
 // Update game (one frame)
-void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
+void UpdateGame(Mario *mario,Goomba* goomba1 ,Hitbox*hitboxes, float delta,int envItems)
 {
     if (!gameOver)
     {
@@ -436,6 +436,8 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
                 break;
             }
         }
+
+        
 
         /* Movimiento de Mario */
         if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
@@ -527,7 +529,7 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
 
 // Draw game (one frame)
 
-void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
+void DrawGame(Mario* mario, Goomba *goomba1, vector<Hitbox> hitboxes)
 {
     BeginDrawing();
 
@@ -567,10 +569,10 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
     DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
     //Goomba
-    Goomba Goomba1(338, 414);//PrimerGoomba
+   
 
-    Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
-    Rectangle Goomba1Recorte = {Goomba1.sprite_status, 17, 16,16}; //FALTA POSICION SPRITE GOOMBA
+    Vector2 PosGoomba1 = {goomba1->position.x,goomba1->position.y };
+    Rectangle Goomba1Recorte = {goomba1->sprite_status, 17, 16,16};
   
     Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
     Vector2 GoombaOrigen = { 0,0 };
