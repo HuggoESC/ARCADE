@@ -1,3 +1,8 @@
+//Copyright(c) 2025[unicef]
+//All rights reserved.
+//This code is for educational viewing purposes only.
+//Use, modification, or distribution is prohibited without explicit permission.
+
 #include "raylib.h"
 #include "raymath.h"
 #include <iostream>
@@ -12,10 +17,10 @@ namespace fs = filesystem;
 //----------------------------------------------------------------------------------
 // Some Defines y ENUMS
 //----------------------------------------------------------------------------------
-#define BACKGROUND "../../resources/world/World_1_1.png"
-#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES "../../resources/sprites/NES - NES - Super Mario Bros - Enemies & Bosses.png"
-#define SOUNDS "../../ARCADE/Sound Effects/Super Mario Bros Efects"
+#define BACKGROUND "resources/world/World_1_1.png"
+#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define SOUNDS "ARCADE/Sound Effects/Super Mario Bros Efects"
 
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
@@ -100,7 +105,7 @@ static int selectedOption = 0;  // 0 para 1 jugador, 1 para 2 jugadores
 Camera2D camera = { 0 };
 Texture2D background;
 Texture2D spriteSheet;
-
+Texture2D EnemySpriteSheet;
 
 static int tiempo = 400;   // Tiempo en cuenta regresiva
 static int monedas = 0;    // Contador de monedas
@@ -202,8 +207,10 @@ int main(void)
    
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
-
+    EnemySpriteSheet = LoadTexture(ENEMIES);
+  
     Mario mario(316, 414); //Creo el objeto de Mario
+    Goomba goomba1(500,414);
 
     vector <Hitbox> lista_hitboxes = {
         { {0, 414, 2208, 400}, 1, BLUE }, 
@@ -453,7 +460,6 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
                     mario->sprite_status += 18;
                 }
             }
-
         }
         else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
             //Esto es para que mario no pueda salirse del mapa por la izquierda
@@ -554,22 +560,22 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
 
     Rectangle marioResized = { marioIni.x, marioIni.y - 32, 16 * 2, 16 * 2 }; // Escalado
     Vector2 MarioOrigen = {0,0};
-   
+
     DrawTexturePro(spriteSheet, marioRecorte,marioResized,MarioOrigen,0, WHITE);
 
     //Hitbox de mario
     DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
-    ////Goomba
-    //Goomba Goomba1(338, 382);//PrimerGoomba
+    //Goomba
+    Goomba Goomba1(338, 414);//PrimerGoomba
 
-
-    //Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
-    //Rectangle Goomba1Recorte = { Goomba1.sprite_status, 16,16,16 }; //FALTA POSICION SPRITE GOOMBA
-
-    //Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
-    //Rectangle Goomba1Recorte = { Goomba1.sprite_status, ,16,16 }; //FALTA POSICION SPRITE GOOMBA
-
+    Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
+    Rectangle Goomba1Recorte = {Goomba1.sprite_status, 17, 16,16}; //FALTA POSICION SPRITE GOOMBA
+  
+    Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
+    Vector2 GoombaOrigen = { 0,0 };
+    DrawTexturePro(EnemySpriteSheet, Goomba1Recorte, Goomba1Resized, GoombaOrigen, 0, WHITE);
+    DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < hitboxes.size(); i++) 
