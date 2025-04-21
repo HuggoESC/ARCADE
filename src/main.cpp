@@ -118,11 +118,11 @@ static int level = 1;
 //------------------------------------------------------------------------------------
 static void InitGame(void);         // Initialize game
 
-static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
+static void UpdateGame(Mario* mario, Goomba* goomba1,Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
 
-static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envItems);       // Update game (one frame)
+static void UpdateGame(Mario* mario, Goomba* goomba1 ,Hitbox* hitboxes, float delta, int envItems);       // Update game (one frame)
 
-static void DrawGame(Mario* mario,vector<Hitbox> hitboxes);         // Draw game (one frame)
+static void DrawGame(Mario* mario,Goomba* goomba1,vector<Hitbox> hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
 void DrawIntro() {
@@ -204,113 +204,113 @@ int main(void)
     Goomba goomba1(500,414);
 
     vector <Hitbox> lista_hitboxes = {
-        { {0, 414, 2208, 400}, 1, BLUE }, 
-        {{512,288,32,32},1,BROWN}, 
-        {{640,288,32,32},1,BROWN},
-        {{672,288,32,32},1,YELLOW},
-        {{704,288,32,32},1,BROWN},
-        {{736,288,32,32},1,YELLOW},
-        {{768,288,32,32},1, BROWN},
-        {{704,160,32,32},1,YELLOW},
-        {{896,352,96,62},1,GREEN},
-        {{1216,320,96,94},1,GREEN},
-        {{1472,288,96,126},1,GREEN},
-        {{1824,288,64,126},1,GREEN},
-        { {2272, 414, 500, 400}, 1, BLUE },
-        {{2464,288,32,32},1,BROWN},
-        {{2496,288,32,32},1,YELLOW},
-        {{2528,288,32,32},1,BROWN},
-        {{2560,160,32,32},1,BROWN},
-        {{2592,160,32,32},1,BROWN},
-        {{2624,160,32,32},1,BROWN},
-        {{2656,160,32,32},1,BROWN},
-        {{2688,160,32,32},1,BROWN},
-        {{2720,160,32,32},1,BROWN},
-        {{2752,160,32,32},1,BROWN},
-        {{2784,160,32,32},1,BROWN},
-        { {2848, 414, 2048, 400}, 1, BLUE },
-        {{2912,160,32,32},1,BROWN},
-        {{2944,160,32,32},1,BROWN},
-        {{2976,160,32,32},1,BROWN},
-        {{3008,160,32,32},1,YELLOW},
-        {{3008,288,32,32},1,BROWN},
-        {{3200,288,32,32},1,BROWN},
-        {{3232,288,32,32},1,BROWN},
-        {{3392,288,32,32},1,YELLOW},
-        {{3488,288,32,32},1,YELLOW},
-        {{3488,160,32,32},1,YELLOW},
-        {{3584,288,32,32},1,YELLOW},
-        {{3776,288,32,32},1,BROWN},
-        {{3872,160,32,32},1,BROWN},
-        {{3904,160,32,32},1,BROWN},
-        {{3936,160,32,32},1,BROWN},
-        {{4096,160,32,32},1,BROWN},
-        {{4160,160,32,32},1,YELLOW},
-        {{4128,160,32,32},1,YELLOW},
-        {{4192,160,32,32},1,BROWN},
-        {{4128,288,32,32},1,BROWN},
-        {{4160,288,32,32},1,BROWN},
-        {{4288,382,32,32},1,ORANGE},
-        {{4320,382,32,32},1,ORANGE},
-        {{4352,382,32,32},1,ORANGE},
-        {{4384,382,32,32},1,ORANGE},
-        {{4320,350,32,32},1,ORANGE},
-        {{4352,350,32,32},1,ORANGE},
-        {{4384,350,32,32},1,ORANGE},
-        {{4352,318,32,32},1,ORANGE},
-        {{4384,318,32,32},1,ORANGE},
-        {{4384,286,32,32},1,ORANGE},
-        {{4480,286,32,32},1,ORANGE},
-        {{4480,318,32,32},1,ORANGE},
-        {{4512,318,32,32},1,ORANGE},
-        {{4480,350,32,32},1,ORANGE},
-        {{4512,350,32,32},1,ORANGE},
-        {{4544,350,32,32},1,ORANGE},
-        {{4480,382,32,32},1,ORANGE},
-        {{4512,382,32,32},1,ORANGE},
-        {{4544,382,32,32},1,ORANGE},
-        {{4576,382,32,32},1,ORANGE},
-        {{4736,382,32,32},1,ORANGE},
-        {{4768,382,32,32},1,ORANGE},
-        {{4800,382,32,32},1,ORANGE},
-        {{4832,382,32,32},1,ORANGE},
-        {{4864,382,32,32},1,ORANGE},
-        {{4768,350,32,32},1,ORANGE},
-        {{4800,350,32,32},1,ORANGE},
-        {{4832,350,32,32},1,ORANGE},
-        {{4864,350,32,32},1,ORANGE},
-        {{4800,318,32,32},1,ORANGE},
-        {{4832,318,32,32},1,ORANGE},
-        {{4864,318,32,32},1,ORANGE},
-        {{4832,286,32,32},1,ORANGE},
-        {{4864,286,32,32},1,ORANGE},
-        {{4960,414,2000,400},1,BLUE},
-        {{4960,382,32,32},1,ORANGE},
-        {{4992,382,32,32},1,ORANGE},
-        {{5024,382,32,32},1,ORANGE},
-        {{5056,382,32,32},1,ORANGE},
-        {{4960,350,32,32},1,ORANGE},
-        {{4992,350,32,32},1,ORANGE},
-        {{5024,350,32,32},1,ORANGE},
-        {{4960,318,32,32},1,ORANGE},
-        {{4992,318,32,32},1,ORANGE},
-        {{4960,286,32,32},1,ORANGE},
-        {{5216,352,64,62},1,GREEN},
-        {{5376,288,32,32},1,ORANGE},
-        {{5408,288,32,32},1,ORANGE},
-        {{5440,288,32,32},1,YELLOW},
-        {{5472,288,32,32},1,ORANGE},
-        {{5728,352,64,62},1,GREEN},
-        {{5792,382,288,32},1,ORANGE},
-        {{5824,350,256,32},1,ORANGE},
-        {{5856,318,224,32},1,ORANGE},
-        {{5888,288,192,32},1,ORANGE},
-        {{5920,256,160,32},1,ORANGE},
-        {{5952,224,128,32},1,ORANGE},
-        {{5984,192,96,32},1,ORANGE},
-        {{6016,160,64,32},1,ORANGE},
-        {{6336,382,32,32},1,BROWN},
-        {{6348,80,8,302},1,GREEN},
+        { {0, 414, 2208, 400}, 1, 0 },
+        {{512,288,32,32},1,0},
+        {{640,288,32,32},1,0},
+        {{672,288,32,32},1,0},
+        {{704,288,32,32},1,0},
+        {{736,288,32,32},1,0},
+        {{768,288,32,32},1,0},
+        {{704,160,32,32},1,0},
+        {{896,352,96,62},1,0},
+        {{1216,320,96,94},1,0},
+        {{1472,288,96,126},1,0},
+        {{1824,288,64,126},1,0},
+        { {2272, 414, 500, 400}, 1, 0 },
+        {{2464,288,32,32},1,0},
+        {{2496,288,32,32},1,0},
+        {{2528,288,32,32},1,0},
+        {{2560,160,32,32},1,0},
+        {{2592,160,32,32},1,0},
+        {{2624,160,32,32},1,0},
+        {{2656,160,32,32},1,0},
+        {{2688,160,32,32},1,0},
+        {{2720,160,32,32},1,0},
+        {{2752,160,32,32},1,0},
+        {{2784,160,32,32},1,0},
+        { {2848, 414, 2048, 400}, 1, 0 },
+        {{2912,160,32,32},1,0},
+        {{2944,160,32,32},1,0},
+        {{2976,160,32,32},1,0},
+        {{3008,160,32,32},1,0},
+        {{3008,288,32,32},1,0},
+        {{3200,288,32,32},1,0},
+        {{3232,288,32,32},1,0},
+        {{3392,288,32,32},1,0},
+        {{3488,288,32,32},1,0},
+        {{3488,160,32,32},1,0},
+        {{3584,288,32,32},1,0},
+        {{3776,288,32,32},1,0},
+        {{3872,160,32,32},1,0},
+        {{3904,160,32,32},1,0},
+        {{3936,160,32,32},1,0},
+        {{4096,160,32,32},1,0},
+        {{4160,160,32,32},1,0},
+        {{4128,160,32,32},1,0},
+        {{4192,160,32,32},1,0},
+        {{4128,288,32,32},1,0},
+        {{4160,288,32,32},1,0},
+        {{4288,382,32,32},1,0},
+        {{4320,382,32,32},1,0},
+        {{4352,382,32,32},1,0},
+        {{4384,382,32,32},1,0},
+        {{4320,350,32,32},1,0},
+        {{4352,350,32,32},1,0},
+        {{4384,350,32,32},1,0},
+        {{4352,318,32,32},1,0},
+        {{4384,318,32,32},1,0},
+        {{4384,286,32,32},1,0},
+        {{4480,286,32,32},1,0},
+        {{4480,318,32,32},1,0},
+        {{4512,318,32,32},1,0},
+        {{4480,350,32,32},1,0},
+        {{4512,350,32,32},1,0},
+        {{4544,350,32,32},1,0},
+        {{4480,382,32,32},1,0},
+        {{4512,382,32,32},1,0},
+        {{4544,382,32,32},1,0},
+        {{4576,382,32,32},1,0},
+        {{4736,382,32,32},1,0},
+        {{4768,382,32,32},1,0},
+        {{4800,382,32,32},1,0},
+        {{4832,382,32,32},1,0},
+        {{4864,382,32,32},1,0},
+        {{4768,350,32,32},1,0},
+        {{4800,350,32,32},1,0},
+        {{4832,350,32,32},1,0},
+        {{4864,350,32,32},1,0},
+        {{4800,318,32,32},1,0},
+        {{4832,318,32,32},1,0},
+        {{4864,318,32,32},1,0},
+        {{4832,286,32,32},1,0},
+        {{4864,286,32,32},1,0},
+        {{4960,414,2000,400},1,0},
+        {{4960,382,32,32},1,0},
+        {{4992,382,32,32},1,0},
+        {{5024,382,32,32},1,0},
+        {{5056,382,32,32},1,0},
+        {{4960,350,32,32},1,0},
+        {{4992,350,32,32},1,0},
+        {{5024,350,32,32},1,0},
+        {{4960,318,32,32},1,0},
+        {{4992,318,32,32},1,0},
+        {{4960,286,32,32},1,0},
+        {{5216,352,64,62},1,0},
+        {{5376,288,32,32},1,0},
+        {{5408,288,32,32},1,0},
+        {{5440,288,32,32},1,0},
+        {{5472,288,32,32},1,0},
+        {{5728,352,64,62},1,0},
+        {{5792,382,288,32},1,0},
+        {{5824,350,256,32},1,0},
+        {{5856,318,224,32},1,0},
+        {{5888,288,192,32},1,0},
+        {{5920,256,160,32},1,0},
+        {{5952,224,128,32},1,0},
+        {{5984,192,96,32},1,0},
+        {{6016,160,64,32},1,0},
+        {{6336,382,32,32},1,0},
+        {{6348,80,8,302},1,0}
         //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
 
@@ -348,8 +348,8 @@ int main(void)
             DrawIntro();
         }
         else {
-            UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
-            DrawGame(&mario, lista_hitboxes);
+            UpdateGame(&mario,&goomba1 ,&lista_hitboxes[0], deltaTime,envItemsLength);
+            DrawGame(&mario,&goomba1, lista_hitboxes);
         }
     }
 
@@ -391,7 +391,7 @@ void Reset(Mario* mario) {
 }
 
 // Update game (one frame)
-void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
+void UpdateGame(Mario *mario,Goomba* goomba1 ,Hitbox*hitboxes, float delta,int envItems)
 {
     if (!gameOver)
     {
@@ -435,7 +435,14 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
                 mario->position.y = ei->rect.y;
                 break;
             }
+
+            if (mario->position.x >= goomba1->position.x && mario->position.x < (goomba1->position.x + 32) && mario->position.y >= goomba1->position.y && mario->position.y < (goomba1->position.y + 32))
+            {
+
+            }
         }
+
+        
 
         /* Movimiento de Mario */
         if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
@@ -527,7 +534,7 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
 
 // Draw game (one frame)
 
-void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
+void DrawGame(Mario* mario, Goomba *goomba1, vector<Hitbox> hitboxes)
 {
     BeginDrawing();
 
@@ -567,10 +574,10 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
     DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
     //Goomba
-    Goomba Goomba1(338, 414);//PrimerGoomba
+   
 
-    Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
-    Rectangle Goomba1Recorte = {Goomba1.sprite_status, 17, 16,16}; //FALTA POSICION SPRITE GOOMBA
+    Vector2 PosGoomba1 = {goomba1->position.x,goomba1->position.y };
+    Rectangle Goomba1Recorte = {goomba1->sprite_status, 17, 16,16};
   
     Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
     Vector2 GoombaOrigen = { 0,0 };
