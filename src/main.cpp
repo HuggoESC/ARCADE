@@ -435,6 +435,11 @@ void UpdateGame(Mario *mario,Goomba* goomba1 ,Hitbox*hitboxes, float delta,int e
                 mario->position.y = ei->rect.y;
                 break;
             }
+
+            if (mario->position.x >= goomba1->position.x && mario->position.x < (goomba1->position.x + 32) && mario->position.y >= goomba1->position.y && mario->position.y < (goomba1->position.y + 32))
+            {
+
+            }
         }
 
         
