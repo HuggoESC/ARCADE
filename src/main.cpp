@@ -17,14 +17,14 @@ namespace fs = filesystem;
 //----------------------------------------------------------------------------------
 // Some Defines y ENUMS
 //----------------------------------------------------------------------------------
-#define BACKGROUND "resources/world/World_1_1.png"
-#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define BACKGROUND "../../resources/world/World_1_1.png"
+#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
 #define SOUNDS "ARCADE/Sound Effects/Super Mario Bros Efects"
 
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
-#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
 enum GameState {
@@ -100,20 +100,17 @@ static int score = 0;
 static float worldPosition = 0;
 static int selectedOption = 0;  // 0 para 1 jugador, 1 para 2 jugadores
 
-
-
 Camera2D camera = { 0 };
 Texture2D background;
 Texture2D spriteSheet;
 Texture2D EnemySpriteSheet;
+Texture2D backgroundInicial;
 
 static int tiempo = 400;   // Tiempo en cuenta regresiva
 static int monedas = 0;    // Contador de monedas
 static int vidas = 3;      // N�mero de vidas de Mario
 static int world = 1;
 static int level = 1;
-
-
 
 
 //------------------------------------------------------------------------------------
@@ -131,8 +128,6 @@ static void UnloadGame(void);       // Unload game
 void DrawIntro() {
 
     BeginDrawing();
-
-    Texture2D backgroundInicial = LoadTexture(INICIALPAGE);
 
     /* Dibujado del Background */
     Rectangle initial_position = { 0,15, backgroundInicial.width - 282, backgroundInicial.height };
@@ -171,8 +166,8 @@ void UpdateGameState(float delta) {
         if (IsKeyPressed(KEY_ENTER)) gameState = INTRO;
     }
     else if (gameState==INTRO) {
-         introTimer -= delta; //COMENTADO PARA PROBAR SELECCION PERSONAJE
-       if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
+        introTimer -= delta; //COMENTADO PARA PROBAR SELECCION PERSONAJE
+        if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
             gameState = PLAYING;
         }
     }
@@ -205,10 +200,6 @@ int main(void)
 
     };
    
-    background = LoadTexture(BACKGROUND); //Cargo la textura del background
-    spriteSheet = LoadTexture(SPRITESHEET);
-    EnemySpriteSheet = LoadTexture(ENEMIES);
-  
     Mario mario(316, 414); //Creo el objeto de Mario
     Goomba goomba1(500,414);
 
@@ -329,7 +320,7 @@ int main(void)
     gameOver = false;
 
 
-    camera.target = { mario.position.x + 20.0f, mario.position.y + 20.0f };
+    camera.target = { mario.position.x + 20.0f, mario.position.y - 32.0f };
     camera.offset = { mario.position.x, mario.position.y + 20.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
@@ -351,14 +342,10 @@ int main(void)
 
 
         if (gameState == INTRO) {
-            //BeginDrawing();
             DrawIntroScreen();
-            //EndDrawing();
-
         }
         else if (gameState == INICIAL) {
             DrawIntro();
-
         }
         else {
             UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
@@ -384,10 +371,23 @@ void UpdateCameraCenter(Camera2D* camera, Mario* mario, Hitbox* envItems, int en
 // Initialize game variables
 void InitGame(void)
 {
-   
+    background = LoadTexture(BACKGROUND); //Cargo la textura del background
+    spriteSheet = LoadTexture(SPRITESHEET);
+    EnemySpriteSheet = LoadTexture(ENEMIES);
+    backgroundInicial = LoadTexture(INICIALPAGE);
 
-   
+}
 
+void Reset(Mario* mario) {
+    gameState = INTRO;
+    mario->position.x = 316;
+    mario->position.y = 414;
+    camera.target = { mario->position.x + 20.0f, mario->position.y - 32.0f };
+    camera.offset = { mario->position.x, mario->position.y + 20.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+    tiempo = 400;
+    introTimer = 2.0f;
 }
 
 // Update game (one frame)
@@ -500,12 +500,9 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
         else mario->canJump = true;
     }
     else
-    {
-        if (IsKeyPressed(KEY_ENTER))
-        {
-            InitGame();
-            gameOver = false;
-        }
+    {        
+        Reset(mario);
+        gameOver = false;   
     }
 
     static float tiempoAcumulado = 0;
@@ -520,8 +517,11 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
         tiempo = 0;
         gameOver = true;  // Termina el juego si el tiempo llega a 0
     }
-
-    
+    cout << mario->position.x << endl;
+    //Si mario se cae del escenario
+    if (mario->position.y > 580 || mario->position.x >= 6336) {
+        gameOver = true;
+    }
 
 }
 
