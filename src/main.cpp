@@ -100,12 +100,11 @@ static int score = 0;
 static float worldPosition = 0;
 static int selectedOption = 0;  // 0 para 1 jugador, 1 para 2 jugadores
 
-
-
 Camera2D camera = { 0 };
 Texture2D background;
 Texture2D spriteSheet;
 Texture2D EnemySpriteSheet;
+Texture2D backgroundInicial;
 
 static int tiempo = 400;   // Tiempo en cuenta regresiva
 static int monedas = 0;    // Contador de monedas
@@ -114,25 +113,21 @@ static int world = 1;
 static int level = 1;
 
 
-
-
 //------------------------------------------------------------------------------------
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
 static void InitGame(void);         // Initialize game
 
-static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
+static void UpdateGame(Mario* mario, Goomba* goomba1,Hitbox* hitboxes, float delta, int envHitboxes, Sound* Sound);       // Update game (one frame)
 
-static void UpdateGame(Mario* mario, Hitbox* hitboxes, float delta, int envItems);       // Update game (one frame)
+static void UpdateGame(Mario* mario, Goomba* goomba1 ,Hitbox* hitboxes, float delta, int envItems);       // Update game (one frame)
 
-static void DrawGame(Mario* mario,vector<Hitbox> hitboxes);         // Draw game (one frame)
+static void DrawGame(Mario* mario,Goomba* goomba1,vector<Hitbox> hitboxes);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 
 void DrawIntro() {
 
     BeginDrawing();
-
-    Texture2D backgroundInicial = LoadTexture(INICIALPAGE);
 
     /* Dibujado del Background */
     Rectangle initial_position = { 0,15, backgroundInicial.width - 282, backgroundInicial.height };
@@ -171,8 +166,8 @@ void UpdateGameState(float delta) {
         if (IsKeyPressed(KEY_ENTER)) gameState = INTRO;
     }
     else if (gameState==INTRO) {
-         introTimer -= delta; //COMENTADO PARA PROBAR SELECCION PERSONAJE
-       if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
+        introTimer -= delta; //COMENTADO PARA PROBAR SELECCION PERSONAJE
+        if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
             gameState = PLAYING;
         }
     }
@@ -205,127 +200,117 @@ int main(void)
 
     };
    
-    
-
-
-   
-           
-
-    background = LoadTexture(BACKGROUND); //Cargo la textura del background
-    spriteSheet = LoadTexture(SPRITESHEET);
-    EnemySpriteSheet = LoadTexture(ENEMIES);
-  
     Mario mario(316, 414); //Creo el objeto de Mario
     Goomba goomba1(500,414);
 
     vector <Hitbox> lista_hitboxes = {
-        { {0, 414, 2208, 400}, 1, BLUE }, 
-        {{512,288,32,32},1,BROWN}, 
-        {{640,288,32,32},1,BROWN},
-        {{672,288,32,32},1,YELLOW},
-        {{704,288,32,32},1,BROWN},
-        {{736,288,32,32},1,YELLOW},
-        {{768,288,32,32},1, BROWN},
-        {{704,160,32,32},1,YELLOW},
-        {{896,352,96,62},1,GREEN},
-        {{1216,320,96,94},1,GREEN},
-        {{1472,288,96,126},1,GREEN},
-        {{1824,288,64,126},1,GREEN},
-        { {2272, 414, 500, 400}, 1, BLUE },
-        {{2464,288,32,32},1,BROWN},
-        {{2496,288,32,32},1,YELLOW},
-        {{2528,288,32,32},1,BROWN},
-        {{2560,160,32,32},1,BROWN},
-        {{2592,160,32,32},1,BROWN},
-        {{2624,160,32,32},1,BROWN},
-        {{2656,160,32,32},1,BROWN},
-        {{2688,160,32,32},1,BROWN},
-        {{2720,160,32,32},1,BROWN},
-        {{2752,160,32,32},1,BROWN},
-        {{2784,160,32,32},1,BROWN},
-        { {2848, 414, 2048, 400}, 1, BLUE },
-        {{2912,160,32,32},1,BROWN},
-        {{2944,160,32,32},1,BROWN},
-        {{2976,160,32,32},1,BROWN},
-        {{3008,160,32,32},1,YELLOW},
-        {{3008,288,32,32},1,BROWN},
-        {{3200,288,32,32},1,BROWN},
-        {{3232,288,32,32},1,BROWN},
-        {{3392,288,32,32},1,YELLOW},
-        {{3488,288,32,32},1,YELLOW},
-        {{3488,160,32,32},1,YELLOW},
-        {{3584,288,32,32},1,YELLOW},
-        {{3776,288,32,32},1,BROWN},
-        {{3872,160,32,32},1,BROWN},
-        {{3904,160,32,32},1,BROWN},
-        {{3936,160,32,32},1,BROWN},
-        {{4096,160,32,32},1,BROWN},
-        {{4160,160,32,32},1,YELLOW},
-        {{4128,160,32,32},1,YELLOW},
-        {{4192,160,32,32},1,BROWN},
-        {{4128,288,32,32},1,BROWN},
-        {{4160,288,32,32},1,BROWN},
-        {{4288,382,32,32},1,ORANGE},
-        {{4320,382,32,32},1,ORANGE},
-        {{4352,382,32,32},1,ORANGE},
-        {{4384,382,32,32},1,ORANGE},
-        {{4320,350,32,32},1,ORANGE},
-        {{4352,350,32,32},1,ORANGE},
-        {{4384,350,32,32},1,ORANGE},
-        {{4352,318,32,32},1,ORANGE},
-        {{4384,318,32,32},1,ORANGE},
-        {{4384,286,32,32},1,ORANGE},
-        {{4480,286,32,32},1,ORANGE},
-        {{4480,318,32,32},1,ORANGE},
-        {{4512,318,32,32},1,ORANGE},
-        {{4480,350,32,32},1,ORANGE},
-        {{4512,350,32,32},1,ORANGE},
-        {{4544,350,32,32},1,ORANGE},
-        {{4480,382,32,32},1,ORANGE},
-        {{4512,382,32,32},1,ORANGE},
-        {{4544,382,32,32},1,ORANGE},
-        {{4576,382,32,32},1,ORANGE},
-        {{4736,382,32,32},1,ORANGE},
-        {{4768,382,32,32},1,ORANGE},
-        {{4800,382,32,32},1,ORANGE},
-        {{4832,382,32,32},1,ORANGE},
-        {{4864,382,32,32},1,ORANGE},
-        {{4768,350,32,32},1,ORANGE},
-        {{4800,350,32,32},1,ORANGE},
-        {{4832,350,32,32},1,ORANGE},
-        {{4864,350,32,32},1,ORANGE},
-        {{4800,318,32,32},1,ORANGE},
-        {{4832,318,32,32},1,ORANGE},
-        {{4864,318,32,32},1,ORANGE},
-        {{4832,286,32,32},1,ORANGE},
-        {{4864,286,32,32},1,ORANGE},
-        {{4960,414,2000,400},1,BLUE},
-        {{4960,382,32,32},1,ORANGE},
-        {{4992,382,32,32},1,ORANGE},
-        {{5024,382,32,32},1,ORANGE},
-        {{5056,382,32,32},1,ORANGE},
-        {{4960,350,32,32},1,ORANGE},
-        {{4992,350,32,32},1,ORANGE},
-        {{5024,350,32,32},1,ORANGE},
-        {{4960,318,32,32},1,ORANGE},
-        {{4992,318,32,32},1,ORANGE},
-        {{4960,286,32,32},1,ORANGE},
-        {{5216,352,64,62},1,GREEN},
-        {{5376,288,32,32},1,ORANGE},
-        {{5408,288,32,32},1,ORANGE},
-        {{5440,288,32,32},1,YELLOW},
-        {{5472,288,32,32},1,ORANGE},
-        {{5728,352,64,62},1,GREEN},
-        {{5792,382,288,32},1,ORANGE},
-        {{5824,350,256,32},1,ORANGE},
-        {{5856,318,224,32},1,ORANGE},
-        {{5888,288,192,32},1,ORANGE},
-        {{5920,256,160,32},1,ORANGE},
-        {{5952,224,128,32},1,ORANGE},
-        {{5984,192,96,32},1,ORANGE},
-        {{6016,160,64,32},1,ORANGE},
-        {{6336,382,32,32},1,BROWN},
-        {{6348,80,8,302},1,GREEN},
+        { {0, 414, 2208, 400}, 1, 0 },
+        {{512,288,32,32},1,0},
+        {{640,288,32,32},1,0},
+        {{672,288,32,32},1,0},
+        {{704,288,32,32},1,0},
+        {{736,288,32,32},1,0},
+        {{768,288,32,32},1,0},
+        {{704,160,32,32},1,0},
+        {{896,352,96,62},1,0},
+        {{1216,320,96,94},1,0},
+        {{1472,288,96,126},1,0},
+        {{1824,288,64,126},1,0},
+        { {2272, 414, 500, 400}, 1, 0 },
+        {{2464,288,32,32},1,0},
+        {{2496,288,32,32},1,0},
+        {{2528,288,32,32},1,0},
+        {{2560,160,32,32},1,0},
+        {{2592,160,32,32},1,0},
+        {{2624,160,32,32},1,0},
+        {{2656,160,32,32},1,0},
+        {{2688,160,32,32},1,0},
+        {{2720,160,32,32},1,0},
+        {{2752,160,32,32},1,0},
+        {{2784,160,32,32},1,0},
+        { {2848, 414, 2048, 400}, 1, 0 },
+        {{2912,160,32,32},1,0},
+        {{2944,160,32,32},1,0},
+        {{2976,160,32,32},1,0},
+        {{3008,160,32,32},1,0},
+        {{3008,288,32,32},1,0},
+        {{3200,288,32,32},1,0},
+        {{3232,288,32,32},1,0},
+        {{3392,288,32,32},1,0},
+        {{3488,288,32,32},1,0},
+        {{3488,160,32,32},1,0},
+        {{3584,288,32,32},1,0},
+        {{3776,288,32,32},1,0},
+        {{3872,160,32,32},1,0},
+        {{3904,160,32,32},1,0},
+        {{3936,160,32,32},1,0},
+        {{4096,160,32,32},1,0},
+        {{4160,160,32,32},1,0},
+        {{4128,160,32,32},1,0},
+        {{4192,160,32,32},1,0},
+        {{4128,288,32,32},1,0},
+        {{4160,288,32,32},1,0},
+        {{4288,382,32,32},1,0},
+        {{4320,382,32,32},1,0},
+        {{4352,382,32,32},1,0},
+        {{4384,382,32,32},1,0},
+        {{4320,350,32,32},1,0},
+        {{4352,350,32,32},1,0},
+        {{4384,350,32,32},1,0},
+        {{4352,318,32,32},1,0},
+        {{4384,318,32,32},1,0},
+        {{4384,286,32,32},1,0},
+        {{4480,286,32,32},1,0},
+        {{4480,318,32,32},1,0},
+        {{4512,318,32,32},1,0},
+        {{4480,350,32,32},1,0},
+        {{4512,350,32,32},1,0},
+        {{4544,350,32,32},1,0},
+        {{4480,382,32,32},1,0},
+        {{4512,382,32,32},1,0},
+        {{4544,382,32,32},1,0},
+        {{4576,382,32,32},1,0},
+        {{4736,382,32,32},1,0},
+        {{4768,382,32,32},1,0},
+        {{4800,382,32,32},1,0},
+        {{4832,382,32,32},1,0},
+        {{4864,382,32,32},1,0},
+        {{4768,350,32,32},1,0},
+        {{4800,350,32,32},1,0},
+        {{4832,350,32,32},1,0},
+        {{4864,350,32,32},1,0},
+        {{4800,318,32,32},1,0},
+        {{4832,318,32,32},1,0},
+        {{4864,318,32,32},1,0},
+        {{4832,286,32,32},1,0},
+        {{4864,286,32,32},1,0},
+        {{4960,414,2000,400},1,0},
+        {{4960,382,32,32},1,0},
+        {{4992,382,32,32},1,0},
+        {{5024,382,32,32},1,0},
+        {{5056,382,32,32},1,0},
+        {{4960,350,32,32},1,0},
+        {{4992,350,32,32},1,0},
+        {{5024,350,32,32},1,0},
+        {{4960,318,32,32},1,0},
+        {{4992,318,32,32},1,0},
+        {{4960,286,32,32},1,0},
+        {{5216,352,64,62},1,0},
+        {{5376,288,32,32},1,0},
+        {{5408,288,32,32},1,0},
+        {{5440,288,32,32},1,0},
+        {{5472,288,32,32},1,0},
+        {{5728,352,64,62},1,0},
+        {{5792,382,288,32},1,0},
+        {{5824,350,256,32},1,0},
+        {{5856,318,224,32},1,0},
+        {{5888,288,192,32},1,0},
+        {{5920,256,160,32},1,0},
+        {{5952,224,128,32},1,0},
+        {{5984,192,96,32},1,0},
+        {{6016,160,64,32},1,0},
+        {{6336,382,32,32},1,0},
+        {{6348,80,8,302},1,0}
         //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
 
@@ -335,7 +320,7 @@ int main(void)
     gameOver = false;
 
 
-    camera.target = { mario.position.x + 20.0f, mario.position.y + 20.0f };
+    camera.target = { mario.position.x + 20.0f, mario.position.y - 32.0f };
     camera.offset = { mario.position.x, mario.position.y + 20.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
@@ -357,18 +342,14 @@ int main(void)
 
 
         if (gameState == INTRO) {
-            //BeginDrawing();
             DrawIntroScreen();
-            //EndDrawing();
-
         }
         else if (gameState == INICIAL) {
             DrawIntro();
-
         }
         else {
-            UpdateGame(&mario, &lista_hitboxes[0], deltaTime,envItemsLength);
-            DrawGame(&mario, lista_hitboxes);
+            UpdateGame(&mario,&goomba1 ,&lista_hitboxes[0], deltaTime,envItemsLength);
+            DrawGame(&mario,&goomba1, lista_hitboxes);
         }
     }
 
@@ -390,14 +371,27 @@ void UpdateCameraCenter(Camera2D* camera, Mario* mario, Hitbox* envItems, int en
 // Initialize game variables
 void InitGame(void)
 {
-   
-
-   
+    background = LoadTexture(BACKGROUND); //Cargo la textura del background
+    spriteSheet = LoadTexture(SPRITESHEET);
+    EnemySpriteSheet = LoadTexture(ENEMIES);
+    backgroundInicial = LoadTexture(INICIALPAGE);
 
 }
 
+void Reset(Mario* mario) {
+    gameState = INTRO;
+    mario->position.x = 316;
+    mario->position.y = 414;
+    camera.target = { mario->position.x + 20.0f, mario->position.y - 32.0f };
+    camera.offset = { mario->position.x, mario->position.y + 20.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+    tiempo = 400;
+    introTimer = 2.0f;
+}
+
 // Update game (one frame)
-void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
+void UpdateGame(Mario *mario,Goomba* goomba1 ,Hitbox*hitboxes, float delta,int envItems)
 {
     if (!gameOver)
     {
@@ -406,31 +400,53 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
 
         for (int i = 0; i < envItems; i++)
         {
-            if (mario->position.x == (hitboxes + i)->rect.width + (hitboxes + i)->rect.x + 1 && 
-                mario->position.y + 32 <= (hitboxes + i)->rect.y)
-                /*mario->position.y >= (hitboxes+i)->rect.y + (hitboxes+i)->rect.height*/
-                /*&&
-                mario->position.x + 24 < (hitboxes + i)->rect.x)*/
-                /*mario->position.y + 32 <= (hitboxes + i)->rect.y) &&
-                mario->position.y >= (hitboxes + i)->rect.y - 5)*/
+            //if (mario->position.x == (hitboxes + i)->rect.width + (hitboxes + i)->rect.x + 1 && 
+            //    mario->position.y + 32 <= (hitboxes + i)->rect.y)
+            //    /*mario->position.y >= (hitboxes+i)->rect.y + (hitboxes+i)->rect.height*/
+            //    /*&&
+            //    mario->position.x + 24 < (hitboxes + i)->rect.x)*/
+            //    /*mario->position.y + 32 <= (hitboxes + i)->rect.y) &&
+            //    mario->position.y >= (hitboxes + i)->rect.y - 5)*/
+            //{
+            //    mario->canMoveLeft = false;   
+            //}
+            //else if (mario->position.x + 24 == (hitboxes + i)->rect.x - 1 &&
+            //    mario->position.y + 32 <= (hitboxes + i)->rect.y)
+            //    /*mario->position.y >= (hitboxes + i)->rect.y + (hitboxes + i)->rect.height*/
+            //{
+            //    mario->canMoveRight = false;
+            //}
+            //else
+            //{
+            //    mario->canMoveLeft = true;
+            //    mario->canMoveRight = true;
+            //}
+
+            Hitbox* ei = hitboxes + i;
+
+            if (ei->blocking &&
+                ei->rect.x <= mario->position.x &&
+                ei->rect.x + ei->rect.width >= mario->position.x &&
+                ei->rect.y >= mario->position.y &&
+                ei->rect.y <= mario->position.y + mario->velocidad * delta)
             {
-                mario->canMoveLeft = false;   
-            }
-            else if (mario->position.x + 24 == (hitboxes + i)->rect.x - 1 &&
-                mario->position.y + 32 <= (hitboxes + i)->rect.y)
-                /*mario->position.y >= (hitboxes + i)->rect.y + (hitboxes + i)->rect.height*/
-            {
-                mario->canMoveRight = false;
-            }
-            else
-            {
-                mario->canMoveLeft = true;
-                mario->canMoveRight = true;
+                hitObstacle = true;
+                mario->velocidad = 0.0f;
+                mario->position.y = ei->rect.y;
+                break;
             }
         }
 
+
+        if (mario->position.x + 24 >= goomba1->position.x &&
+            mario->position.x < (goomba1->position.x + 32) &&
+            mario->position.y >= goomba1->position.y)
+        {
+            gameOver = true;
+        }
+
         /* Movimiento de Mario */
-        if (IsKeyDown(KEY_RIGHT)&&mario->canMoveRight) {
+        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
             mario->position.x += 5;
             
             if (mario->sprite_status == 56)
@@ -439,8 +455,10 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
                 mario->sprite_status += 18;
 
             if (mario->position.x >= (screenWidth / 2) - 12) {
+                
                 worldPosition = mario->position.x;
                 mario->mirando_derecha = true;
+                
                 if (mario->sprite_status >= 56)
                 {
                     mario->sprite_status = 20;
@@ -480,14 +498,19 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
         }
       
         UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
+
+        if (!hitObstacle)
+        {
+            mario->position.y += mario->velocidad * delta;
+            mario->velocidad += GRAVEDAD * delta;
+            mario->canJump = false;
+        }
+        else mario->canJump = true;
     }
     else
-    {
-        if (IsKeyPressed(KEY_ENTER))
-        {
-            InitGame();
-            gameOver = false;
-        }
+    {        
+        Reset(mario);
+        gameOver = false;   
     }
 
     static float tiempoAcumulado = 0;
@@ -502,12 +525,17 @@ void UpdateGame(Mario *mario, Hitbox*hitboxes, float delta,int envItems)
         tiempo = 0;
         gameOver = true;  // Termina el juego si el tiempo llega a 0
     }
+    
+    //Si mario se cae del escenario
+    if (mario->position.y > 580 || mario->position.x >= 6336) {
+        gameOver = true;
+    }
 
 }
 
 // Draw game (one frame)
 
-void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
+void DrawGame(Mario* mario, Goomba *goomba1, vector<Hitbox> hitboxes)
 {
     BeginDrawing();
 
@@ -544,18 +572,18 @@ void DrawGame(Mario* mario, vector<Hitbox> hitboxes)
     DrawTexturePro(spriteSheet, marioRecorte,marioResized,MarioOrigen,0, WHITE);
 
     //Hitbox de mario
-    DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
+    //DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
     //Goomba
-    Goomba Goomba1(338, 414);//PrimerGoomba
+   
 
-    Vector2 PosGoomba1 = { Goomba1.position.x,Goomba1.position.y };
-    Rectangle Goomba1Recorte = {Goomba1.sprite_status, 17, 16,16}; //FALTA POSICION SPRITE GOOMBA
+    Vector2 PosGoomba1 = {goomba1->position.x,goomba1->position.y };
+    Rectangle Goomba1Recorte = {goomba1->sprite_status, 17, 16,16};
   
     Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
     Vector2 GoombaOrigen = { 0,0 };
     DrawTexturePro(EnemySpriteSheet, Goomba1Recorte, Goomba1Resized, GoombaOrigen, 0, WHITE);
-    DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
+    //DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < hitboxes.size(); i++) 
