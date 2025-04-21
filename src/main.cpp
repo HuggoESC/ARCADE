@@ -435,14 +435,15 @@ void UpdateGame(Mario *mario,Goomba* goomba1 ,Hitbox*hitboxes, float delta,int e
                 mario->position.y = ei->rect.y;
                 break;
             }
-
-            if (mario->position.x >= goomba1->position.x && mario->position.x < (goomba1->position.x + 32) && mario->position.y >= goomba1->position.y && mario->position.y < (goomba1->position.y + 32))
-            {
-
-            }
         }
 
-        
+
+        if (mario->position.x + 24 >= goomba1->position.x &&
+            mario->position.x < (goomba1->position.x + 32) &&
+            mario->position.y >= goomba1->position.y)
+        {
+            gameOver = true;
+        }
 
         /* Movimiento de Mario */
         if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
@@ -524,7 +525,7 @@ void UpdateGame(Mario *mario,Goomba* goomba1 ,Hitbox*hitboxes, float delta,int e
         tiempo = 0;
         gameOver = true;  // Termina el juego si el tiempo llega a 0
     }
-    cout << mario->position.x << endl;
+    
     //Si mario se cae del escenario
     if (mario->position.y > 580 || mario->position.x >= 6336) {
         gameOver = true;
@@ -571,7 +572,7 @@ void DrawGame(Mario* mario, Goomba *goomba1, vector<Hitbox> hitboxes)
     DrawTexturePro(spriteSheet, marioRecorte,marioResized,MarioOrigen,0, WHITE);
 
     //Hitbox de mario
-    DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
+    //DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
     //Goomba
    
@@ -582,7 +583,7 @@ void DrawGame(Mario* mario, Goomba *goomba1, vector<Hitbox> hitboxes)
     Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
     Vector2 GoombaOrigen = { 0,0 };
     DrawTexturePro(EnemySpriteSheet, Goomba1Recorte, Goomba1Resized, GoombaOrigen, 0, WHITE);
-    DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
+    //DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
 
     /* Dibujado de Hitbox */
     for (int i = 0; i < hitboxes.size(); i++) 
