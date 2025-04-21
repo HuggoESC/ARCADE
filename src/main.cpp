@@ -17,14 +17,14 @@ namespace fs = filesystem;
 //----------------------------------------------------------------------------------
 // Some Defines y ENUMS
 //----------------------------------------------------------------------------------
-#define BACKGROUND "../../resources/world/World_1_1.png"
-#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define BACKGROUND "resources/world/World_1_1.png"
+#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
 #define SOUNDS "ARCADE/Sound Effects/Super Mario Bros Efects"
 
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
-#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
 enum GameState {
