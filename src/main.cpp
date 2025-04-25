@@ -396,45 +396,16 @@ void UpdateGame(Mario *mario,Goomba* goomba1 ,Hitbox*hitboxes, float delta,int e
     if (!gameOver)
     {
         //colisions
-        bool hitObstacle = false;
-
+       
         for (int i = 0; i < envItems; i++)
         {
-            //if (mario->position.x == (hitboxes + i)->rect.width + (hitboxes + i)->rect.x + 1 && 
-            //    mario->position.y + 32 <= (hitboxes + i)->rect.y)
-            //    /*mario->position.y >= (hitboxes+i)->rect.y + (hitboxes+i)->rect.height*/
-            //    /*&&
-            //    mario->position.x + 24 < (hitboxes + i)->rect.x)*/
-            //    /*mario->position.y + 32 <= (hitboxes + i)->rect.y) &&
-            //    mario->position.y >= (hitboxes + i)->rect.y - 5)*/
-            //{
-            //    mario->canMoveLeft = false;   
-            //}
-            //else if (mario->position.x + 24 == (hitboxes + i)->rect.x - 1 &&
-            //    mario->position.y + 32 <= (hitboxes + i)->rect.y)
-            //    /*mario->position.y >= (hitboxes + i)->rect.y + (hitboxes + i)->rect.height*/
-            //{
-            //    mario->canMoveRight = false;
-            //}
-            //else
-            //{
-            //    mario->canMoveLeft = true;
-            //    mario->canMoveRight = true;
-            //}
-
             Hitbox* ei = hitboxes + i;
-
-            if (ei->blocking &&
-                ei->rect.x <= mario->position.x &&
-                ei->rect.x + ei->rect.width >= mario->position.x &&
-                ei->rect.y >= mario->position.y &&
-                ei->rect.y <= mario->position.y + mario->velocidad * delta)
+            if ()
             {
-                hitObstacle = true;
-                mario->velocidad = 0.0f;
-                mario->position.y = ei->rect.y;
-                break;
+
             }
+            
+            
         }
 
 
