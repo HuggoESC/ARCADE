@@ -235,7 +235,7 @@ void InitGame(void)
     //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
 
-    InitAudioDevice();
+    InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
 
 }
 
