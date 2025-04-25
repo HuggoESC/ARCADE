@@ -528,12 +528,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\Mario.h" />
     <ClInclude Include="..\..\include\resource_dir.h" />
+    <ClInclude Include="AABB.h" />
+    <ClInclude Include="Mario.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cpp" />
-    <ClCompile Include="..\..\src\Mario.cpp" />
+    <ClCompile Include="AABB.cpp" />
+    <ClCompile Include="Mario.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="raylib.vcxproj">
