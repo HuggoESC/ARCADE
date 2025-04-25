@@ -20,8 +20,8 @@ namespace fs = filesystem;
 #define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
 #define SOUNDS "ARCADE/Sound Effects/Super Mario Bros Efects"
 
-#define PLAYER_JUMP_SPD 350.0f
-#define GRAVEDAD 400
+#define PLAYER_JUMP_SPD 500.0f
+#define GRAVEDAD 700
 #define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
@@ -316,8 +316,7 @@ void DrawGame(Mario* mario, Goomba* goomba1, vector<Hitbox> hitboxes)
     Rectangle marioRecorte = { mario->sprite_status, 8, 16, 16 };
 
     //*Cambio de derecha a izquierda
-    int mariowidth;
-    if (mario->mirando_derecha == true)
+    if (mario->mirando_derecha)
     {
         marioRecorte.width = 16;
     }
@@ -450,7 +449,6 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
                     break;
 
                 }
-
         }
 
         /* Colision con enemigos */
@@ -464,51 +462,41 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
         /* Movimiento de Mario */
         if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
             mario->position.x += 5;
+            mario->mirando_derecha = true;
 
-            if (mario->sprite_status == 56)
-                mario->sprite_status = 20;
-            else
-                mario->sprite_status += 18;
+            if (mario->canJump) {
+                if (mario->sprite_status >= 56)
+                    mario->sprite_status = 20;
+                else
+                    mario->sprite_status += 18;
+            }
 
             if (mario->position.x >= (screenWidth / 2) - 12) {
-
                 worldPosition = mario->position.x;
-                mario->mirando_derecha = true;
-
-                if (mario->sprite_status >= 56)
-                {
-                    mario->sprite_status = 20;
-                }
-                else
-                {
-                    mario->sprite_status += 18;
-                }
             }
         }
         else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
             //Esto es para que mario no pueda salirse del mapa por la izquierda
             if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
+                
                 mario->position.x -= 5;
                 mario->mirando_derecha = false;
-                if (mario->sprite_status >= 56)
-                {
-                    mario->sprite_status = 20;
-                }
-                else
-                {
-                    mario->sprite_status += 18;
+                
+                if (mario->canJump) {
+                    if (mario->sprite_status >= 56)
+                        mario->sprite_status = 20;
+                    else
+                        mario->sprite_status += 18;
                 }
             }
         }
-        else
-        {
-            mario->sprite_status = 0;
-        }
+        
 
         /* Salto */
         if (IsKeyDown(KEY_SPACE) && mario->canJump) {
             mario->velocidad = -PLAYER_JUMP_SPD;
             mario->canJump = false;
+            mario->sprite_status = 96;
         }
 
         UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
@@ -519,7 +507,13 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
             mario->velocidad += GRAVEDAD * delta;
             mario->canJump = false;
         }
-        else mario->canJump = true;
+        else {
+            mario->canJump = true;
+        }
+
+        if (mario->canJump && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT))
+            mario->sprite_status = 0;
+
     }
     else
     {
