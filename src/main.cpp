@@ -20,7 +20,7 @@ namespace fs = filesystem;
 #define BACKGROUND "resources/world/World_1_1.png"
 #define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define SOUNDS "ARCADE/Sound Effects/Super Mario Bros Efects"
+#define SOUNDS "resources/Super Mario Bros Efects"
 
 #define PLAYER_JUMP_SPD 350.0f
 #define GRAVEDAD 400
@@ -186,19 +186,30 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
     InitGame();
 
-    InitAudioDevice();
+    InitAudioDevice(); // HUGO
+
+    Music music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav"); // HUGO
+    PlayMusicStream(music);
+
+    float timeplayed = 0.0f; // HUGO
+    bool pause = false; // HUGO
 
 
     vector <Sound> lista_Sounds = {
 
-    //vector <Sound> lista_Sounds;
-    //string Folderpath = "GitHub/ARCADE/Sound Effects/Super Mario Bros Efects";
+        //vector <Sound> lista_Sounds;
+        //string Folderpath = "GitHub/ARCADE/Sound Effects/Super Mario Bros Efects";
 
+     /*LoadSound("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav"),*/ // Hugo musica fondo
+        
 
-     LoadSound("ARCADE/Sound Effects/Super Mario Bros Efects/1up.wav"),
+     LoadSound("resources/Sound Effects/Super Mario Bros Efects/1up.wav"),
+
 
 
     };
+
+    PlaySound(lista_Sounds [0]); // HUGO
    
     Mario mario(316, 414); //Creo el objeto de Mario
     Goomba goomba1(500,414);
@@ -335,6 +346,28 @@ int main(void)
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+
+        UpdateMusicStream(music); //HUGO
+
+        if (IsKeyPressed(KEY_SPACE)) //hugo
+        {
+            StopMusicStream(music);
+            PlayMusicStream(music);
+        }
+        if (IsKeyPressed(KEY_P))
+        {
+            pause = !pause;
+
+            if (pause) PauseMusicStream(music);
+            else ResumeMusicStream(music);
+        }
+        timeplayed = GetMusicTimePlayed(music) / GetMusicTimeLength(music);
+
+        if (timeplayed > 1.0f) timeplayed = 1.0f;
+
+
+
+
         float deltaTime = GetFrameTime();
         UpdateGameState(deltaTime);
 
@@ -356,6 +389,8 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    UnloadMusicStream(music); //HUGO
+    CloseAudioDevice(); // hugo
     UnloadGame();         // Unload loaded data (textures, sounds, models...)
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
