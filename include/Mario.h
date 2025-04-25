@@ -14,6 +14,8 @@ public:
 	};
 
 	bool mirando_derecha = true;
+	bool canMoveLeft;
+	bool canMoveRight;
 	int sprite_status = 0;
 	Rectangle position;
 	bool canJump = true;
@@ -23,6 +25,6 @@ public:
 	/* Constructores */
 	Mario();
 	    
-	Mario(float posX, float posY) {};
+	Mario(float posX, float posY);
 };
 #endif

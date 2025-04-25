@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
-//#include "Mario.h"
+#include "Mario.h"
 
 using namespace std;
 namespace fs = filesystem;
@@ -58,26 +58,26 @@ public:
     }
 };
 
-class Mario {
-public:
-    bool mirando_derecha = true;
-    bool canMoveLeft;
-    bool canMoveRight;
-    int sprite_status = 0;
-    Rectangle position;
-    bool canJump = true;
-    float velocidad;
-    Powers poder;
-
-    /* Constructores */
-    Mario();
-    
-    Mario(float posX, float posY) {
-        position = { posX, posY, 24, 32 };
-        velocidad = 0;
-        poder = BASE;
-    }
-};
+//class Mario {
+//public:
+//    bool mirando_derecha = true;
+//    bool canMoveLeft;
+//    bool canMoveRight;
+//    int sprite_status = 0;
+//    Rectangle position;
+//    bool canJump = true;
+//    float velocidad;
+//    Powers poder;
+//
+//    /* Constructores */
+//    Mario();
+//    
+//    Mario(float posX, float posY) {
+//        position = { posX, posY, 24, 32 };
+//        velocidad = 0;
+//        poder = BASE;
+//    }
+//};
 
 struct Hitbox {
     Rectangle rect;
