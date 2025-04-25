@@ -432,15 +432,25 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
     {
         //colisions
        
+        bool hitObstacle = false;
+
         for (int i = 0; i < envItems; i++)
         {
             Hitbox* ei = hitboxes + i;
-            if ()
-            {
 
-            }
-            
-            
+            if (ei->blocking &&
+                ei->rect.x <= mario->position.x &&
+                ei->rect.x + ei->rect.width >= mario->position.x &&
+                ei->rect.y >= mario->position.y &&
+                ei->rect.y <= mario->position.y + mario->velocidad * delta)
+                {
+                    hitObstacle = true;
+                    mario->velocidad = 0.0f;
+                    mario->position.y = ei->rect.y;
+                    break;
+
+                }
+
         }
 
         /* Colision con enemigos */
