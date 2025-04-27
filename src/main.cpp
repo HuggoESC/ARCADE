@@ -18,7 +18,8 @@ namespace fs = filesystem;
 #define BACKGROUND "resources/world/World_1_1.png"
 #define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define SOUNDS "ARCADE/Sound Effects/Super Mario Bros Efects"
+#define SOUNDS "ARCADE/resources/Super Mario Bros Efects"
+//#define Music "ARCADE/resources/Super Mario Bros Music"
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
@@ -86,6 +87,8 @@ struct Hitbox {
 };
 
 #pragma region VARIABLES GLOBALES
+
+static Music music; //HUGO 
 
 static const int screenWidth = 800;
 static const int screenHeight = 480;
@@ -235,7 +238,15 @@ void InitGame(void)
     //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
 
+    //HUGO MUSICA
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
+
+    Music music = LoadMusicStream("ARCADE\\resources\\Super Mario Bros Music\\overworld - theme - super - mario - world - made - with - Voicemod.wav");
+
+    PlayMusicStream(music);
+
+    float timePlayed = 0.0f;
+    bool pause = false;
 
 }
 
@@ -547,7 +558,11 @@ int main(void)
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
+
     {
+
+        UpdateMusicStream(music); //HUGO
+
         float deltaTime = GetFrameTime();
         UpdateGameState(deltaTime);
 
@@ -568,6 +583,8 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    UnloadMusicStream(music);
+    CloseAudioDevice();
     UnloadGame();         // Unload loaded data (textures, sounds, models...)
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
