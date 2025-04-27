@@ -241,7 +241,7 @@ void InitGame(void)
     //HUGO MUSICA
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
 
-    music = LoadMusicStream("ARCADE/resources/Super Mario Bros Music/overworld - theme - super - mario - world - made - with - Voicemod.wav");
+    music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
 
     PlayMusicStream(music);
 
