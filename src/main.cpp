@@ -570,9 +570,11 @@ int main(void)
 
         if (gameState == INTRO) {
             DrawIntroScreen();
+            PlayMusicStream(music);
         }
         else if (gameState == INICIAL) {
             DrawIntro();
+            PlayMusicStream(music);
         }
         else {
             UpdateGame(&mario, &goomba1, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
