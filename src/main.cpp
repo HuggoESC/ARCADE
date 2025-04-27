@@ -19,7 +19,7 @@ namespace fs = filesystem;
 #define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
 #define SOUNDS "ARCADE/resources/Super Mario Bros Efects"
-//#define Music "ARCADE/resources/Super Mario Bros Music"
+
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
@@ -241,7 +241,7 @@ void InitGame(void)
     //HUGO MUSICA
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
 
-    Music music = LoadMusicStream("ARCADE\\resources\\Super Mario Bros Music\\overworld - theme - super - mario - world - made - with - Voicemod.wav");
+    music = LoadMusicStream("ARCADE/resources/Super Mario Bros Music/overworld - theme - super - mario - world - made - with - Voicemod.wav");
 
     PlayMusicStream(music);
 
