@@ -15,15 +15,15 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND "resources/world/World_1_1.png"
-#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define SOUNDS "ARCADE/resources/Super Mario Bros Efects"
+#define BACKGROUND "../../resources/world/World_1_1.png"
+#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define SOUNDS "../../resources/Super Mario Bros Efects"
 
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
-#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
 enum GameState {
