@@ -118,6 +118,7 @@ static int world = 1;
 static int level = 1;
 vector <Hitbox> lista_hitboxes;
 
+
 #pragma endregion
 
 #pragma region Inits
@@ -486,9 +487,9 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
                     mario->velocidad = 0.0f;
                     mario->position.y = ei->rect.y;
                     break;
-
                 }
         }
+
 
         /* Colision con enemigos */
         if (mario->position.x + 24 >= goomba1->position.x &&
@@ -582,6 +583,10 @@ int main(void)
     camera.offset = { mario.position.x, mario.position.y + 20.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
+
+    int currentFrame = 0; //frame actual
+    int framesCounter = 0; //contador de frames
+    int framesSpeed = 8; //velocidad de los frames
 
     SetTargetFPS(60);
 
