@@ -15,15 +15,15 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND "../../resources/world/World_1_1.png"
-#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define SOUNDS "../../resources/Super Mario Bros Efects"
+#define BACKGROUND "resources/world/World_1_1.png"
+#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define SOUNDS "resources/Super Mario Bros Efects"
 
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
-#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
 enum GameState {
@@ -94,6 +94,24 @@ static Music Gameover;
 static Music Pause;
 
 static Sound JumpSound;
+static Sound UpSound;
+static Sound BeepSound;
+static Sound BigJumpSound;
+static Sound Break;
+static Sound Bump;
+static Sound Coin;
+static Sound FireBall;
+static Sound Flagpole;
+static Sound item;
+static Sound kick;
+static Sound Powerup;
+static Sound Skid;
+static Sound Squish;
+static Sound Thwomp;
+static Sound Vine;
+static Sound Warp;
+static Sound Enemyfire;
+
 
 static const int screenWidth = 800;
 static const int screenHeight = 480;
@@ -246,30 +264,30 @@ void InitGame(void)
     //HUGO MUSICA
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
     //MUSICA
-    music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
-    Die = LoadMusicStream("../../resources/Super Mario Bros Music/Die.wav");
-    Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
-    Pause = LoadMusicStream("../../resources/Super Mario Bros Music/Pause.wav");
+    music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
+    Die = LoadMusicStream("resources/Super Mario Bros Music/Die.wav");
+    Gameover = LoadMusicStream("resources/Super Mario Bros Music/Game Over.wav");
+    Pause = LoadMusicStream("resources/Super Mario Bros Music/Pause.wav");
 
     //sonidos
-    Sound JumpSound = LoadSound("../../resources/Super Mario Bros Efects/Jump.wav");
-    Sound UpSound = LoadSound("../../resources/Super Mario Bros Efects/1 up.wav");
-    Sound BeepSound = LoadSound("../../resources/Super Mario Bros Efects/Beep.wav");
-    Sound BigJumpSound = LoadSound("../../resources/Super Mario Bros Efects/Big Jump.wav");
-    Sound Break = LoadSound("../../resources/Super Mario Bros Efects/Break.wav");
-    Sound Bump = LoadSound("../../resources/Super Mario Bros Efects/Bump.wav");
-    Sound Coin = LoadSound("../../resources/Super Mario Bros Efects/Coin.wav");
-    Sound FireBall = LoadSound("../../resources/Super Mario Bros Efects/Fire Ball.wav");
-    Sound Flagpole = LoadSound("../../resources/Super Mario Bros Efects/Flagpole.wav");
-    Sound item = LoadSound("../../resources/Super Mario Bros Efects/Item.wav");
-    Sound kick = LoadSound("../../resources/Super Mario Bros Efects/Kick.wav");
-    Sound Powerup = LoadSound("../../resources/Super Mario Bros Efects/Powerup.wav");
-    Sound Skid = LoadSound("../../resources/Super Mario Bros Efects/Skid.wav");
-    Sound Squish = LoadSound("../../resources/Super Mario Bros Efects/Squish.wav");
-    Sound Thwomp = LoadSound("../../resources/Super Mario Bros Efects/Tjwomp.wav");
-    Sound Vine = LoadSound("../../resources/Super Mario Bros Efects/Vine.wav");
-    Sound Warp = LoadSound("../../resources/Super Mario Bros Efects/Wa`rp.wav");
-    Sound Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
+    JumpSound = LoadSound("resources/Super Mario Bros Efects/Jump.wav");
+    UpSound = LoadSound("resources/Super Mario Bros Efects/1 up.wav");
+    BeepSound = LoadSound("resources/Super Mario Bros Efects/Beep.wav");
+    BigJumpSound = LoadSound("resources/Super Mario Bros Efects/Big Jump.wav");
+    Break = LoadSound("resources/Super Mario Bros Efects/Break.wav");
+    Bump = LoadSound("resources/Super Mario Bros Efects/Bump.wav");
+    Coin = LoadSound("resources/Super Mario Bros Efects/Coin.wav");
+    FireBall = LoadSound("resources/Super Mario Bros Efects/Fire Ball.wav");
+    Flagpole = LoadSound("resources/Super Mario Bros Efects/Flagpole.wav");
+    item = LoadSound("resources/Super Mario Bros Efects/Item.wav");
+    kick = LoadSound("resources/Super Mario Bros Efects/Kick.wav");
+    Powerup = LoadSound("resources/Super Mario Bros Efects/Powerup.wav");
+    Skid = LoadSound("resources/Super Mario Bros Efects/Skid.wav");
+    Squish = LoadSound("resources/Super Mario Bros Efects/Squish.wav");
+    Thwomp = LoadSound("resources/Super Mario Bros Efects/Tjwomp.wav");
+    Vine = LoadSound("resources/Super Mario Bros Efects/Vine.wav");
+    Warp = LoadSound("resources/Super Mario Bros Efects/Warp.wav");
+    Enemyfire = LoadSound("resources/Super Mario Bros Efects/Enemy Fire.wav");
 
     PlayMusicStream(music);
 
@@ -294,6 +312,10 @@ void UnloadGame(void)
 {
     UnloadTexture(spriteSheet);
     UnloadTexture(background);
+    UnloadMusicStream(music);
+    UnloadMusicStream(Die);
+    UnloadMusicStream(Gameover);
+    UnloadMusicStream(Pause);
     // TODO: Unload all dynamic loaded data (textures, sounds, models...)
 }
 
@@ -495,7 +517,17 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
             mario->position.x < (goomba1->position.x + 32) &&
             mario->position.y >= goomba1->position.y)
         {
+            //sprite muerte
+            mario->sprite_status = 117;
+            for (int i = 0; i < 64; ++i) {
+                mario->position.y+=2.0f;
+            }
+
+            PlayMusicStream(Die);
+            StopMusicStream(music);
             gameOver = true;
+           
+            
         }
 
         /* Movimiento de Mario */
@@ -557,6 +589,7 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
     }
     else
     {
+        PlayMusicStream(Die);
         Reset(mario);
         gameOver = false;
     }
@@ -600,10 +633,12 @@ int main(void)
         if (gameState == INTRO) {
             DrawIntroScreen();
             PlayMusicStream(music);
+            StopMusicStream(Die);
         }
         else if (gameState == INICIAL) {
             DrawIntro();
             PlayMusicStream(music);
+            StopMusicStream(Die);
         }
         else {
             UpdateGame(&mario, &goomba1, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
