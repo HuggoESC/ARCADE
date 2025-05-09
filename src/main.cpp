@@ -15,28 +15,30 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND "../../resources/world/World_1_1.png"
+#define TILEMAP "../../resources/world/TILE_MAP.png"
+#define BACKGROUND "../../resources/world/Empty_World_1_1.png"
 #define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
 #define SOUNDS "../../resources/Super Mario Bros Efects"
-
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
 #define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
-
-enum GameState {
+enum STAGE {
     INICIAL,
     INTRO,
     PLAYING
 };
 
-enum Powers {
-    BASE = 0,
-    SETA = 1,
-    FLOR = 2,
-    ESTRELLA = 3
+enum TILE_TYPE {
+    VACIO,
+    SUELO,
+    BLOQUE,
+    BLOQUEMONEDA,
+    BLOQUESOLIDO,
+    INVISIBLE,
+    TUBERIA
 };
 
 #pragma endregion
@@ -44,6 +46,12 @@ enum Powers {
 //----------------------------------------------------------------------------------
 // Class Definition
 //----------------------------------------------------------------------------------
+
+typedef struct Tile {
+    bool isVisible;
+    int neighbourMask;
+    TILE_TYPE type;
+} Tile;
 
 class Goomba {
 public:
@@ -59,34 +67,19 @@ public:
     }
 };
 
-//class Mario {
-//public:
-//    bool mirando_derecha = true;
-//    bool canMoveLeft;
-//    bool canMoveRight;
-//    int sprite_status = 0;
-//    Rectangle position;
-//    bool canJump = true;
-//    float velocidad;
-//    Powers poder;
-//
-//    /* Constructores */
-//    Mario();
-//    
-//    Mario(float posX, float posY) {
-//        position = { posX, posY, 24, 32 };
-//        velocidad = 0;
-//        poder = BASE;
-//    }
-//};
-
 struct Hitbox {
     Rectangle rect;
     int blocking;
     Color color;
 };
 
+
 #pragma region VARIABLES GLOBALES
+
+constexpr int WORLD_WIDTH = 3376;
+constexpr int WORLD_HEIGHT = 480;
+constexpr int TILE_SIZE = 16;
+constexpr Vector2 WORLD_GRID = { WORLD_WIDTH / TILE_SIZE, WORLD_HEIGHT / TILE_SIZE };
 
 static Music music; //HUGO 
 static Music Die;
@@ -97,12 +90,7 @@ static Sound JumpSound;
 
 static const int screenWidth = 800;
 static const int screenHeight = 480;
-static GameState gameState = INICIAL;
-static float introTimer = 2.0f;
 
-static bool gameOver = false;
-static int score = 0;
-static float worldPosition = 0;
 static int selectedOption = 0;  // 0 para 1 jugador, 1 para 2 jugadores
 
 Camera2D camera = { 0 };
@@ -111,26 +99,84 @@ Texture2D spriteSheet;
 Texture2D EnemySpriteSheet;
 Texture2D backgroundInicial;
 
-static int tiempo = 400;   // Tiempo en cuenta regresiva
-static int monedas = 0;    // Contador de monedas
-static int vidas = 3;      // N�mero de vidas de Mario
-static int world = 1;
-static int level = 1;
 vector <Hitbox> lista_hitboxes;
+
+struct GameState {
+    bool initialized = false;
+    bool gameOver = false;
+    int score = 0;
+    int tiempo = 400;   // Tiempo en cuenta regresiva
+    float introTimer = 2.0f;
+    int monedas = 0;    // Contador de monedas
+    int vidas = 3;      // N�mero de vidas de Mario
+    int world = 1;
+    int level = 1;
+    float worldPosition = 0;
+
+    STAGE state = INICIAL;
+
+    Tile WorldGrid[(int)WORLD_GRID.x][(int)WORLD_GRID.y];
+};
+
+static GameState* gameState;
 
 #pragma endregion
 
 #pragma region Inits
+void InitGrid() {
+    Image tileMap = LoadImage(TILEMAP);
+    int posX = 0;
+    int posY = 0;
+
+    for (int x = 0; x < WORLD_GRID.x; x++)
+    {
+        for (int y = 0; y < WORLD_GRID.y; y++)
+        {
+            Tile temp = Tile{ false, 0, VACIO };
+            
+            Color pixel = GetImageColor(tileMap, posX, posY);
+           
+            if (pixel.r == 255 && pixel.g == 0 && pixel.b == 0) { //Rojo
+                temp.isVisible = true;
+                temp.type = BLOQUE;
+            }
+            else if (pixel.r == 0 && pixel.g == 255 && pixel.b == 0) { //Verde
+                temp.isVisible = true;
+                temp.type = TUBERIA;
+            }
+            else if (pixel.r == 0 && pixel.g == 0 && pixel.b == 255) { //Azul
+                temp.isVisible = true;
+                temp.type = BLOQUESOLIDO;
+            }
+            else if (pixel.r == 255 && pixel.g == 255 && pixel.b == 0) { //Amarillo
+                temp.isVisible = true;
+                temp.type = BLOQUEMONEDA;
+            }
+            else if (pixel.r == 255 && pixel.g == 0 && pixel.b == 255) { //Rosa?
+                temp.isVisible = true;
+                temp.type = SUELO;
+            }
+            
+            gameState->WorldGrid[x][y] = temp;
+
+            posY += TILE_SIZE;
+        }
+        posX += TILE_SIZE;
+        posY = 0;
+    }
+
+}
 
 void InitGame(void)
 {
+    GameState temp;
+    gameState = &temp;
+
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
     EnemySpriteSheet = LoadTexture(ENEMIES);
     backgroundInicial = LoadTexture(INICIALPAGE);
 
-    score = 0;
-    gameOver = false;
 
     lista_hitboxes = {
     { {0, 414, 2208, 400},1,0},
@@ -276,18 +322,35 @@ void InitGame(void)
     float timePlayed = 0.0f;
     bool pause = false;
 
+    InitGrid();
 }
 
+
+
 void Reset(Mario* mario) {
-    gameState = INTRO;
+    gameState->state = INICIAL;
     mario->position.x = 316;
     mario->position.y = 414;
     camera.target = { mario->position.x + 20.0f, mario->position.y - 32.0f };
     camera.offset = { mario->position.x, mario->position.y + 20.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
-    tiempo = 400;
-    introTimer = 2.0f;
+    gameState->tiempo = 400;
+    gameState->introTimer = 2.0f;
+}
+
+Tile* GetTile(int x, int y) {
+    
+    //Si las coordenadas estan dentro del mapa, devuelve el Tile que hay alli
+    if (x >= 0 && x < WORLD_GRID.x && y >= 0 && y < WORLD_GRID.y) {
+
+        return &gameState->WorldGrid[x][y];
+    }
+
+}
+
+Tile* GetTile(Vector2 worldPos) {
+    return GetTile(worldPos.x / TILE_SIZE, worldPos.y / TILE_SIZE);
 }
 
 void UnloadGame(void)
@@ -298,6 +361,8 @@ void UnloadGame(void)
 }
 
 #pragma endregion
+
+
 
 #pragma region FUNCIONES DE DRAW
 
@@ -321,12 +386,12 @@ void DrawIntroScreen() {
     ClearBackground(BLACK);
 
     DrawText("MARIO", 20, 10, 20, WHITE);
-    DrawText(TextFormat("%06i", score), 20, 30, 20, WHITE);
+    DrawText(TextFormat("%06i", gameState->score), 20, 30, 20, WHITE);
     DrawText("WORLD", screenWidth / 2 - 40, 10, 20, WHITE);
-    DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
+    DrawText(TextFormat("%i - %i", gameState->world, gameState->level), screenWidth / 2 - 25, 30, 20, WHITE);
    
     DrawText("x", screenWidth / 2 - 20, screenHeight / 2, 20, WHITE);
-    DrawText(TextFormat("%i", vidas), screenWidth / 2 + 10, screenHeight / 2, 20, WHITE);
+    DrawText(TextFormat("%i", gameState->vidas), screenWidth / 2 + 10, screenHeight / 2, 20, WHITE);
 
     Rectangle marioRecorte = { 0, 8, 16, 16 };
     Rectangle marioResized = { screenWidth / 2 - 50, screenHeight / 2, marioRecorte.width * 2, marioRecorte.height * 2 };
@@ -384,6 +449,45 @@ void DrawGame(Mario* mario, Goomba* goomba1, vector<Hitbox> hitboxes)
     //DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
 
     /* Dibujado de Hitbox */
+    float posX = 0;
+    float posY = 0;
+    for (int x = 0; x <= WORLD_GRID.x; x++)
+    {
+        for (int y = 0; y <= WORLD_GRID.y; y++)
+        {
+            switch (gameState->WorldGrid[x][y].type) {
+            case BLOQUE: {
+                DrawRectangleRec({posX, posY, TILE_SIZE*2, TILE_SIZE*2}, RED);
+                break;
+            };
+            case BLOQUEMONEDA: {
+                DrawRectangleRec({ posX, posY, TILE_SIZE*2, TILE_SIZE*2 }, YELLOW);
+
+                break;
+            };
+            case SUELO: {
+                DrawRectangleRec({ posX, posY, TILE_SIZE*2, TILE_SIZE*2 }, PINK);
+
+                break;
+            };
+            case TUBERIA: {
+                DrawRectangleRec({ posX, posY, TILE_SIZE*2, TILE_SIZE*2 }, GREEN);
+
+                break;
+            };
+            case BLOQUESOLIDO: {
+                DrawRectangleRec({ posX, posY, TILE_SIZE * 2, TILE_SIZE * 2 }, BLUE);
+
+                break;
+            };
+            }
+
+            posY += TILE_SIZE * 2;
+        }
+        posX += TILE_SIZE * 2;
+        posY = 0;
+    }
+
     for (int i = 0; i < hitboxes.size(); i++)
         DrawRectangleRec(hitboxes[i].rect, hitboxes[i].color);
 
@@ -391,16 +495,16 @@ void DrawGame(Mario* mario, Goomba* goomba1, vector<Hitbox> hitboxes)
 
     /*Hud draw*/
     DrawText("MARIO", 20, 10, 20, WHITE);
-    DrawText(TextFormat("%06i", score), 20, 30, 20, WHITE);
+    DrawText(TextFormat("%06i", gameState->score), 20, 30, 20, WHITE);
 
 
-    DrawText(TextFormat("x %02i", monedas), 180, 30, 20, YELLOW);
+    DrawText(TextFormat("x %02i", gameState->monedas), 180, 30, 20, YELLOW);
 
     DrawText("TIME", screenWidth - 100, 10, 20, WHITE);
-    DrawText(TextFormat("%03i", tiempo), screenWidth - 100, 30, 20, WHITE);
+    DrawText(TextFormat("%03i", gameState->tiempo), screenWidth - 100, 30, 20, WHITE);
 
     DrawText("WORLD", screenWidth / 2 - 40, 10, 20, WHITE);
-    DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
+    DrawText(TextFormat("%i - %i", gameState->world, gameState->level), screenWidth / 2 - 25, 30, 20, WHITE);
 
 
 
@@ -417,13 +521,13 @@ void UpdateTimer(float delta) {
 
     tiempoAcumulado += delta;
     if (tiempoAcumulado >= 1.0f) {
-        tiempo -= 1;
+        gameState->tiempo -= 1;
         tiempoAcumulado = 0;  // Reiniciamos el acumulador
     }
 
-    if (tiempo <= 0) {
-        tiempo = 0;
-        gameOver = true;  // Termina el juego si el tiempo llega a 0
+    if (gameState->tiempo <= 0) {
+        gameState->tiempo = 0;
+        gameState->gameOver = true;  // Termina el juego si el tiempo llega a 0
     }
 }
 
@@ -450,23 +554,23 @@ void UpdateCameraCenter(Camera2D* camera, Mario* mario, Hitbox* envItems, int en
 }
 
 void UpdateGameState(float delta) {
-    if (gameState == INICIAL) {
+    if (gameState->state == INICIAL) {
        
         if (IsKeyPressed(KEY_DOWN)) selectedOption = 1;
         if (IsKeyPressed(KEY_UP)) selectedOption = 0;
-        if (IsKeyPressed(KEY_ENTER)) gameState = INTRO;
+        if (IsKeyPressed(KEY_ENTER)) gameState->state = INTRO;
     }
-    else if (gameState==INTRO) {
-        introTimer -= delta; //COMENTADO PARA PROBAR SELECCION PERSONAJE
-        if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
-            gameState = PLAYING;
+    else if (gameState->state == INTRO) {
+        gameState->introTimer -= delta; //COMENTADO PARA PROBAR SELECCION PERSONAJE
+        if (gameState->introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
+            gameState->state = PLAYING;
         }
     }
 }
 
 void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, int envItems)
 {
-    if (!gameOver)
+    if (!gameState->gameOver)
     {
         //colisions
        
@@ -476,7 +580,7 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
         {
             Hitbox* ei = hitboxes + i;
 
-            if (ei->blocking &&
+            /*if (ei->blocking &&
                 ei->rect.x <= mario->position.x &&
                 ei->rect.x + ei->rect.width >= mario->position.x &&
                 ei->rect.y >= mario->position.y &&
@@ -487,20 +591,21 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
                     mario->position.y = ei->rect.y;
                     break;
 
-                }
+                }*/
         }
 
         /* Colision con enemigos */
-        if (mario->position.x + 24 >= goomba1->position.x &&
+        /*if (mario->position.x + 24 >= goomba1->position.x &&
             mario->position.x < (goomba1->position.x + 32) &&
             mario->position.y >= goomba1->position.y)
         {
-            gameOver = true;
-        }
+            gameState->gameOver = true;
+        }*/
 
         /* Movimiento de Mario */
         if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
-            mario->position.x += 5;
+            mario->MoveX(5, hitObstacle);
+            //mario->position.x += 5;
             mario->mirando_derecha = true;
 
             if (mario->canJump) {
@@ -511,14 +616,16 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
             }
 
             if (mario->position.x >= (screenWidth / 2) - 12) {
-                worldPosition = mario->position.x;
+                gameState->worldPosition = mario->position.x;
             }
         }
         else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
             //Esto es para que mario no pueda salirse del mapa por la izquierda
             if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
                 
-                mario->position.x -= 5;
+                mario->MoveX(-5, hitObstacle);
+
+                //mario->position.x -= 5;
                 mario->mirando_derecha = false;
                 
                 if (mario->canJump) {
@@ -533,7 +640,7 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
 
         /* Salto */
         if (IsKeyDown(KEY_SPACE) && mario->canJump) {
-            mario->velocidad = -PLAYER_JUMP_SPD;
+            //mario->velocidad = -PLAYER_JUMP_SPD;
             mario->canJump = false;
             mario->sprite_status = 96;
             PlaySound(JumpSound);
@@ -543,8 +650,8 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
 
         if (!hitObstacle)
         {
-            mario->position.y += mario->velocidad * delta;
-            mario->velocidad += GRAVEDAD * delta;
+            //mario->position.y += mario->velocidad * delta;
+            //mario->velocidad += GRAVEDAD * delta;
             mario->canJump = false;
         }
         else {
@@ -558,13 +665,20 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
     else
     {
         Reset(mario);
-        gameOver = false;
+        gameState->gameOver = false;
     }
 
     /* Si Mario llega al final o se cae */
     if (mario->position.y > 580 || mario->position.x >= 6336) {
-        gameOver = true;
+        gameState->gameOver = true;
     }
+}
+
+bool CheckCollision(Rectangle *player, Rectangle *obstacle) {
+    return  player->x < obstacle->x + obstacle->width &&   // Si mario choca desde la derecha
+            player->x + player->width > obstacle->x &&     // Si mario choca desde la izquierda
+            player->y < obstacle->y + obstacle->height &&  // Si mario choca desde abajo
+            player->y + player->height > obstacle->y;      // Si mario choca desde arriba
 }
 
 #pragma endregion
@@ -597,11 +711,11 @@ int main(void)
 
         ClearBackground(RAYWHITE);
 
-        if (gameState == INTRO) {
+        if (gameState->state == INTRO) {
             DrawIntroScreen();
             PlayMusicStream(music);
         }
-        else if (gameState == INICIAL) {
+        else if (gameState->state == INICIAL) {
             DrawIntro();
             PlayMusicStream(music);
         }
