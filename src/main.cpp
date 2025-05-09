@@ -15,15 +15,15 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND "../../resources/world/World_1_1.png"
-#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define SOUNDS "../../resources/Super Mario Bros Efects"
+#define BACKGROUND "resources/world/World_1_1.png"
+#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define SOUNDS "resources/Super Mario Bros Efects"
 
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
-#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
 enum GameState {
@@ -369,7 +369,7 @@ void DrawGame(Mario* mario, Goomba* goomba1, vector<Hitbox> hitboxes)
 
     DrawTexturePro(spriteSheet, marioRecorte, marioResized, MarioOrigen, 0, WHITE);
 
-    //Hitbox de mario
+    ////Hitbox de mario
     //DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
     //Goomba
@@ -464,12 +464,12 @@ void UpdateGameState(float delta) {
     }
 }
 
+
 void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, int envItems)
 {
     if (!gameOver)
     {
         //colisions
-       
         bool hitObstacle = false;
 
         for (int i = 0; i < envItems; i++)
