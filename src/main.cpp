@@ -136,6 +136,7 @@ static int world = 1;
 static int level = 1;
 vector <Hitbox> lista_hitboxes;
 
+
 #pragma endregion
 
 #pragma region Inits
@@ -391,7 +392,7 @@ void DrawGame(Mario* mario, Goomba* goomba1, vector<Hitbox> hitboxes)
 
     DrawTexturePro(spriteSheet, marioRecorte, marioResized, MarioOrigen, 0, WHITE);
 
-    //Hitbox de mario
+    ////Hitbox de mario
     //DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
 
     //Goomba
@@ -486,12 +487,12 @@ void UpdateGameState(float delta) {
     }
 }
 
+
 void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, int envItems)
 {
     if (!gameOver)
     {
         //colisions
-       
         bool hitObstacle = false;
 
         for (int i = 0; i < envItems; i++)
@@ -508,15 +509,16 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
                     mario->velocidad = 0.0f;
                     mario->position.y = ei->rect.y;
                     break;
-
                 }
         }
+
 
         /* Colision con enemigos */
         if (mario->position.x + 24 >= goomba1->position.x &&
             mario->position.x < (goomba1->position.x + 32) &&
             mario->position.y >= goomba1->position.y)
         {
+
             //sprite muerte
             mario->sprite_status = 117;
             for (int i = 0; i < 64; ++i) {
@@ -525,6 +527,7 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
 
             PlayMusicStream(Die);
             StopMusicStream(music);
+
             gameOver = true;
            
             
@@ -589,7 +592,12 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
     }
     else
     {
+
         PlayMusicStream(Die);
+
+        //ANIMACION
+        //SONIDO
+
         Reset(mario);
         gameOver = false;
     }
@@ -599,6 +607,7 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
         gameOver = true;
     }
 }
+
 
 #pragma endregion
 
@@ -615,6 +624,10 @@ int main(void)
     camera.offset = { mario.position.x, mario.position.y + 20.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
+
+    int currentFrame = 0; //frame actual
+    int framesCounter = 0; //contador de frames
+    int framesSpeed = 8; //velocidad de los frames
 
     SetTargetFPS(60);
 
