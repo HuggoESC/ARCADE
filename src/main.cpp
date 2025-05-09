@@ -496,6 +496,7 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
             mario->position.x < (goomba1->position.x + 32) &&
             mario->position.y >= goomba1->position.y)
         {
+
             gameOver = true;
         }
 
@@ -558,6 +559,8 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
     }
     else
     {
+        //ANIMACION
+        //SONIDO
         Reset(mario);
         gameOver = false;
     }
@@ -567,6 +570,7 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
         gameOver = true;
     }
 }
+
 
 #pragma endregion
 
