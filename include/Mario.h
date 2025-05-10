@@ -13,6 +13,7 @@ public:
 		ESTRELLA = 3
 	};
 
+	bool hasPlayedDieSound = false;
 	bool mirando_derecha = true;
 	bool canMoveLeft;
 	bool canMoveRight;

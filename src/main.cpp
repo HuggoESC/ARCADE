@@ -93,7 +93,27 @@ static Music Die;
 static Music Gameover;
 static Music Pause;
 
+bool playDeathSound = false;
+bool musicRestarted = false;
+
 static Sound JumpSound;
+static Sound UpSound;
+static Sound BeepSound;
+static Sound BigJumpSound;
+static Sound Break;
+static Sound Bump;
+static Sound Coin;
+static Sound FireBall;
+static Sound Flagpole;
+static Sound item;
+static Sound kick;
+static Sound Powerup;
+static Sound Skid;
+static Sound Squish;
+static Sound Thwomp;
+static Sound Vine;
+static Sound Warp;
+static Sound Enemyfire;
 
 static const int screenWidth = 800;
 static const int screenHeight = 480;
@@ -252,24 +272,24 @@ void InitGame(void)
     Pause = LoadMusicStream("../../resources/Super Mario Bros Music/Pause.wav");
 
     //sonidos
-    Sound JumpSound = LoadSound("../../resources/Super Mario Bros Efects/Jump.wav");
-    Sound UpSound = LoadSound("../../resources/Super Mario Bros Efects/1 up.wav");
-    Sound BeepSound = LoadSound("../../resources/Super Mario Bros Efects/Beep.wav");
-    Sound BigJumpSound = LoadSound("../../resources/Super Mario Bros Efects/Big Jump.wav");
-    Sound Break = LoadSound("../../resources/Super Mario Bros Efects/Break.wav");
-    Sound Bump = LoadSound("../../resources/Super Mario Bros Efects/Bump.wav");
-    Sound Coin = LoadSound("../../resources/Super Mario Bros Efects/Coin.wav");
-    Sound FireBall = LoadSound("../../resources/Super Mario Bros Efects/Fire Ball.wav");
-    Sound Flagpole = LoadSound("../../resources/Super Mario Bros Efects/Flagpole.wav");
-    Sound item = LoadSound("../../resources/Super Mario Bros Efects/Item.wav");
-    Sound kick = LoadSound("../../resources/Super Mario Bros Efects/Kick.wav");
-    Sound Powerup = LoadSound("../../resources/Super Mario Bros Efects/Powerup.wav");
-    Sound Skid = LoadSound("../../resources/Super Mario Bros Efects/Skid.wav");
-    Sound Squish = LoadSound("../../resources/Super Mario Bros Efects/Squish.wav");
-    Sound Thwomp = LoadSound("../../resources/Super Mario Bros Efects/Tjwomp.wav");
-    Sound Vine = LoadSound("../../resources/Super Mario Bros Efects/Vine.wav");
-    Sound Warp = LoadSound("../../resources/Super Mario Bros Efects/Wa`rp.wav");
-    Sound Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
+     JumpSound = LoadSound("../../resources/Super Mario Bros Efects/Jump.wav");
+     UpSound = LoadSound("../../resources/Super Mario Bros Efects/1 up.wav");
+     BeepSound = LoadSound("../../resources/Super Mario Bros Efects/Beep.wav");
+     BigJumpSound = LoadSound("../../resources/Super Mario Bros Efects/Big Jump.wav");
+     Break = LoadSound("../../resources/Super Mario Bros Efects/Break.wav");
+     Bump = LoadSound("../../resources/Super Mario Bros Efects/Bump.wav");
+     Coin = LoadSound("../../resources/Super Mario Bros Efects/Coin.wav");
+     FireBall = LoadSound("../../resources/Super Mario Bros Efects/Fire Ball.wav");
+     Flagpole = LoadSound("../../resources/Super Mario Bros Efects/Flagpole.wav");
+     item = LoadSound("../../resources/Super Mario Bros Efects/Item.wav");
+     kick = LoadSound("../../resources/Super Mario Bros Efects/Kick.wav");
+     Powerup = LoadSound("../../resources/Super Mario Bros Efects/Powerup.wav");
+     Skid = LoadSound("../../resources/Super Mario Bros Efects/Skid.wav");
+     Squish = LoadSound("../../resources/Super Mario Bros Efects/Squish.wav");
+     Thwomp = LoadSound("../../resources/Super Mario Bros Efects/Tjwomp.wav");
+     Vine = LoadSound("../../resources/Super Mario Bros Efects/Vine.wav");
+     Warp = LoadSound("../../resources/Super Mario Bros Efects/Wa`rp.wav");
+     Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
 
     PlayMusicStream(music);
 
@@ -280,6 +300,8 @@ void InitGame(void)
 
 void Reset(Mario* mario) {
     gameState = INTRO;
+    StopMusicStream(music); //hugo
+    PlayMusicStream(music); //hugo
     mario->position.x = 316;
     mario->position.y = 414;
     camera.target = { mario->position.x + 20.0f, mario->position.y - 32.0f };
@@ -469,7 +491,7 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
     if (!gameOver)
     {
         //colisions
-       
+
         bool hitObstacle = false;
 
         for (int i = 0; i < envItems; i++)
@@ -481,13 +503,13 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
                 ei->rect.x + ei->rect.width >= mario->position.x &&
                 ei->rect.y >= mario->position.y &&
                 ei->rect.y <= mario->position.y + mario->velocidad * delta)
-                {
-                    hitObstacle = true;
-                    mario->velocidad = 0.0f;
-                    mario->position.y = ei->rect.y;
-                    break;
+            {
+                hitObstacle = true;
+                mario->velocidad = 0.0f;
+                mario->position.y = ei->rect.y;
+                break;
 
-                }
+            }
         }
 
         /* Colision con enemigos */
@@ -496,80 +518,99 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
             mario->position.y >= goomba1->position.y)
         {
             gameOver = true;
-        }
-
-        /* Movimiento de Mario */
-        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
-            mario->position.x += 5;
-            mario->mirando_derecha = true;
-
-            if (mario->canJump) {
-                if (mario->sprite_status >= 56)
-                    mario->sprite_status = 20;
-                else
-                    mario->sprite_status += 18;
+            StopMusicStream(music);          //Hugo
+            if (!playDeathSound) {
+                PlayMusicStream(Die);
+                playDeathSound = true;
+                musicRestarted = false;
             }
 
-            if (mario->position.x >= (screenWidth / 2) - 12) {
-                worldPosition = mario->position.x;
-            }
-        }
-        else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
-            //Esto es para que mario no pueda salirse del mapa por la izquierda
-            if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
-                
-                mario->position.x -= 5;
-                mario->mirando_derecha = false;
-                
+            /* Movimiento de Mario */
+            if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
+                mario->position.x += 5;
+                mario->mirando_derecha = true;
+
                 if (mario->canJump) {
                     if (mario->sprite_status >= 56)
                         mario->sprite_status = 20;
                     else
                         mario->sprite_status += 18;
                 }
+
+                if (mario->position.x >= (screenWidth / 2) - 12) {
+                    worldPosition = mario->position.x;
+                }
             }
+            else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
+                //Esto es para que mario no pueda salirse del mapa por la izquierda
+                if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
+
+                    mario->position.x -= 5;
+                    mario->mirando_derecha = false;
+
+                    if (mario->canJump) {
+                        if (mario->sprite_status >= 56)
+                            mario->sprite_status = 20;
+                        else
+                            mario->sprite_status += 18;
+                    }
+                }
+            }
+
+
+            /* Salto */
+            if (IsKeyDown(KEY_SPACE) && mario->canJump) {
+                mario->velocidad = -PLAYER_JUMP_SPD;
+                mario->canJump = false;
+                mario->sprite_status = 96;
+                PlaySound(JumpSound);
+            }
+
+            UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
+
+            if (!hitObstacle)
+            {
+                mario->position.y += mario->velocidad * delta;
+                mario->velocidad += GRAVEDAD * delta;
+                mario->canJump = false;
+            }
+            else {
+                mario->canJump = true;
+            }
+
+            if (mario->canJump && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT))
+                mario->sprite_status = 0;
+
         }
-        
-
-        /* Salto */
-        if (IsKeyDown(KEY_SPACE) && mario->canJump) {
-            mario->velocidad = -PLAYER_JUMP_SPD;
-            mario->canJump = false;
-            mario->sprite_status = 96;
-            PlaySound(JumpSound);
-        }
-
-        UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
-
-        if (!hitObstacle)
+        else
         {
-            mario->position.y += mario->velocidad * delta;
-            mario->velocidad += GRAVEDAD * delta;
-            mario->canJump = false;
-        }
-        else {
-            mario->canJump = true;
-        }
+            Reset(mario);
+            gameOver = false;
+            if (!musicRestarted) {          //hugo
+                StopMusicStream(music);
+                PlayMusicStream(music);   // Vuelve a empezar desde el inicio
+                musicRestarted = true;
+            }
 
-        if (mario->canJump && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT))
-            mario->sprite_status = 0;
+            playDeathSound = false; // Resetea para futuras muertes
+        }
+    }
 
-    }
-    else
-    {
-        Reset(mario);
-        gameOver = false;
-    }
 
     /* Si Mario llega al final o se cae */
     if (mario->position.y > 580 || mario->position.x >= 6336) {
         gameOver = true;
+        StopMusicStream(music);  //hugo
+        if (!playDeathSound) {
+            PlayMusicStream(Die);
+            playDeathSound = true;
+            musicRestarted = false;
+        }
     }
-}
 
 #pragma endregion
 
-int main(void)
+    int main(void);
 {
     InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
 
