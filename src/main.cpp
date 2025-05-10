@@ -607,10 +607,11 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
             musicRestarted = false;
         }
     }
+}
 
 #pragma endregion
 
-    int main(void);
+int main(void)
 {
     InitWindow(screenWidth, screenHeight, "classic game: Super Mario Bros.");
 
@@ -628,12 +629,12 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
-
     {
 
         UpdateMusicStream(music); //HUGO
 
         float deltaTime = GetFrameTime();
+
         UpdateGameState(deltaTime);
 
         ClearBackground(RAYWHITE);
