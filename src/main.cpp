@@ -19,7 +19,7 @@ namespace fs = filesystem;
 #define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
 #define SOUNDS "../../resources/Super Mario Bros Efects"
-
+#define MUSICS "../../resources/Super Mario Bros Music"
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
@@ -29,7 +29,8 @@ namespace fs = filesystem;
 enum GameState {
     INICIAL,
     INTRO,
-    PLAYING
+    PLAYING,
+    GAME_OVER, 
 };
 
 enum Powers {
@@ -89,13 +90,13 @@ struct Hitbox {
 #pragma region VARIABLES GLOBALES
 
 static Music music; //HUGO 
-static Music Die;
 static Music Gameover;
-static Music Pause;
 
 bool playDeathSound = false;
 bool musicRestarted = false;
 
+static Sound Die;
+static Sound Pause;
 static Sound JumpSound;
 static Sound UpSound;
 static Sound BeepSound;
@@ -121,6 +122,7 @@ static GameState gameState = INICIAL;
 static float introTimer = 2.0f;
 
 static bool gameOver = false;
+static bool gameovermusicplayed = false;
 static int score = 0;
 static float worldPosition = 0;
 static int selectedOption = 0;  // 0 para 1 jugador, 1 para 2 jugadores
@@ -267,11 +269,11 @@ void InitGame(void)
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
     //MUSICA
     music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
-    Die = LoadMusicStream("../../resources/Super Mario Bros Music/Die.wav");
     Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
-    Pause = LoadMusicStream("../../resources/Super Mario Bros Music/Pause.wav");
-
+    
     //sonidos
+     Pause = LoadSound("../../resources/Super Mario Bros Efects/Pause.wav");
+     Die = LoadSound("../../resources/Super Mario Bros Efects/Die.wav");
      JumpSound = LoadSound("../../resources/Super Mario Bros Efects/Jump.wav");
      UpSound = LoadSound("../../resources/Super Mario Bros Efects/1 up.wav");
      BeepSound = LoadSound("../../resources/Super Mario Bros Efects/Beep.wav");
@@ -292,6 +294,7 @@ void InitGame(void)
      Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
 
     PlayMusicStream(music);
+    PlayMusicStream(Gameover);
 
     float timePlayed = 0.0f;
     bool pause = false;
@@ -309,7 +312,8 @@ void Reset(Mario* mario) {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
     tiempo = 400;
-    introTimer = 2.0f;
+
+    introTimer = 3.5f; //HUGO: aumento el tiempo por tema de duracion sound(Die)
 }
 
 void UnloadGame(void)
@@ -424,10 +428,19 @@ void DrawGame(Mario* mario, Goomba* goomba1, vector<Hitbox> hitboxes)
     DrawText("WORLD", screenWidth / 2 - 40, 10, 20, WHITE);
     DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
 
+    //Dibujado de Game Over
+
 
 
     EndDrawing();
 
+}
+
+void Drawgameintoscreen() {
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawText("GAME OVER", screenWidth / 2 - 100, screenHeight /2, 40, RED);
+    EndDrawing();
 }
 
 #pragma endregion
@@ -520,7 +533,13 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
             gameOver = true;
             StopMusicStream(music);          //Hugo
             if (!playDeathSound) {
-                PlayMusicStream(Die);
+                vidas--;
+
+                if (vidas <= 0) 
+                {
+                    PlaySound(Die);
+                }
+
                 playDeathSound = true;
                 musicRestarted = false;
             }
@@ -582,19 +601,31 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
             mario->sprite_status = 0;
 
     }
-    else
+    else 
     {
-        Reset(mario);
-        gameOver = false;
-        if (!musicRestarted) {          //hugo
-            StopMusicStream(music);
-            PlayMusicStream(music);   // Vuelve a empezar desde el inicio
-            musicRestarted = true;
-        }
+        if (vidas <= 0) 
+        {
+            gameState = GAME_OVER;
 
-        playDeathSound = false; // Resetea para futuras muertes
+            if (!gameovermusicplayed) {
+                StopMusicStream(music);
+                PlayMusicStream(Gameover);
+                gameovermusicplayed = true;
+            }
+        }
+        else
+        {
+            Reset(mario);
+            gameOver = false;
+            if (!musicRestarted) {
+                StopMusicStream(music);
+                PlayMusicStream(music);   // Vuelve a empezar desde el inicio
+                musicRestarted = true;
+            }
+
+            playDeathSound = false; // Resetea para futuras muertes
+        }
     }
-    
 
 
     /* Si Mario llega al final o se cae */
@@ -602,7 +633,12 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
         gameOver = true;
         StopMusicStream(music);  //hugo
         if (!playDeathSound) {
-            PlayMusicStream(Die);
+
+            if (vidas > 0) 
+            {
+                PlaySound(Die);
+            }
+
             playDeathSound = true;
             musicRestarted = false;
         }
@@ -643,6 +679,25 @@ int main(void)
             DrawIntroScreen();
             PlayMusicStream(music);
         }
+        else if (gameState == GAME_OVER) {
+            Drawgameintoscreen();
+            if (IsKeyPressed(KEY_ENTER)) {
+                vidas = 3;
+                score = 0;
+                monedas = 0;
+                worldPosition = 0;
+
+                StopMusicStream(Gameover);
+                PlayMusicStream(music);
+
+                mario = Mario(316, 414);
+                gameState = INICIAL;
+
+                playDeathSound = false;
+                musicRestarted = false;
+                gameovermusicplayed = false;
+            }
+        }
         else if (gameState == INICIAL) {
             DrawIntro();
             PlayMusicStream(music);
@@ -651,16 +706,22 @@ int main(void)
             UpdateGame(&mario, &goomba1, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
             DrawGame(&mario, &goomba1, lista_hitboxes);
         }
+
+        if (vidas <= 0) {
+            Drawgameintoscreen();
+        }
     }
 
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadMusicStream(music);
+    UnloadMusicStream(Gameover);
     CloseAudioDevice();
     UnloadGame();         // Unload loaded data (textures, sounds, models...)
     CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------
+    // --------
 
     return 0;
 }
