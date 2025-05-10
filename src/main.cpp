@@ -524,11 +524,29 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
                 playDeathSound = true;
                 musicRestarted = false;
             }
-
+        }
             /* Movimiento de Mario */
-            if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
-                mario->position.x += 5;
-                mario->mirando_derecha = true;
+        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
+            mario->position.x += 5;
+            mario->mirando_derecha = true;
+
+            if (mario->canJump) {
+                if (mario->sprite_status >= 56)
+                    mario->sprite_status = 20;
+                else
+                    mario->sprite_status += 18;
+            }
+
+            if (mario->position.x >= (screenWidth / 2) - 12) {
+                worldPosition = mario->position.x;
+            }
+        }
+        else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
+            //Esto es para que mario no pueda salirse del mapa por la izquierda
+            if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
+
+                mario->position.x -= 5;
+                mario->mirando_derecha = false;
 
                 if (mario->canJump) {
                     if (mario->sprite_status >= 56)
@@ -536,65 +554,47 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
                     else
                         mario->sprite_status += 18;
                 }
-
-                if (mario->position.x >= (screenWidth / 2) - 12) {
-                    worldPosition = mario->position.x;
-                }
             }
-            else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
-                //Esto es para que mario no pueda salirse del mapa por la izquierda
-                if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
-
-                    mario->position.x -= 5;
-                    mario->mirando_derecha = false;
-
-                    if (mario->canJump) {
-                        if (mario->sprite_status >= 56)
-                            mario->sprite_status = 20;
-                        else
-                            mario->sprite_status += 18;
-                    }
-                }
-            }
-
-
-            /* Salto */
-            if (IsKeyDown(KEY_SPACE) && mario->canJump) {
-                mario->velocidad = -PLAYER_JUMP_SPD;
-                mario->canJump = false;
-                mario->sprite_status = 96;
-                PlaySound(JumpSound);
-            }
-
-            UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
-
-            if (!hitObstacle)
-            {
-                mario->position.y += mario->velocidad * delta;
-                mario->velocidad += GRAVEDAD * delta;
-                mario->canJump = false;
-            }
-            else {
-                mario->canJump = true;
-            }
-
-            if (mario->canJump && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT))
-                mario->sprite_status = 0;
-
         }
-        else
+
+
+        /* Salto */
+        if (IsKeyDown(KEY_SPACE) && mario->canJump) {
+            mario->velocidad = -PLAYER_JUMP_SPD;
+            mario->canJump = false;
+            mario->sprite_status = 96;
+            PlaySound(JumpSound);
+        }
+
+        UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
+
+        if (!hitObstacle)
         {
-            Reset(mario);
-            gameOver = false;
-            if (!musicRestarted) {          //hugo
-                StopMusicStream(music);
-                PlayMusicStream(music);   // Vuelve a empezar desde el inicio
-                musicRestarted = true;
-            }
-
-            playDeathSound = false; // Resetea para futuras muertes
+            mario->position.y += mario->velocidad * delta;
+            mario->velocidad += GRAVEDAD * delta;
+            mario->canJump = false;
         }
+        else {
+            mario->canJump = true;
+        }
+
+        if (mario->canJump && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT))
+            mario->sprite_status = 0;
+
     }
+    else
+    {
+        Reset(mario);
+        gameOver = false;
+        if (!musicRestarted) {          //hugo
+            StopMusicStream(music);
+            PlayMusicStream(music);   // Vuelve a empezar desde el inicio
+            musicRestarted = true;
+        }
+
+        playDeathSound = false; // Resetea para futuras muertes
+    }
+    
 
 
     /* Si Mario llega al final o se cae */
