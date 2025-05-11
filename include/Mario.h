@@ -14,18 +14,33 @@ public:
 	};
 
 	bool hasPlayedDieSound = false;
-	bool mirando_derecha = true;
+	bool mirando_derecha/* = true*/;
 	bool canMoveLeft;
 	bool canMoveRight;
-	int sprite_status = 0;
+	int sprite_status /*= 0*/;
 	Rectangle position;
-	bool canJump = true;
+	bool canJump/* = true*/;
 	float velocidad;
+	float animTimer;
+	/*const float animSpeed = 0.15f;*/
 	Powers poder;
-	
+
 	/* Constructores */
-	Mario();
-	    
-	Mario(float posX, float posY);
+	Mario() {};
+
+	Mario(float posX, float posY)
+	{
+
+		position = { posX, posY, 24, 32 };
+		velocidad = 0;
+		poder = BASE;
+		mirando_derecha = true;
+		canMoveLeft = true;
+		canMoveRight = true;
+		sprite_status = 0;
+		canJump = true;
+		animTimer = 0.0f;
+
+	}
 };
 #endif

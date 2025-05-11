@@ -91,7 +91,7 @@ public:
 
         Rectangle dest = position;
         dest.y -= 32;
-        DrawTexturePro(enemyTexture, source, position, { 0, 0 }, 0.0f, WHITE);
+        DrawTexturePro(enemyTexture, source, dest, { 0, 0 }, 0.0f, WHITE);
     }
 };
 
@@ -610,8 +610,9 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             }
         }
             /* Movimiento de Mario */
-        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
-            mario->position.x += 5;
+        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) 
+        {
+           /* mario->position.x += 5;
             mario->mirando_derecha = true;
 
             if (mario->canJump) {
@@ -623,6 +624,18 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
 
             if (mario->position.x >= (screenWidth / 2) - 12) {
                 worldPosition = mario->position.x;
+            }*/
+
+            mario->animTimer += delta;
+
+            if (mario->canJump && mario->animTimer >= mario->animTimer) 
+            {
+                if (mario->sprite_status >= 56)
+                    mario->sprite_status = 20;
+                else
+                    mario->sprite_status += 18;
+
+                mario->animTimer = 0.0f;
             }
         }
         else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
