@@ -48,15 +48,50 @@ enum Powers {
 
 class Goomba {
 public:
-    bool mirando_derecha = true;
-    int sprite_status = 0;
+
+    int CurrentFrame = 0;
+    float animationTimer = 0.0f;
+    float framespeed = 0.2f;
+    bool mirando_derecha;
+    bool activo;
+   /* int sprite_status = 0;*/
     Rectangle position;
     float velocidad;
 
     Goomba();
 
     Goomba(float x, float y) {
-        position = { x, y };
+        position = { x, y, 16 * 2, 16 * 2 };
+        velocidad = 30.0f;
+        mirando_derecha = false;
+        activo = true;
+    }
+
+    void Update(float delta)
+    {
+        if (!activo) return;
+
+        position.x += (mirando_derecha ? velocidad : -velocidad) * delta;
+
+        if (position.x < 0) mirando_derecha = true;
+        if (position.x > 6000) mirando_derecha = false;
+
+        animationTimer += delta;
+
+        if (animationTimer >= framespeed) 
+        {
+            CurrentFrame = (CurrentFrame + 1) % 2;
+            animationTimer = 0.0f;
+        }
+    }
+
+    void Draw(Texture2D enemyTexture) {
+        Rectangle source = { 16.0f * CurrentFrame, 17, 16, 14 };
+        if (!mirando_derecha) source.width = -16;
+
+        Rectangle dest = position;
+        dest.y -= 32;
+        DrawTexturePro(enemyTexture, source, position, { 0, 0 }, 0.0f, WHITE);
     }
 };
 
@@ -266,7 +301,7 @@ void InitGame(void)
     //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
 
-    //HUGO MUSICA
+    
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
     //MUSICA
     music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
@@ -304,8 +339,8 @@ void InitGame(void)
 
 void Reset(Mario* mario) {
     gameState = INTRO;
-    StopMusicStream(music); //hugo
-    PlayMusicStream(music); //hugo
+    StopMusicStream(music); 
+    PlayMusicStream(music); 
     mario->position.x = 316;
     mario->position.y = 414;
     camera.target = { mario->position.x + 20.0f, mario->position.y - 32.0f };
@@ -314,7 +349,7 @@ void Reset(Mario* mario) {
     camera.zoom = 1.0f;
     tiempo = 400;
 
-    introTimer = 3.5f; //HUGO: aumento el tiempo por tema de duracion sound(Die)
+    introTimer = 3.5f; 
 }
 
 void UnloadGame(void)
@@ -361,7 +396,7 @@ void DrawIntroScreen() {
     EndDrawing();
 }
 
-void DrawGame(Mario* mario, Goomba* goomba1, vector<Hitbox> hitboxes)
+void DrawGame(Mario* mario, vector<Goomba>& goombas, vector<Hitbox> hitboxes)
 {
     BeginDrawing();
 
@@ -402,12 +437,19 @@ void DrawGame(Mario* mario, Goomba* goomba1, vector<Hitbox> hitboxes)
     //Goomba
 
 
-    Vector2 PosGoomba1 = { goomba1->position.x,goomba1->position.y };
-    Rectangle Goomba1Recorte = { goomba1->sprite_status, 17, 16,16 };
+    //Vector2 PosGoomba1 = { goomba1->position.x,goomba1->position.y };
+    //Rectangle Goomba1Recorte = { goomba1->sprite_status, 17, 16,16 };
 
-    Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
-    Vector2 GoombaOrigen = { 0,0 };
-    DrawTexturePro(EnemySpriteSheet, Goomba1Recorte, Goomba1Resized, GoombaOrigen, 0, WHITE);
+    //Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
+    //Vector2 GoombaOrigen = { 0,0 };
+    //DrawTexturePro(EnemySpriteSheet, Goomba1Recorte, Goomba1Resized, GoombaOrigen, 0, WHITE);
+    
+    for (Goomba& goomba : goombas) 
+    {
+        goomba.Draw(EnemySpriteSheet);
+
+    }
+
     //DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
 
     /* Dibujado de Hitbox */
@@ -504,7 +546,7 @@ void UpdateGameState(float delta) {
     }
 }
 
-void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, int envItems)
+void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float delta, int envItems)
 {
     if (!gameOver)
     {
@@ -531,35 +573,40 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
         }
 
         /* Colision con enemigos */
-        if (mario->position.x + 24 >= goomba1->position.x &&
-            mario->position.x < (goomba1->position.x + 32) &&
-            mario->position.y >= goomba1->position.y)
+        
+        for (Goomba& goomba : goombas) 
         {
-            gameOver = true;
-            StopMusicStream(music);          //Hugo
+            if (CheckCollisionRecs(mario->position, goomba.position))
+            {
 
-            if (!playDeathSound) {
-
-                vidas--;
+                gameOver = true;
                 StopMusicStream(music);
-                PlaySound(Die);
-                musicPlaying = false;
+           
 
-                if (vidas <= 0 && !gameovermusicplayed) 
-                {
+                if (!playDeathSound) {
+
+                    vidas--;
                     StopMusicStream(music);
-                    StopMusicStream(Gameover);
-                    PlayMusicStream(Gameover);
-                    gameovermusicplayed = true;
-                    gameState = GAME_OVER;
-                }
-                else 
-                {
                     PlaySound(Die);
+                    musicPlaying = false;
+
+                    if (vidas <= 0 && !gameovermusicplayed)
+                    {
+                        StopMusicStream(music);
+                        StopMusicStream(Gameover);
+                        PlayMusicStream(Gameover);
+                        gameovermusicplayed = true;
+                        gameState = GAME_OVER;
+                    }
+                    else
+                    {
+                        PlaySound(Die);
+                    }
+
+                    playDeathSound = true;
+                    musicRestarted = false;
                 }
-                
-                playDeathSound = true;
-                musicRestarted = false;
+                break;
             }
         }
             /* Movimiento de Mario */
@@ -695,7 +742,14 @@ int main(void)
     InitGame();
 
     Mario mario(316, 414); //Creo el objeto de Mario
-    Goomba goomba1(500, 414);
+    vector<Goomba> goombas = {
+    
+    Goomba(500, 382),
+    Goomba(700, 382),
+    Goomba(1100, 382),
+    Goomba(1800, 382)
+
+    };
 
     camera.target = { mario.position.x + 20.0f, mario.position.y - 32.0f };
     camera.offset = { mario.position.x, mario.position.y + 20.0f };
@@ -753,8 +807,9 @@ int main(void)
          
         }
         else {
-            UpdateGame(&mario, &goomba1, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
-            DrawGame(&mario, &goomba1, lista_hitboxes);
+            for (Goomba& goomba : goombas) goomba.Update(deltaTime);
+            UpdateGame(&mario, goombas, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
+            DrawGame(&mario, goombas, lista_hitboxes);
         }
 
         if (vidas <= 0) {
