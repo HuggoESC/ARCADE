@@ -94,6 +94,7 @@ static Music Gameover;
 
 bool playDeathSound = false;
 bool musicRestarted = false;
+bool musicPlaying = false;
 
 static Sound Die;
 static Sound Pause;
@@ -270,6 +271,7 @@ void InitGame(void)
     //MUSICA
     music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
     Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
+   
     
     //sonidos
      Pause = LoadSound("../../resources/Super Mario Bros Efects/Pause.wav");
@@ -293,8 +295,7 @@ void InitGame(void)
      Warp = LoadSound("../../resources/Super Mario Bros Efects/Wa`rp.wav");
      Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
 
-    PlayMusicStream(music);
-    PlayMusicStream(Gameover);
+   /* PlayMusicStream(music);*/
 
     float timePlayed = 0.0f;
     bool pause = false;
@@ -495,6 +496,10 @@ void UpdateGameState(float delta) {
         introTimer -= delta; //COMENTADO PARA PROBAR SELECCION PERSONAJE
         if (introTimer <= 0 || IsKeyPressed(KEY_ENTER)) {
             gameState = PLAYING;
+            if (!musicPlaying) {
+                PlayMusicStream(music);
+                musicPlaying = true;
+            }
         }
     }
 }
@@ -532,14 +537,27 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
         {
             gameOver = true;
             StopMusicStream(music);          //Hugo
-            if (!playDeathSound) {
-                vidas--;
 
-                if (vidas <= 0) 
+            if (!playDeathSound) {
+
+                vidas--;
+                StopMusicStream(music);
+                PlaySound(Die);
+                musicPlaying = false;
+
+                if (vidas <= 0 && !gameovermusicplayed) 
+                {
+                    StopMusicStream(music);
+                    StopMusicStream(Gameover);
+                    PlayMusicStream(Gameover);
+                    gameovermusicplayed = true;
+                    gameState = GAME_OVER;
+                }
+                else 
                 {
                     PlaySound(Die);
                 }
-
+                
                 playDeathSound = true;
                 musicRestarted = false;
             }
@@ -615,15 +633,23 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
         }
         else
         {
-            Reset(mario);
-            gameOver = false;
-            if (!musicRestarted) {
-                StopMusicStream(music);
-                PlayMusicStream(music);   // Vuelve a empezar desde el inicio
-                musicRestarted = true;
-            }
+            if (vidas <= 0)
+            {
+                gameState = GAME_OVER;
 
-            playDeathSound = false; // Resetea para futuras muertes
+            }
+            else
+            {
+                Reset(mario);
+                gameOver = false;
+                if (!musicRestarted) {
+                    StopMusicStream(music);
+                   /* PlayMusicStream(music);*/   // Vuelve a empezar desde el inicio
+                    musicRestarted = true;
+                }
+
+                playDeathSound = false; // Resetea para futuras muertes
+            }
         }
     }
 
@@ -632,12 +658,27 @@ void UpdateGame(Mario* mario, Goomba* goomba1, Hitbox* hitboxes, float delta, in
     if (mario->position.y > 580 || mario->position.x >= 6336) {
         gameOver = true;
         StopMusicStream(music);  //hugo
+
         if (!playDeathSound) {
 
-            if (vidas > 0) 
+            vidas--;
+            PlaySound(Die);
+            StopMusicStream(music);
+            musicPlaying = false;
+
+            if (vidas <= 0 && !gameovermusicplayed)
+            {
+                StopMusicStream(music);
+                StopMusicStream(Gameover);
+                PlayMusicStream(Gameover);
+                gameovermusicplayed = true;
+                gameState = GAME_OVER;
+            }
+            else 
             {
                 PlaySound(Die);
             }
+
 
             playDeathSound = true;
             musicRestarted = false;
@@ -668,6 +709,7 @@ int main(void)
     {
 
         UpdateMusicStream(music); //HUGO
+        UpdateMusicStream(Gameover);
 
         float deltaTime = GetFrameTime();
 
@@ -677,18 +719,26 @@ int main(void)
 
         if (gameState == INTRO) {
             DrawIntroScreen();
-            PlayMusicStream(music);
+         
         }
         else if (gameState == GAME_OVER) {
-            Drawgameintoscreen();
+            if (!gameovermusicplayed)
+            { 
+                StopMusicStream(music);
+                PlayMusicStream(Gameover);
+                gameovermusicplayed = true;
+                Drawgameintoscreen(); 
+
+            }
+            
             if (IsKeyPressed(KEY_ENTER)) {
                 vidas = 3;
                 score = 0;
                 monedas = 0;
                 worldPosition = 0;
 
-                StopMusicStream(Gameover);
-                PlayMusicStream(music);
+                StopMusicStream(music);
+                PlayMusicStream(Gameover);
 
                 mario = Mario(316, 414);
                 gameState = INICIAL;
@@ -700,7 +750,7 @@ int main(void)
         }
         else if (gameState == INICIAL) {
             DrawIntro();
-            PlayMusicStream(music);
+         
         }
         else {
             UpdateGame(&mario, &goomba1, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
