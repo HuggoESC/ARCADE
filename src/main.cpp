@@ -628,7 +628,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
 
             mario->animTimer += delta;
 
-            if (mario->canJump && mario->animTimer >= mario->animTimer) 
+            if ( mario->animTimer >= 0.01) //el 0.02f cambia la vel
             {
                 mario->position.x += 5;
                 mario->mirando_derecha = true;
@@ -643,7 +643,9 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         }
         else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
             //Esto es para que mario no pueda salirse del mapa por la izquierda
-            if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
+            mario->animTimer += delta;
+
+            if ( mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325 && mario->animTimer >= 0.01f) {
 
                 mario->position.x -= 5;
                 mario->mirando_derecha = false;
@@ -758,7 +760,7 @@ int main(void)
 
     InitGame();
 
-    Mario mario(316, 416); //Creo el objeto de Mario
+    Mario mario(316, 414); //Creo el objeto de Mario
     vector<Goomba> goombas = {
     
     Goomba(500, 416),
