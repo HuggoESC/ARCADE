@@ -15,15 +15,15 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND "../../resources/world/World_1_1.png"
-#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define SOUNDS "../../resources/Super Mario Bros Efects"
-#define MUSICS "../../resources/Super Mario Bros Music"
+#define BACKGROUND "resources/world/World_1_1.png"
+#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define SOUNDS "resources/Super Mario Bros Efects"
+#define MUSICS "resources/Super Mario Bros Music"
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
-#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
 enum GameState {
@@ -86,7 +86,7 @@ public:
     }
 
     void Draw(Texture2D enemyTexture) {
-        Rectangle source = { 16.0f * CurrentFrame, 17, 16, 14 };
+        Rectangle source = { 18.0f * CurrentFrame, 16, 16, 16 };
         if (!mirando_derecha) source.width = -16;
 
         Rectangle dest = position;
@@ -389,7 +389,8 @@ void DrawIntroScreen() {
    
     DrawText("x", screenWidth / 2 - 20, screenHeight / 2, 20, WHITE);
     DrawText(TextFormat("%i", vidas), screenWidth / 2 + 10, screenHeight / 2, 20, WHITE);
-
+   
+    
     Rectangle marioRecorte = { 0, 8, 16, 16 };
     Rectangle marioResized = { screenWidth / 2 - 50, screenHeight / 2, marioRecorte.width * 2, marioRecorte.height * 2 };
     DrawTexturePro(spriteSheet, marioRecorte, marioResized, { 0, 0 }, 0, WHITE);
@@ -415,7 +416,7 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector<Hitbox> hitboxes)
     /* Dibujado de Mario */
     Vector2 marioIni = { mario->position.x, mario->position.y };
     Rectangle marioRecorte = { mario->sprite_status, 8, 16, 16 };
-
+  
     //*Cambio de derecha a izquierda
     if (mario->mirando_derecha)
     {
@@ -447,7 +448,6 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector<Hitbox> hitboxes)
     for (Goomba& goomba : goombas) 
     {
         goomba.Draw(EnemySpriteSheet);
-
     }
 
     //DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
@@ -630,11 +630,14 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
 
             if (mario->canJump && mario->animTimer >= mario->animTimer) 
             {
-                if (mario->sprite_status >= 56)
-                    mario->sprite_status = 20;
-                else
-                    mario->sprite_status += 18;
-
+                mario->position.x += 5;
+                mario->mirando_derecha = true;
+                if (mario->canJump) {
+                    if (mario->sprite_status >= 56)
+                        mario->sprite_status = 20;
+                    else
+                        mario->sprite_status += 18;
+                }
                 mario->animTimer = 0.0f;
             }
         }
@@ -651,6 +654,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
                     else
                         mario->sprite_status += 18;
                 }
+                mario->animTimer = 0.0f;
             }
         }
 
@@ -754,13 +758,13 @@ int main(void)
 
     InitGame();
 
-    Mario mario(316, 414); //Creo el objeto de Mario
+    Mario mario(316, 416); //Creo el objeto de Mario
     vector<Goomba> goombas = {
     
-    Goomba(500, 382),
-    Goomba(700, 382),
-    Goomba(1100, 382),
-    Goomba(1800, 382)
+    Goomba(500, 416),
+    Goomba(700, 416),
+    Goomba(1100, 416),
+    Goomba(1800, 416)
 
     };
 
