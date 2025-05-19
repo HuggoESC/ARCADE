@@ -57,15 +57,28 @@ public:
    /* int sprite_status = 0;*/
     Rectangle position;
     float velocidad;
+    Rectangle posicion_inicial;
 
-    Goomba();
+    Goomba() {};
 
     Goomba(float x, float y) {
         position = { x, y, 16 * 2, 16 * 2 };
+        posicion_inicial = position;
         velocidad = 30.0f;
         mirando_derecha = false;
         activo = true;
     }
+
+    // Método reset para restaurar estado inicial
+    void reset() {
+        position = posicion_inicial;
+        velocidad = 30.0f;
+        mirando_derecha = false;
+        activo = true;
+        CurrentFrame = 0;
+        animationTimer = 0.0f;
+    }
+
 
     void Update(float delta)
     {
@@ -576,12 +589,24 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         
         for (Goomba& goomba : goombas) 
         {
-            if (CheckCollisionRecs(mario->position, goomba.position))
+            /*if (CheckCollisionRecs(mario->position, goomba.position))*/
+            if (!mario->isDead && CheckCollisionRecs(mario->position, goomba.position))
             {
 
-                gameOver = true;
+                mario->isDead = true;
+                mario->deathAnimationInProgress = true;
+                mario->velocidad = mario->deathVelocity;
                 StopMusicStream(music);
-           
+                for (int i = 0; i < goombas.size(); ++i) {
+                    goombas[i].reset();
+                }
+                return;
+               /* gameOver = true;
+                StopMusicStream(music);
+                for (int i = 0; i < goombas.size(); ++i) {
+                    goombas[i].reset();
+                }*/
+             
 
                 if (!playDeathSound) {
 
@@ -731,6 +756,9 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             PlaySound(Die);
             StopMusicStream(music);
             musicPlaying = false;
+            for (int i = 0; i < goombas.size(); ++i) {
+                goombas[i].reset();
+            }
 
             if (vidas <= 0 && !gameovermusicplayed)
             {

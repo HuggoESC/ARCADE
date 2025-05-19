@@ -24,6 +24,10 @@ public:
 	float animTimer;
 	/*const float animSpeed = 0.15f;*/
 	Powers poder;
+	bool isDead = false;
+	bool deathAnimationInProgress = false;
+	float deathVelocity = -350.0f;
+	float deathAnimTimer = 0.0f;
 
 	/* Constructores */
 	Mario() {};
@@ -40,7 +44,10 @@ public:
 		sprite_status = 0;
 		canJump = true;
 		animTimer = 0.0f;
+		
 
 	}
+	~Mario(){}
+
 };
 #endif
