@@ -15,8 +15,6 @@ public:
 
 	bool hasPlayedDieSound = false;
 	bool mirando_derecha/* = true*/;
-	bool canMoveLeft;
-	bool canMoveRight;
 	int sprite_status /*= 0*/;
 	Rectangle position;
 
@@ -51,13 +49,10 @@ public:
 		velocidad = 0;
 		poder = BASE;
 		mirando_derecha = true;
-		canMoveLeft = true;
-		canMoveRight = true;
 		sprite_status = 0;
 		canJump = true;
 		animTimer = 0.0f;
 		
-
 	}
 
 	~Mario(){}
