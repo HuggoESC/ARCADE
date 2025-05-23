@@ -683,6 +683,12 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
 
         // Aplicar movimiento horizontal
         mario->position.x += mario->velocidadX;
+        if (mario->position.x < 0) {
+
+            mario->position.x = 0;
+            mario->velocidadX = 0;
+
+        }
        
 
         /* Salto */
