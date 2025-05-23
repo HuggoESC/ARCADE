@@ -23,6 +23,8 @@ namespace fs = filesystem;
 
 #define PLAYER_JUMP_SPD 500.0f
 #define GRAVEDAD 700
+#define ACELERACION 0.5f
+#define VELOCIDAD_MAXIMA 5.0f
 #define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 
@@ -188,6 +190,13 @@ static int vidas = 3;      // N�mero de vidas de Mario
 static int world = 1;
 static int level = 1;
 vector <Hitbox> lista_hitboxes;
+
+//CONTADOR FRAMES
+
+int currentFrame = 0;
+int framesCounter = 0;
+int framesSpeed = 3;
+
 
 #pragma endregion
 
@@ -657,12 +666,12 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
                 break;
             }
         }
-        
-        /* Movimiento de Mario */
-        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) 
-        {
-           /* mario->position.x += 5;
+            /* Movimiento de Mario */
+        if (IsKeyDown(KEY_RIGHT)) {
             mario->mirando_derecha = true;
+            mario->velocidadX += ACELERACION;
+            if (mario->velocidadX > VELOCIDAD_MAXIMA)
+                mario->velocidadX = VELOCIDAD_MAXIMA;
 
             if (mario->canJump) {
                 if (mario->sprite_status >= 56)
@@ -673,42 +682,44 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
 
             if (mario->position.x >= (screenWidth / 2) - 12) {
                 worldPosition = mario->position.x;
-            }*/
+            }
 
-            mario->animTimer += delta;
+                mario->animTimer += delta;
+        }
+        else if (IsKeyDown(KEY_LEFT)) {
+            mario->mirando_derecha = false;
+            mario->velocidadX -= ACELERACION;
+            if (mario->velocidadX < -VELOCIDAD_MAXIMA)
+                mario->velocidadX = -VELOCIDAD_MAXIMA;
 
-            if ( mario->animTimer >= 0.01) //el 0.02f cambia la vel
-            {
-                mario->MoveX(5);
-                mario->mirando_derecha = true;
-                if (mario->canJump) {
-                    if (mario->sprite_status >= 56)
-                        mario->sprite_status = 20;
-                    else
-                        mario->sprite_status += 18;
-                }
-                mario->animTimer = 0.0f;
+            if (mario->canJump) {
+                if (mario->sprite_status >= 56)
+                    mario->sprite_status = 20;
+                else
+                    mario->sprite_status += 18;
+            }
+
+            if (mario->position.x >= (screenWidth / 2) - 12) {
+                worldPosition = mario->position.x;
+            }
+
+                mario->animTimer += delta;
+        }
+        else {
+            // Desaceleración natural (fricción)
+            if (mario->velocidadX > 0) {
+                mario->velocidadX -= ACELERACION;
+                if (mario->velocidadX < 0) mario->velocidadX = 0;
+            }
+            else if (mario->velocidadX < 0) {
+                mario->velocidadX += ACELERACION;
+                if (mario->velocidadX > 0) mario->velocidadX = 0;
             }
         }
-        else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
-            //Esto es para que mario no pueda salirse del mapa por la izquierda
-            mario->animTimer += delta;
 
-            if ( mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325 && mario->animTimer >= 0.01f) {
-
-                mario->MoveX(-5);
-                mario->mirando_derecha = false;
-
-                if (mario->canJump) {
-                    if (mario->sprite_status >= 56)
-                        mario->sprite_status = 20;
-                    else
-                        mario->sprite_status += 18;
-                }
-                mario->animTimer = 0.0f;
-            }
-        }
-
+        // Aplicar movimiento horizontal
+        mario->position.x += mario->velocidadX;
+       
 
         /* Salto */
         if (IsKeyDown(KEY_SPACE) && mario->canJump) {
@@ -842,6 +853,10 @@ int main(void)
         UpdateGameState(deltaTime);
 
         ClearBackground(RAYWHITE);
+
+        /*CONTADOR DE FRAMES MARIO*/
+        
+
 
         if (gameState == INTRO) {
             DrawIntroScreen();

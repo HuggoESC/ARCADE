@@ -27,6 +27,7 @@ public:
 
 	bool canJump /* = true*/;
 	float velocidad;
+	float velocidadX = 0.0f;
 	float animTimer;
 	/*const float animSpeed = 0.15f;*/
 	Powers poder;
