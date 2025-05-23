@@ -213,7 +213,7 @@ void InitGame(void)
     gameOver = false;
 
     lista_hitboxes = {
-    { {0, 414, 2208, 400},1,0},
+    {{0,414,2208,400},1,0},
     {{512,288,32,32},1,0},
     {{640,288,32,32},1,0},
     {{672,288,32,32},1,0},
@@ -221,9 +221,9 @@ void InitGame(void)
     {{736,288,32,32},1,0},
     {{768,288,32,32},1,0},
     {{704,160,32,32},1,0},
-    {{896,352,96,62},1,0},
-    {{1216,320,96,94},1,0},
-    {{1472,288,96,126},1,0},
+    {{896,352,64,64},1,0},
+    {{1216,320,64,94},1,0},
+    {{1472,288,64,126},1,0},
     {{1824,288,64,126},1,0},
     {{2272,414,500,400},1,0},
     {{2464,288,32,32},1,0},
@@ -304,19 +304,19 @@ void InitGame(void)
     {{4960,318,32,32},1,0},
     {{4992,318,32,32},1,0},
     {{4960,286,32,32},1,0},
-    {{5216,352,64,62},1,0},
+    {{5216,352,64,64},1,0},
     {{5376,288,32,32},1,0},
     {{5408,288,32,32},1,0},
     {{5440,288,32,32},1,0},
     {{5472,288,32,32},1,0},
-    {{5728,352,64,62},1,0},
+    {{5728,352,64,64},1,0},
     {{5792,382,288,32},1,0},
     {{5824,350,256,32},1,0},
     {{5856,318,224,32},1,0},
     {{5888,288,192,32},1,0},
     {{5920,256,160,32},1,0},
     {{5952,224,128,32},1,0},
-    {{5984,192,96,32},1,0},
+    {{5984,192,64,32},1,0},
     {{6016,160,64,32},1,0},
     {{6336,382,32,32},1,0},
     {{6348,80,8,302},1,0}
@@ -364,7 +364,7 @@ void Reset(Mario* mario) {
     StopMusicStream(music); 
     PlayMusicStream(music); 
     mario->position.x = 316;
-    mario->position.y = 414;
+    mario->position.y = 382;
     camera.target = { mario->position.x + 20.0f, mario->position.y - 32.0f };
     camera.offset = { mario->position.x, mario->position.y + 20.0f };
     camera.rotation = 0.0f;
@@ -449,10 +449,27 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector<Hitbox> hitboxes)
         marioRecorte.width = -16;
     }
 
-    Rectangle marioResized = { marioIni.x, marioIni.y - 32, 16 * 2, 16 * 2 }; // Escalado
+    Rectangle marioResized = { marioIni.x, marioIni.y, 16 * 2, 16 * 2 }; // Escalado
     Vector2 MarioOrigen = { 0,0 };
 
     DrawTexturePro(spriteSheet, marioRecorte, marioResized, MarioOrigen, 0, WHITE);
+
+    //Hitbox de mario
+    DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
+    DrawRectangleLines(mario->pies.x, mario->pies.y, mario->pies.width, mario->pies.height, RED);
+    DrawRectangleLines(mario->cabeza.x, mario->cabeza.y, mario->cabeza.width, mario->cabeza.height, BLUE);
+    DrawRectangleLines(mario->derecha.x, mario->derecha.y, mario->derecha.width, mario->derecha.height, GREEN);
+    DrawRectangleLines(mario->izquierda.x, mario->izquierda.y, mario->izquierda.width, mario->izquierda.height, YELLOW);
+
+    //Goomba
+
+
+    //Vector2 PosGoomba1 = { goomba1->position.x,goomba1->position.y };
+    //Rectangle Goomba1Recorte = { goomba1->sprite_status, 17, 16,16 };
+
+    //Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
+    //Vector2 GoombaOrigen = { 0,0 };
+    //DrawTexturePro(EnemySpriteSheet, Goomba1Recorte, Goomba1Resized, GoombaOrigen, 0, WHITE);
     
     for (Goomba& goomba : goombas) 
     {
@@ -562,23 +579,42 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         //colisions
 
         bool hitObstacle = false;
+        bool hitGround = false;
 
         for (int i = 0; i < envItems; i++)
         {
             Hitbox* ei = hitboxes + i;
 
-            if (ei->blocking &&
-                ei->rect.x <= mario->position.x &&
-                ei->rect.x + ei->rect.width >= mario->position.x &&
-                ei->rect.y >= mario->position.y &&
-                ei->rect.y <= mario->position.y + mario->velocidad * delta)
-            {
-                hitObstacle = true;
+            if (CheckCollisionRecs(ei->rect, mario->pies)) {
+                hitGround = true;
                 mario->velocidad = 0.0f;
-                mario->position.y = ei->rect.y;
-                break;
-
+                mario->SetY(ei->rect.y - mario->position.height + 2);
             }
+            if (CheckCollisionRecs(ei->rect, mario->cabeza) && !hitGround) {
+                mario->velocidad = 0.0f;
+                mario->SetY(ei->rect.y + ei->rect.height + 2);
+            }
+            if (CheckCollisionRecs(ei->rect, mario->derecha)) {
+                hitObstacle = true;
+                mario->SetX(ei->rect.x - mario->position.width - 2);
+            }
+            if (CheckCollisionRecs(ei->rect, mario->izquierda)) {
+                hitObstacle = true;
+                mario->SetX(ei->rect.x + ei->rect.width + 2);
+            }
+
+           
+            //if (ei->rect.x <= mario->position.x &&
+            //    ei->rect.x + ei->rect.width >= mario->position.x &&
+            //    ei->rect.y >= mario->position.y - mario->position.height &&
+            //    ei->rect.y <= mario->pies.y + mario->velocidad * delta)
+            //{
+            //    hitObstacle = true;
+            //    mario->velocidad = 0.0f;
+            //    mario->SetY(ei->rect.y - mario->position.height + 2);
+            //    break;
+            //
+            //}
         }
 
         /* Colision con enemigos */
@@ -630,43 +666,47 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
                 break;
             }
         }
+
             /* Movimiento de Mario */
-        if (IsKeyDown(KEY_RIGHT)) {
-            mario->mirando_derecha = true;
-            mario->velocidadX += ACELERACION;
-            if (mario->velocidadX > VELOCIDAD_MAXIMA)
-                mario->velocidadX = VELOCIDAD_MAXIMA;
+        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
+           
 
-            if (mario->canJump) {
-                if (mario->sprite_status >= 56)
-                    mario->sprite_status = 20;
-                else
-                    mario->sprite_status += 18;
+            if (mario->animTimer >= 0.01) //el 0.02f cambia la vel
+            {
+                mario->animTimer = delta;
+                mario->mirando_derecha = true;
+                mario->velocidadX += ACELERACION;
+                if (mario->velocidadX > VELOCIDAD_MAXIMA)
+                    mario->velocidadX = VELOCIDAD_MAXIMA;
+                if (mario->canJump) {
+                    if (mario->sprite_status >= 56)
+                        mario->sprite_status = 20;
+                    else
+                        mario->sprite_status += 18;
+                }
+                mario->animTimer = 0.0f;
             }
-
-            if (mario->position.x >= (screenWidth / 2) - 12) {
-                worldPosition = mario->position.x;
-            }
-
-                mario->animTimer += delta;
+            mario->animTimer += delta;
         }
-        else if (IsKeyDown(KEY_LEFT)) {
-            mario->mirando_derecha = false;
-            mario->velocidadX -= ACELERACION;
-            if (mario->velocidadX < -VELOCIDAD_MAXIMA)
-                mario->velocidadX = -VELOCIDAD_MAXIMA;
+        else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
+           
+            if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325 && mario->animTimer >= 0.01f) {
+                mario->animTimer += delta;
+                mario->mirando_derecha = false;
+                mario->velocidadX -= ACELERACION;
+                if (mario->velocidadX < -VELOCIDAD_MAXIMA)
+                    mario->velocidadX = -VELOCIDAD_MAXIMA;
+                if (mario->canJump) {
+                    if (mario->sprite_status >= 56)
+                        mario->sprite_status = 20;
+                    else
+                        mario->sprite_status += 18;
+                }
 
-            if (mario->canJump) {
-                if (mario->sprite_status >= 56)
-                    mario->sprite_status = 20;
-                else
-                    mario->sprite_status += 18;
+                if (mario->position.x >= (screenWidth / 2) - 12) {
+                    worldPosition = mario->position.x;
+                }
             }
-
-            if (mario->position.x >= (screenWidth / 2) - 12) {
-                worldPosition = mario->position.x;
-            }
-
                 mario->animTimer += delta;
         }
         else {
@@ -689,10 +729,12 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             mario->velocidadX = 0;
 
         }
+        mario->MoveX(mario->velocidadX);
        
 
         /* Salto */
         if (IsKeyDown(KEY_SPACE) && mario->canJump) {
+            hitGround = false;
             mario->velocidad = -PLAYER_JUMP_SPD;
             mario->canJump = false;
             mario->sprite_status = 96;
@@ -701,9 +743,9 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
 
         UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
 
-        if (!hitObstacle)
+        if (!hitGround)
         {
-            mario->position.y += mario->velocidad * delta;
+            mario->MoveY(mario->velocidad * delta);
             mario->velocidad += GRAVEDAD * delta;
             mario->canJump = false;
         }
@@ -793,7 +835,7 @@ int main(void)
 
     InitGame();
 
-    Mario mario(316, 414); //Creo el objeto de Mario
+    Mario mario(316, 382); //Creo el objeto de Mario
     vector<Goomba> goombas = {
     
     Goomba(500, 416),
@@ -822,9 +864,6 @@ int main(void)
         UpdateGameState(deltaTime);
 
         ClearBackground(RAYWHITE);
-
-        /*CONTADOR DE FRAMES MARIO*/
-        
 
 
         if (gameState == INTRO) {

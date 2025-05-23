@@ -19,7 +19,13 @@ public:
 	bool canMoveRight;
 	int sprite_status /*= 0*/;
 	Rectangle position;
-	bool canJump/* = true*/;
+
+	Rectangle pies;
+	Rectangle cabeza;
+	Rectangle derecha;
+	Rectangle izquierda;
+
+	bool canJump /* = true*/;
 	float velocidad;
 	float velocidadX = 0.0f;
 	float animTimer;
@@ -35,8 +41,13 @@ public:
 
 	Mario(float posX, float posY)
 	{
+		position = { posX, posY, 32, 32 };
+		
+		pies = { posX + 4, posY + 30, 24, 1 };
+		cabeza = { posX + 4, posY, 24, 1 };
+		derecha = { posX + 30, posY + 4, 1, 24 };
+		izquierda = { posX, posY + 4, 1, 24 };
 
-		position = { posX, posY, 24, 32 };
 		velocidad = 0;
 		poder = BASE;
 		mirando_derecha = true;
@@ -48,7 +59,41 @@ public:
 		
 
 	}
+
 	~Mario(){}
 
+
+	/* Funciones */
+	void SetX(float distance) {
+		position.x = distance;
+		pies.x = position.x + 4;
+		cabeza.x = position.x + 4;
+		derecha.x = position.x + 30;
+		izquierda.x = distance;
+	}
+
+	void SetY(float distance) {
+		position.y = distance;
+		pies.y = position.y + 30;
+		cabeza.y = distance;
+		derecha.y = distance + 4;
+		izquierda.y = distance + 4;
+	}
+
+	void MoveX(float distance) {
+		position.x += distance;
+		pies.x += distance;
+		cabeza.x += distance;
+		derecha.x += distance;
+		izquierda.x += distance;
+	}
+
+	void MoveY(float distance) {
+		position.y += distance;
+		pies.y += distance;
+		cabeza.y += distance;
+		derecha.y += distance;
+		izquierda.y += distance;
+	}
 };
 #endif
