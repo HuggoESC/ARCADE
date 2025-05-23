@@ -630,43 +630,47 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
                 break;
             }
         }
+
             /* Movimiento de Mario */
-        if (IsKeyDown(KEY_RIGHT)) {
-            mario->mirando_derecha = true;
-            mario->velocidadX += ACELERACION;
-            if (mario->velocidadX > VELOCIDAD_MAXIMA)
-                mario->velocidadX = VELOCIDAD_MAXIMA;
+        if (IsKeyDown(KEY_RIGHT) && mario->canMoveRight) {
+           
 
-            if (mario->canJump) {
-                if (mario->sprite_status >= 56)
-                    mario->sprite_status = 20;
-                else
-                    mario->sprite_status += 18;
+            if (mario->animTimer >= 0.01) //el 0.02f cambia la vel
+            {
+                mario->animTimer = delta;
+                mario->mirando_derecha = true;
+                mario->velocidadX += ACELERACION;
+                if (mario->velocidadX > VELOCIDAD_MAXIMA)
+                    mario->velocidadX = VELOCIDAD_MAXIMA;
+                if (mario->canJump) {
+                    if (mario->sprite_status >= 56)
+                        mario->sprite_status = 20;
+                    else
+                        mario->sprite_status += 18;
+                }
+                mario->animTimer = 0.0f;
             }
-
-            if (mario->position.x >= (screenWidth / 2) - 12) {
-                worldPosition = mario->position.x;
-            }
-
-                mario->animTimer += delta;
+            mario->animTimer += delta;
         }
-        else if (IsKeyDown(KEY_LEFT)) {
-            mario->mirando_derecha = false;
-            mario->velocidadX -= ACELERACION;
-            if (mario->velocidadX < -VELOCIDAD_MAXIMA)
-                mario->velocidadX = -VELOCIDAD_MAXIMA;
+        else if (IsKeyDown(KEY_LEFT) && mario->canMoveLeft) {
+           
+            if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325 && mario->animTimer >= 0.01f) {
+                mario->animTimer += delta;
+                mario->mirando_derecha = false;
+                mario->velocidadX -= ACELERACION;
+                if (mario->velocidadX < -VELOCIDAD_MAXIMA)
+                    mario->velocidadX = -VELOCIDAD_MAXIMA;
+                if (mario->canJump) {
+                    if (mario->sprite_status >= 56)
+                        mario->sprite_status = 20;
+                    else
+                        mario->sprite_status += 18;
+                }
 
-            if (mario->canJump) {
-                if (mario->sprite_status >= 56)
-                    mario->sprite_status = 20;
-                else
-                    mario->sprite_status += 18;
+                if (mario->position.x >= (screenWidth / 2) - 12) {
+                    worldPosition = mario->position.x;
+                }
             }
-
-            if (mario->position.x >= (screenWidth / 2) - 12) {
-                worldPosition = mario->position.x;
-            }
-
                 mario->animTimer += delta;
         }
         else {
@@ -816,9 +820,6 @@ int main(void)
         UpdateGameState(deltaTime);
 
         ClearBackground(RAYWHITE);
-
-        /*CONTADOR DE FRAMES MARIO*/
-        
 
 
         if (gameState == INTRO) {
