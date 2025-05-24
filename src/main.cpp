@@ -215,8 +215,8 @@ void InitGrid(vector <Hitbox> *lista_hitboxes) {
             int index = ((y * 16) * tile_map.width) + (x * 16);
 
             if (colors[index].r == 255 && colors[index].g == 0 && colors[index].b == 0) {
-                //Rectangle rec = { x * 32, y * 32, 32, 32 };
-                //lista_hitboxes->push_back(Hitbox(rec, BLOQUE));
+                Rectangle rec = { x * 32, y * 32, 32, 32 };
+                lista_hitboxes->push_back(Hitbox(rec, BLOQUE));
             }
             else if (colors[index].r == 255 && colors[index].g == 255 && colors[index].b == 0) {
                 Rectangle rec = { x * 32, y * 32, 32, 32 };
