@@ -24,6 +24,8 @@ public:
 	Rectangle izquierda;
 
 	bool canJump /* = true*/;
+	bool isJumping = false;
+	float jumpTime = 0.0f;
 	float velocidad;
 	float velocidadX = 0.0f;
 	float animTimer;

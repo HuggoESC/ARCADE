@@ -643,6 +643,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         //colisions
 
         bool hitGround = false;
+        bool isJumping = false;
 
         for (int i = 0; i < envItems; i++)
         {
@@ -728,7 +729,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
 
         /* Movimiento de Mario */
         if (IsKeyDown(KEY_RIGHT)) {
-            if (mario->animTimer >= 0.01) //el 0.02f cambia la vel
+            if (mario->animTimer >= 0.01) //el 0.01f cambia la vel
             {
                 mario->animTimer += delta;
                 mario->mirando_derecha = true;
@@ -774,7 +775,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             mario->animTimer += delta;
         }
         else {
-            // Desaceleración natural (fricción)
+            // fricción
             if (mario->velocidadX > 0) {
                 mario->velocidadX -= ACELERACION;
                 if (mario->velocidadX < 0) mario->velocidadX = 0;
@@ -791,12 +792,34 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         cout << mario->position.x << endl;
 
         /* Salto */
+        float jumpTime = 0.2f;
+
         if (IsKeyDown(KEY_SPACE) && mario->canJump) {
+            isJumping = true;
             hitGround = false;
             mario->velocidad = -PLAYER_JUMP_SPD;
             mario->canJump = false;
+            jumpTime = 0.0f;
             mario->sprite_status = 96;
             PlaySound(JumpSound);
+        }
+
+        if (IsKeyDown(KEY_SPACE) && isJumping) {
+            jumpTime += GetFrameTime();
+            
+            if (jumpTime < 0.2f) {
+                mario->velocidad +=  0.2f*-PLAYER_JUMP_SPD;
+                jumpTime = -PLAYER_JUMP_SPD;
+                cout << jumpTime;
+            }
+            else {
+                isJumping = false;
+            }
+        }
+
+        // Soltar el salto antes del tiempo máximo
+        if (IsKeyReleased(KEY_SPACE)) {
+            isJumping = false;
         }
 
         UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
