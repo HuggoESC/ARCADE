@@ -15,9 +15,10 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND  "../../resources/world/World_1_1.png"
+#define BACKGROUND  "../../resources/world/Empty_World_1_1.png"
 #define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES     "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define BLOCKS     "../../resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
 #define SOUNDS      "../../resources/Super Mario Bros Efects"
 #define MUSICS      "../../resources/Super Mario Bros Music"
 #define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
@@ -127,6 +128,15 @@ struct Hitbox {
     int blocking;
     Color color;
     BlockType type;
+
+    Hitbox(Rectangle r) {
+        rect = r;
+    }
+
+    Hitbox(Rectangle r, BlockType t) {
+        rect = r;
+        type = t;
+    }
 };
 
 #pragma region VARIABLES GLOBALES
@@ -173,6 +183,7 @@ static int selectedOption = 0;  // 0 para 1 jugador, 1 para 2 jugadores
 Camera2D camera = { 0 };
 Texture2D background;
 Texture2D spriteSheet;
+Texture2D blocksheet;
 Texture2D EnemySpriteSheet;
 Texture2D backgroundInicial;
 
@@ -197,7 +208,6 @@ int framesSpeed = 3;
 void InitGrid(vector <Hitbox> *lista_hitboxes) {
     Image tile_map = LoadImage("../../resources/world/Tile_Map.png");
     Color* colors = LoadImageColors(tile_map);
-    
     for (int x = 0; x < 211; x++)
     {
         for (int y = 0; y < 30; y++)
@@ -205,30 +215,36 @@ void InitGrid(vector <Hitbox> *lista_hitboxes) {
             int index = ((y * 16) * tile_map.width) + (x * 16);
 
             if (colors[index].r == 255 && colors[index].g == 0 && colors[index].b == 0) {
-                Hitbox temp = { {x * 32,y * 32, 32, 32 },1,0, BLOQUE };
-
-                lista_hitboxes->push_back(temp);
+                //Rectangle rec = { x * 32, y * 32, 32, 32 };
+                //lista_hitboxes->push_back(Hitbox(rec, BLOQUE));
             }
             else if (colors[index].r == 255 && colors[index].g == 255 && colors[index].b == 0) {
-                Hitbox temp = { {x * 32,y * 32, 32, 32 },1,0, BLOQUEMONEDA };
+                Rectangle rec = { x * 32, y * 32, 32, 32 };
 
-                lista_hitboxes->push_back(temp);
+                lista_hitboxes->push_back(Hitbox(rec, BLOQUEMONEDA));
             }
             else if (colors[index].r == 0 && colors[index].g == 255 && colors[index].b == 0) {
-                Hitbox temp = { {x * 32,y * 32, 32, 32 },1,0, TUBERIA };
+                Rectangle rec = { x * 32, y * 32, 32, 32 };
 
-                lista_hitboxes->push_back(temp);
+                lista_hitboxes->push_back(Hitbox(rec, TUBERIA));
+            }
+            else if (colors[index].r == 0 && colors[index].g == 0 && colors[index].b == 255) {
+                Rectangle rec = { x * 32, y * 32, 32, 32 };
+
+                lista_hitboxes->push_back(Hitbox(rec));
             }
         }
     }
     
-    
+    UnloadImage(tile_map);
+    UnloadImageColors(colors);
 }
 
 void InitGame(void)
 {
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
     spriteSheet = LoadTexture(SPRITESHEET);
+    blocksheet = LoadTexture(BLOCKS);
     EnemySpriteSheet = LoadTexture(ENEMIES);
     backgroundInicial = LoadTexture(INICIALPAGE);
 
@@ -236,7 +252,7 @@ void InitGame(void)
     gameOver = false;
 
     lista_hitboxes = {
-    {{0,414,2208,400},1,0},
+    {{0,414,2208,400}},
     //{{512,288,32,32},1,0},
     //{{640,288,32,32},1,0},
     //{{672,288,32,32},1,0},
@@ -248,7 +264,7 @@ void InitGame(void)
     //{{1216,320,64,94},1,0},
     //{{1472,288,64,126},1,0},
     //{{1824,288,64,126},1,0},
-    {{2272,414,500,400},1,0},
+    {{2272,414,500,400}},
     //{{2464,288,32,32},1,0},
     //{{2496,288,32,32},1,0},
     //{{2528,288,32,32},1,0},
@@ -260,7 +276,7 @@ void InitGame(void)
     //{{2720,160,32,32},1,0},
     //{{2752,160,32,32},1,0},
     //{{2784,160,32,32},1,0},
-    {{2848,414,2048,400},1,0},
+    {{2848,414,2048,400}},
     //{{2912,160,32,32},1,0},
     //{{2944,160,32,32},1,0},
     //{{2976,160,32,32},1,0},
@@ -316,7 +332,7 @@ void InitGame(void)
     //{{4864,318,32,32},1,0},
     //{{4832,286,32,32},1,0},
     //{{4864,286,32,32},1,0},
-    {{4960,414,2000,400},1,0},
+    {{4960,414,2000,400}},
     //{{4960,382,32,32},1,0},
     //{{4992,382,32,32},1,0},
     //{{5024,382,32,32},1,0},
@@ -333,19 +349,21 @@ void InitGame(void)
     //{{5440,288,32,32},1,0},
     //{{5472,288,32,32},1,0},
     //{{5728,352,64,64},1,0},
-    {{5792,382,288,32},1,0},
-    {{5824,350,256,32},1,0},
-    {{5856,318,224,32},1,0},
-    {{5888,288,192,32},1,0},
-    {{5920,256,160,32},1,0},
-    {{5952,224,128,32},1,0},
+    {{5792,382,288,32}},
+    {{5824,350,256,32}},
+    {{5856,318,224,32}},
+    {{5888,288,192,32}},
+    {{5920,256,160,32}},
+    {{5952,224,128,32}},
     //{{5984,192,64,32},1,0},
     //{{6016,160,64,32},1,0},
     //{{6336,382,32,32},1,0},
-    {{6348,80,8,302},1,0}
+    {{6348,80,8,302}}
     //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
+    
     InitGrid(&lista_hitboxes);
+
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
     //MUSICA
     music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
@@ -385,10 +403,12 @@ void Reset(Mario* mario) {
     gameState = INTRO;
     StopMusicStream(music); 
     PlayMusicStream(music); 
-    mario->position.x = 316;
-    mario->position.y = 382;
-    camera.target = { mario->position.x + 20.0f, mario->position.y - 32.0f };
-    camera.offset = { mario->position.x, mario->position.y + 20.0f };
+    mario->SetX(316);
+    mario->SetY(382);
+    mario->velocidad = 0;
+    mario->velocidadX = 0;
+    camera.target = { mario->position.x + 20.0f, mario->position.y };
+    camera.offset = { mario->position.x, mario->position.y };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
     tiempo = 400;
@@ -396,11 +416,35 @@ void Reset(Mario* mario) {
     introTimer = 3.5f; 
 }
 
+
 void UnloadGame(void)
 {
-    UnloadTexture(spriteSheet);
     UnloadTexture(background);
-    // TODO: Unload all dynamic loaded data (textures, sounds, models...)
+    UnloadTexture(spriteSheet);
+    UnloadTexture(blocksheet);
+    UnloadTexture(EnemySpriteSheet);
+    UnloadTexture(backgroundInicial);
+
+    UnloadSound(Pause);
+    UnloadSound(Die);
+    UnloadSound(JumpSound);
+    UnloadSound(UpSound);
+    UnloadSound(BeepSound);
+    UnloadSound(BigJumpSound);
+    UnloadSound(Break);
+    UnloadSound(Bump);
+    UnloadSound(Coin);
+    UnloadSound(FireBall);
+    UnloadSound(Flagpole);
+    UnloadSound(item);
+    UnloadSound(kick);
+    UnloadSound(Powerup);
+    UnloadSound(Skid);
+    UnloadSound(Squish);
+    UnloadSound(Thwomp);
+    UnloadSound(Vine);
+    UnloadSound(Warp);
+    UnloadSound(Enemyfire);
 }
 
 #pragma endregion
@@ -501,8 +545,16 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector<Hitbox> hitboxes)
     //DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
 
     /* Dibujado de Hitbox */
-    for (int i = 0; i < hitboxes.size(); i++)
-        DrawRectangleRec(hitboxes[i].rect, hitboxes[i].color);
+    for (int i = 0; i < hitboxes.size(); i++) {
+        if (hitboxes[i].type == BLOQUE) {
+            DrawTexturePro(blocksheet, { 272, 112, 16, 16 }, { hitboxes[i].rect.x, hitboxes[i].rect.y, 32, 32 }, {0,0}, 0, WHITE);
+        }
+        else if (hitboxes[i].type == BLOQUEMONEDA) {
+            DrawTexturePro(blocksheet, { 80, 112, 16, 16 }, { hitboxes[i].rect.x, hitboxes[i].rect.y, 32, 32 }, { 0,0 }, 0, WHITE);
+        }
+
+        //DrawRectangleRec(hitboxes[i].rect, hitboxes[i].color);
+    }
 
     EndMode2D();
 
@@ -604,6 +656,17 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             if (CheckCollisionRecs(ei->rect, mario->cabeza) && !hitGround) {
                 mario->velocidad = 0.0f;
                 mario->SetY(ei->rect.y + ei->rect.height + 2);
+                if (ei->type == BLOQUE) {
+                    if (mario->poder == BASE) {
+                        PlaySound(Bump);
+
+                    }
+                    else {
+                        PlaySound(Break);
+                        lista_hitboxes.erase(lista_hitboxes.begin() + i);
+                    }
+                }
+
             }
             if (CheckCollisionRecs(ei->rect, mario->derecha)) {
                 mario->SetX(ei->rect.x - mario->position.width - 2);
@@ -722,15 +785,10 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             }
         }
 
-        // Aplicar movimiento horizontal
-        /*if (mario->position.x < 0) {
-            mario->position.x = 0;
-            mario->velocidadX = 0;
-
-        }*/
+        // Aplicar movimiento horizontal 
         mario->MoveX(mario->velocidadX);
        
-        cout << mario->position.x << " - " << (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325 << endl;
+        cout << mario->position.x << endl;
 
         /* Salto */
         if (IsKeyDown(KEY_SPACE) && mario->canJump) {
@@ -845,7 +903,7 @@ int main(void)
 
     };
 
-    camera.target = { mario.position.x + 20.0f, mario.position.y  };
+    camera.target = { mario.position.x + 20.0f, mario.position.y };
     camera.offset = { mario.position.x, mario.position.y };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
