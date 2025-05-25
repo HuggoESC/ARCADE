@@ -15,16 +15,16 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND  "resources/world/Empty_World_1_1.png"
-#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES     "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define BLOCKS     "resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
-#define SOUNDS      "resources/Super Mario Bros Efects"
-#define MUSICS      "resources/Super Mario Bros Music"
-#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define BACKGROUND  "../../resources/world/Empty_World_1_1.png"
+#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES     "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define BLOCKS     "../../resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
+#define SOUNDS      "../../resources/Super Mario Bros Efects"
+#define MUSICS      "../../resources/Super Mario Bros Music"
+#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
-#define PLAYER_JUMP_SPD 200.0f
-#define GRAVEDAD 700
+#define PLAYER_JUMP_SPD 420.0f
+#define GRAVEDAD 1000
 #define ACELERACION 0.5f
 #define VELOCIDAD_MAXIMA 5.0f
 
@@ -205,40 +205,40 @@ int framesSpeed = 3;
 
 #pragma region Inits
 
-void InitGrid(vector <Hitbox> *lista_hitboxes) {
+void InitGrid(vector<Hitbox>* lista_hitboxes) {
     Image tile_map = LoadImage("resources/world/Tile_Map.png");
     Color* colors = LoadImageColors(tile_map);
-    for (int x = 0; x < 211; x++)
-    {
-        for (int y = 0; y < 30; y++)
-        {
-            int index = ((y * 16) * tile_map.width) + (x * 16);
+
+    if (colors == nullptr) {
+        cout << "Error cargando los colores del mapa." << endl;
+        return;
+    }
+
+    for (int y = 0; y < tile_map.height; y++) {
+        for (int x = 0; x < tile_map.width; x++) {
+            int index = y * tile_map.width + x;
+
+            Rectangle rec = { x * 32, y * 32, 32, 32 };
 
             if (colors[index].r == 255 && colors[index].g == 0 && colors[index].b == 0) {
-                Rectangle rec = { x * 32, y * 32, 32, 32 };
                 lista_hitboxes->push_back(Hitbox(rec, BLOQUE));
             }
             else if (colors[index].r == 255 && colors[index].g == 255 && colors[index].b == 0) {
-                Rectangle rec = { x * 32, y * 32, 32, 32 };
-
                 lista_hitboxes->push_back(Hitbox(rec, BLOQUEMONEDA));
             }
             else if (colors[index].r == 0 && colors[index].g == 255 && colors[index].b == 0) {
-                Rectangle rec = { x * 32, y * 32, 32, 32 };
-
                 lista_hitboxes->push_back(Hitbox(rec, TUBERIA));
             }
             else if (colors[index].r == 0 && colors[index].g == 0 && colors[index].b == 255) {
-                Rectangle rec = { x * 32, y * 32, 32, 32 };
-
                 lista_hitboxes->push_back(Hitbox(rec));
             }
         }
     }
-    
+
     UnloadImage(tile_map);
     UnloadImageColors(colors);
 }
+
 
 void InitGame(void)
 {
@@ -693,11 +693,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
                     goombas[i].reset();
                 }
                 return;
-               /* gameOver = true;
-                StopMusicStream(music);
-                for (int i = 0; i < goombas.size(); ++i) {
-                    goombas[i].reset();
-                }*/
+              
              
 
                 if (!playDeathSound) {
@@ -794,32 +790,31 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         /* Salto */
         float jumpTime = 0.2f;
 
-        if (IsKeyDown(KEY_SPACE) && mario->canJump) {
-            isJumping = true;
-            hitGround = false;
-            mario->velocidad = -PLAYER_JUMP_SPD;
+        // Inicio del salto
+        if (IsKeyPressed(KEY_SPACE) && mario->canJump) {
+            mario->isJumping = true;
             mario->canJump = false;
-            jumpTime = 0.0f;
+            mario->jumpTime = 0.0f;
+            mario->velocidad = -PLAYER_JUMP_SPD;
             mario->sprite_status = 96;
             PlaySound(JumpSound);
+            hitGround = false;
         }
 
-        if (IsKeyDown(KEY_SPACE) && isJumping) {
-            jumpTime += GetFrameTime();
-            
-            if (jumpTime < 0.2f) {
-                mario->velocidad +=  0.2f*-PLAYER_JUMP_SPD;
-                jumpTime = -PLAYER_JUMP_SPD;
-                cout << jumpTime;
+        // Mientras se mantenga pulsado, se sigue aplicando fuerza hacia arriba
+        if (mario->isJumping && IsKeyDown(KEY_SPACE)) {
+            mario->jumpTime += delta;
+            if (mario->jumpTime < mario->maxjumptime) {
+                mario->velocidad = -PLAYER_JUMP_SPD;
             }
             else {
-                isJumping = false;
+                mario->isJumping = false;  // se agota el tiempo máximo
             }
         }
 
-        // Soltar el salto antes del tiempo máximo
+        // Si se suelta la tecla antes, se corta el salto
         if (IsKeyReleased(KEY_SPACE)) {
-            isJumping = false;
+            mario->isJumping = false;
         }
 
         UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
