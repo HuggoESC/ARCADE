@@ -58,7 +58,8 @@ enum BlockType {
     BLOQUE = 0,
     BLOQUEMONEDA = 1,
     TUBERIA = 2,
-    VACIO = 3
+    BANDERA = 3,
+    VACIO = 4
 };
 
 #pragma endregion
@@ -365,11 +366,11 @@ void InitGrid(vector<Hitbox>* lista_hitboxes) {
             else if (colors[index].r == 0 && colors[index].g == 255 && colors[index].b == 0) {
                 lista_hitboxes->push_back(Hitbox(rec, TUBERIA));
             }
+            else if (colors[index].r == 255 && colors[index].g == 0 && colors[index].b == 255) {
+                lista_hitboxes->push_back(Hitbox(rec, BANDERA));
+            }
             else if (colors[index].r == 0 && colors[index].g == 0 && colors[index].b == 255) {
-                if (rec.x >= 6300) {  // Solo marcar como bandera si está cerca del mástil real
-                    lista_hitboxes->push_back(Hitbox(rec, BANDERA));
-                }
-            
+                lista_hitboxes->push_back(Hitbox(rec));
             }
         }
     }
