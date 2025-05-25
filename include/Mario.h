@@ -13,6 +13,15 @@ public:
 		ESTRELLA = 3
 	};
 
+	enum EstadoMario {
+		NORMAL,
+		TOCANDO_BANDERA,
+		BAJANDO_BANDERA,
+		CAMINANDO_CASTILLO
+	};
+
+	EstadoMario estado = NORMAL;
+
 	bool hasPlayedDieSound = false;
 	bool mirando_derecha/* = true*/;
 	int sprite_status /*= 0*/;
