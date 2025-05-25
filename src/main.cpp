@@ -163,6 +163,10 @@ static Music Gameover;
 bool playDeathSound = false;
 bool musicRestarted = false;
 bool musicPlaying = false;
+bool waitingforgameover = false;
+bool diesoundplayed = false;
+
+float gameoverwaitimer = 0.0f;
 
 static Sound Die;
 static Sound Pause;
@@ -384,6 +388,7 @@ void InitGame(void)
     //MUSICA
     music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
     Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
+    Gameover.looping = false;
    
     
     //sonidos
@@ -417,23 +422,26 @@ void InitGame(void)
 
 void Reset(Mario* mario) {
     gameState = INTRO;
-    StopMusicStream(music); 
-    PlayMusicStream(music); 
-    playDeathSound = false;
+
+    StopMusicStream(music);          // Detiene la música actual
+    musicPlaying = false;            // Marca que aún NO se debe reproducir
+    playDeathSound = false;          // Permite reproducir "Die" la próxima vez
+
     mario->SetX(316);
     mario->SetY(382);
     mario->velocidad = 0;
     mario->velocidadX = 0;
-    camera.target = { mario->position.x + 20.0f, mario->position.y };
-    camera.offset = { mario->position.x, mario->position.y };
-    camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
-    tiempo = 400;
     mario->isDead = false;
     mario->deathAnimationInProgress = false;
     mario->deathAnimTimer = 0.0f;
 
-    introTimer = 3.5f; 
+    camera.target = { mario->position.x + 20.0f, mario->position.y };
+    camera.offset = { mario->position.x, mario->position.y };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+
+    tiempo = 400;
+    introTimer = 3.5f;               // Se muestra pantalla de vidas durante 3.5 segundos
 }
 
 
@@ -650,6 +658,21 @@ void UpdateGameState(float delta) {
 
 void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float delta, int envItems)
 {
+    if (waitingforgameover) {
+        gameoverwaitimer += delta;
+
+        if (!diesoundplayed) {
+            PlaySound(Die);
+            diesoundplayed = true;
+        }
+        if (gameoverwaitimer >= 5.0f) {
+            gameState = GAME_OVER;
+            waitingforgameover = false;
+        }
+
+        return;
+    }
+
     if (!gameOver)
 
     {
@@ -747,21 +770,33 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         if (mario->isDead && mario->deathAnimationInProgress) {
             mario->deathAnimTimer += delta;
 
-            if (mario->deathAnimTimer >= 2.0f) {
+            if (mario->deathAnimTimer >= 2.0f) 
+            {
                 vidas--;
 
-                if (vidas <= 0) {
-                    gameState = GAME_OVER;
+                if (vidas <= 0) 
+                { //Esperamos a que termine die
+                    waitingforgameover = true;
+                    gameoverwaitimer = 0.0f;
+                    PlaySound(Die);
                     StopMusicStream(music);
-                    PlayMusicStream(Gameover);
-                    gameovermusicplayed = true;
+
+                    return;
+                   
                 }
-                else {
+                else 
+                {
                     Reset(mario);  // Reinicia nivel y reposiciona a Mario
                     gameOver = false;
                     musicRestarted = false;
                     playDeathSound = false;
                 }
+
+                mario->deathAnimationInProgress = false;
+                mario->isDead = false;
+                mario->deathAnimTimer = 0.0f;
+
+                return;
             }
 
             // Aplicar movimiento de caída
@@ -769,6 +804,21 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             mario->velocidad += GRAVEDAD * delta;
 
             return; // Salir del UpdateGame mientras Mario está muriendo
+        }
+        if (waitingforgameover) {
+            gameoverwaitimer += delta;
+
+            if (gameoverwaitimer >= 3.0f) { // Espera después del sonido Die.wav
+                gameState = GAME_OVER;
+                waitingforgameover = false;
+
+                if (!gameovermusicplayed) {
+                    StopMusicStream(music);
+                    PlayMusicStream(Gameover);
+                    gameovermusicplayed = true;
+                }
+            }
+            return;
         }
        
 
@@ -1010,39 +1060,46 @@ int main(void)
          
         }
         else if (gameState == GAME_OVER) {
-            if (!gameovermusicplayed)
-            { 
-                StopMusicStream(music);
+            Drawgameintoscreen();
+            gameoverwaitimer += deltaTime;
+            // ⏱ Reproducir música Game Over después de un pequeño retardo para no solaparse con Die.wav
+            if (!gameovermusicplayed && gameoverwaitimer >= 5.0f) {
+               /* StopMusicStream(music); */       // Por si acaso
                 PlayMusicStream(Gameover);
                 gameovermusicplayed = true;
-                Drawgameintoscreen(); 
-
             }
-            
+
+
+            // Permitir reiniciar con ENTER
             if (IsKeyPressed(KEY_ENTER)) {
+                StopMusicStream(Gameover);  // Detenemos música de game over
+
+                // Reset de variables de estado
                 vidas = 3;
                 score = 0;
                 monedas = 0;
                 worldPosition = 0;
-
-                StopMusicStream(music);
-                PlayMusicStream(Gameover);
-
-                mario = Mario(316, 414);
                 gameState = INICIAL;
 
+                mario = Mario(316, 414);
+
+                // 🔁 Reiniciamos flags
                 playDeathSound = false;
                 musicRestarted = false;
                 gameovermusicplayed = false;
+                waitingforgameover = false;
+                gameoverwaitimer = 0.0f;
+                diesoundplayed = false;
             }
         }
+        
         else if (gameState == INICIAL) {
             DrawIntro();
          
         }
         else {
 
-            if (gameOver) 
+            if (gameOver&&vidas > 0) 
             {
                 // Detiene música, reinicia estado y muestra pantalla de intro
                 gameState = INTRO;
