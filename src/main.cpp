@@ -497,12 +497,12 @@ void InitGame(void)
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
     //MUSICA
     
-    music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
-    Gameover = LoadMusicStream("resources/Super Mario Bros Music/Game Over.wav");
+    music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
+    Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
     Gameover.looping = false;
 
-    music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
-    Gameover = LoadMusicStream("resources/Super Mario Bros Music/Game Over.wav");
+    music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
+    Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
    
     
     //sonidos
@@ -514,13 +514,13 @@ void InitGame(void)
      BigJumpSound = LoadSound("../../resources/Super Mario Bros Efects/Big Jump.wav");
      Break = LoadSound("../../resources/Super Mario Bros Efects/Break.wav");
      Bump = LoadSound("../../resources/Super Mario Bros Efects/Bump.wav");
-     Coin = LoadSound("resources/Super Mario Bros Efects/Coin.wav");
-     FireBall = LoadSound("resources/Super Mario Bros Efects/Fire Ball.wav");
-     Flagpole = LoadSound("resources/Super Mario Bros Efects/Flagpole.wav");
-     item = LoadSound("resources/Super Mario Bros Efects/Item.wav");
-     kick = LoadSound("resources/Super Mario Bros Efects/Kick.wav");
-     Powerup = LoadSound("resources/Super Mario Bros Efects/Powerup.wav");
-     Skid = LoadSound("resources/Super Mario Bros Efects/Skid.wav");
+     Coin = LoadSound("../../resources/Super Mario Bros Efects/Coin.wav");
+     FireBall = LoadSound("../../resources/Super Mario Bros Efects/Fire Ball.wav");
+     Flagpole = LoadSound("../../resources/Super Mario Bros Efects/Flagpole.wav");
+     item = LoadSound("../../resources/Super Mario Bros Efects/Item.wav");
+     kick = LoadSound("../../resources/Super Mario Bros Efects/Kick.wav");
+     Powerup = LoadSound("../../resources/Super Mario Bros Efects/Powerup.wav");
+     Skid = LoadSound("../../resources/Super Mario Bros Efects/Skid.wav");
      Squish = LoadSound("../../resources/Super Mario Bros Efects/Squish.wav");
      Thwomp = LoadSound("../../resources/Super Mario Bros Efects/Tjwomp.wav");
      Vine = LoadSound("../../resources/Super Mario Bros Efects/Vine.wav");
