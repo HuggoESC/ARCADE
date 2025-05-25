@@ -18,11 +18,20 @@ namespace fs = filesystem;
 #define BACKGROUND  "../../resources/world/Empty_World_1_1.png"
 #define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES     "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define BLOCKS     "../../resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
+#define BLOCKS      "../../resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
 #define SOUNDS      "../../resources/Super Mario Bros Efects"
 #define MUSICS      "../../resources/Super Mario Bros Music"
 #define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
-#define TILEMAP "../../resources/world/Tile_Map.png"
+#define TILEMAP     "../../resources/world/Tile_Map.png"
+
+#define BACKGROUND2  "resources/world/Empty_World_1_1.png"
+#define SPRITESHEET2 "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES2     "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define BLOCKS2      "resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
+#define SOUNDS2      "resources/Super Mario Bros Efects"
+#define MUSICS2      "resources/Super Mario Bros Music"
+#define INICIALPAGE2 "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define TILEMAP2     "resources/world/Tile_Map.png"
 
 #define PLAYER_JUMP_SPD 420.0f
 #define GRAVEDAD 1000
@@ -48,7 +57,8 @@ enum Powers {
 enum BlockType {
     BLOQUE = 0,
     BLOQUEMONEDA = 1,
-    TUBERIA = 2
+    TUBERIA = 2,
+    VACIO = 3
 };
 
 #pragma endregion
@@ -247,18 +257,18 @@ public:
 
 struct Hitbox {
     Rectangle rect;
-    int blocking;
-    Color color;
     BlockType type;
-
+    
     Hitbox(Rectangle r) {
         rect = r;
+        type = VACIO;
     }
 
     Hitbox(Rectangle r, BlockType t) {
         rect = r;
         type = t;
     }
+
 };
 
 #pragma region VARIABLES GLOBALES
@@ -369,10 +379,20 @@ void InitGrid(vector<Hitbox>* lista_hitboxes) {
 void InitGame(void)
 {
     background = LoadTexture(BACKGROUND); //Cargo la textura del background
-    spriteSheet = LoadTexture(SPRITESHEET);
-    blocksheet = LoadTexture(BLOCKS);
-    EnemySpriteSheet = LoadTexture(ENEMIES);
-    backgroundInicial = LoadTexture(INICIALPAGE);
+    
+    if (background.height == 0) { //Si falla en cargar, usa el otro path
+        background = LoadTexture(BACKGROUND2); 
+        spriteSheet = LoadTexture(SPRITESHEET2);
+        blocksheet = LoadTexture(BLOCKS2);
+        EnemySpriteSheet = LoadTexture(ENEMIES2);
+        backgroundInicial = LoadTexture(INICIALPAGE2);
+    }
+    else {
+        spriteSheet = LoadTexture(SPRITESHEET);
+        blocksheet = LoadTexture(BLOCKS);
+        EnemySpriteSheet = LoadTexture(ENEMIES);
+        backgroundInicial = LoadTexture(INICIALPAGE);
+    }
 
     score = 0;
     gameOver = false;
@@ -458,7 +478,7 @@ void InitGame(void)
     //{{4864,318,32,32},1,0},
     //{{4832,286,32,32},1,0},
     //{{4864,286,32,32},1,0},
-    {{4960,414,2000,400}},
+    {{4960,414,2000,400}}
     //{{4960,382,32,32},1,0},
     //{{4992,382,32,32},1,0},
     //{{5024,382,32,32},1,0},
@@ -475,16 +495,16 @@ void InitGame(void)
     //{{5440,288,32,32},1,0},
     //{{5472,288,32,32},1,0},
     //{{5728,352,64,64},1,0},
-    {{5792,382,288,32}},
-    {{5824,350,256,32}},
-    {{5856,318,224,32}},
-    {{5888,288,192,32}},
-    {{5920,256,160,32}},
-    {{5952,224,128,32}},
+    //{{5792,382,288,32}},
+    //{{5824,350,256,32}},
+    //{{5856,318,224,32}},
+    //{{5888,288,192,32}},
+    //{{5920,256,160,32}},
+    //{{5952,224,128,32}},
     //{{5984,192,64,32},1,0},
     //{{6016,160,64,32},1,0},
     //{{6336,382,32,32},1,0},
-    {{6348,80,8,302}}
+    //{{6348,80,8,302}}
     //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
     
@@ -493,35 +513,59 @@ void InitGame(void)
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
     //MUSICA
     
-    music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
-    Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
-    Gameover.looping = false;
-
     music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
-    Gameover = LoadMusicStream("resources/Super Mario Bros Music/Game Over.wav");
-   
-    
+    if (music.stream.buffer == 0) {
+        music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
+        Pause = LoadSound("../../resources/Super Mario Bros Efects/Pause.wav");
+        Die = LoadSound("../../resources/Super Mario Bros Efects/Die.wav");
+        JumpSound = LoadSound("../../resources/Super Mario Bros Efects/Jump.wav");
+        UpSound = LoadSound("../../resources/Super Mario Bros Efects/1up.wav");
+        BeepSound = LoadSound("../../resources/Super Mario Bros Efects/Beep.wav");
+        BigJumpSound = LoadSound("../../resources/Super Mario Bros Efects/Big Jump.wav");
+        Break = LoadSound("../../resources/Super Mario Bros Efects/Break.wav");
+        Bump = LoadSound("../../resources/Super Mario Bros Efects/Bump.wav");
+        Coin = LoadSound("../../resources/Super Mario Bros Efects/Coin.wav");
+        FireBall = LoadSound("../../resources/Super Mario Bros Efects/Fire Ball.wav");
+        Flagpole = LoadSound("../../resources/Super Mario Bros Efects/Flagpole.wav");
+        item = LoadSound("../../resources/Super Mario Bros Efects/Item.wav");
+        kick = LoadSound("../../resources/Super Mario Bros Efects/Kick.wav");
+        Powerup = LoadSound("../../resources/Super Mario Bros Efects/Powerup.wav");
+        Skid = LoadSound("../../resources/Super Mario Bros Efects/Skid.wav");
+        Squish = LoadSound("../../resources/Super Mario Bros Efects/Squish.wav");
+        Thwomp = LoadSound("../../resources/Super Mario Bros Efects/Thwomp.wav");
+        Vine = LoadSound("../../resources/Super Mario Bros Efects/Vine.wav");
+        Warp = LoadSound("../../resources/Super Mario Bros Efects/Warp.wav");
+        Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
+        Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
+        Gameover.looping = false;
+    }
+    else {
+        Pause = LoadSound("resources/Super Mario Bros Efects/Pause.wav");
+        Die = LoadSound("resources/Super Mario Bros Efects/Die.wav");
+        JumpSound = LoadSound("resources/Super Mario Bros Efects/Jump.wav");
+        UpSound = LoadSound("resources/Super Mario Bros Efects/1up.wav");
+        BeepSound = LoadSound("resources/Super Mario Bros Efects/Beep.wav");
+        BigJumpSound = LoadSound("resources/Super Mario Bros Efects/Big Jump.wav");
+        Break = LoadSound("resources/Super Mario Bros Efects/Break.wav");
+        Bump = LoadSound("resources/Super Mario Bros Efects/Bump.wav");
+        Coin = LoadSound("resources/Super Mario Bros Efects/Coin.wav");
+        FireBall = LoadSound("resources/Super Mario Bros Efects/Fire Ball.wav");
+        Flagpole = LoadSound("resources/Super Mario Bros Efects/Flagpole.wav");
+        item = LoadSound("resources/Super Mario Bros Efects/Item.wav");
+        kick = LoadSound("resources/Super Mario Bros Efects/Kick.wav");
+        Powerup = LoadSound("resources/Super Mario Bros Efects/Powerup.wav");
+        Skid = LoadSound("resources/Super Mario Bros Efects/Skid.wav");
+        Squish = LoadSound("resources/Super Mario Bros Efects/Squish.wav");
+        Thwomp = LoadSound("resources/Super Mario Bros Efects/Thwomp.wav");
+        Vine = LoadSound("resources/Super Mario Bros Efects/Vine.wav");
+        Warp = LoadSound("resources/Super Mario Bros Efects/Warp.wav");
+        Enemyfire = LoadSound("resources/Super Mario Bros Efects/Enemy Fire.wav");
+        Gameover = LoadMusicStream("resources/Super Mario Bros Music/Game Over.wav");
+        Gameover.looping = false;
+    }
+
     //sonidos
-     Pause = LoadSound("resources/Super Mario Bros Efects/Pause.wav");
-     Die = LoadSound("resources/Super Mario Bros Efects/Die.wav");
-     JumpSound = LoadSound("resources/Super Mario Bros Efects/Jump.wav");
-     UpSound = LoadSound("resources/Super Mario Bros Efects/1 up.wav");
-     BeepSound = LoadSound("resources/Super Mario Bros Efects/Beep.wav");
-     BigJumpSound = LoadSound("resources/Super Mario Bros Efects/Big Jump.wav");
-     Break = LoadSound("resources/Super Mario Bros Efects/Break.wav");
-     Bump = LoadSound("resources/Super Mario Bros Efects/Bump.wav");
-     Coin = LoadSound("resources/Super Mario Bros Efects/Coin.wav");
-     FireBall = LoadSound("resources/Super Mario Bros Efects/Fire Ball.wav");
-     Flagpole = LoadSound("resources/Super Mario Bros Efects/Flagpole.wav");
-     item = LoadSound("resources/Super Mario Bros Efects/Item.wav");
-     kick = LoadSound("resources/Super Mario Bros Efects/Kick.wav");
-     Powerup = LoadSound("resources/Super Mario Bros Efects/Powerup.wav");
-     Skid = LoadSound("resources/Super Mario Bros Efects/Skid.wav");
-     Squish = LoadSound("resources/Super Mario Bros Efects/Squish.wav");
-     Thwomp = LoadSound("resources/Super Mario Bros Efects/Tjwomp.wav");
-     Vine = LoadSound("resources/Super Mario Bros Efects/Vine.wav");
-     Warp = LoadSound("resources/Super Mario Bros Efects/Wa`rp.wav");
-     Enemyfire = LoadSound("resources/Super Mario Bros Efects/Enemy Fire.wav");
+     
 
    /* PlayMusicStream(music);*/
 
@@ -1115,7 +1159,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
         // Aplicar movimiento horizontal 
         mario->MoveX(mario->velocidadX);
        
-        cout << mario->position.x << endl;
+        //cout << mario->position.x << endl;
 
         /* Salto */
         float jumpTime = 0.2f;
