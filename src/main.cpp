@@ -22,6 +22,7 @@ namespace fs = filesystem;
 #define SOUNDS      "../../resources/Super Mario Bros Efects"
 #define MUSICS      "../../resources/Super Mario Bros Music"
 #define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define TILEMAP "../../resources/world/Tile_Map.png"
 
 #define PLAYER_JUMP_SPD 420.0f
 #define GRAVEDAD 1000
@@ -220,7 +221,7 @@ int framesSpeed = 3;
 #pragma region Inits
 
 void InitGrid(vector<Hitbox>* lista_hitboxes) {
-    Image tile_map = LoadImage("resources/world/Tile_Map.png");
+    Image tile_map = LoadImage(TILEMAP);
     Color* colors = LoadImageColors(tile_map);
 
     if (colors == nullptr) {
@@ -228,9 +229,9 @@ void InitGrid(vector<Hitbox>* lista_hitboxes) {
         return;
     }
 
-    for (int y = 0; y < tile_map.height; y++) {
-        for (int x = 0; x < tile_map.width; x++) {
-            int index = y * tile_map.width + x;
+    for (int x = 0; x < 211; x++) {
+        for (int y = 0; y < 30; y++) {
+            int index = ((y * 16) * tile_map.width) + (x * 16);
 
             Rectangle rec = { x * 32, y * 32, 32, 32 };
 
