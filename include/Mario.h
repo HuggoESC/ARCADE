@@ -64,34 +64,48 @@ public:
 	/* Funciones */
 	void SetX(float distance) {
 		position.x = distance;
-		pies.x = position.x + 4;
+		/*pies.x = position.x + 4;
 		cabeza.x = position.x + 4;
 		derecha.x = position.x + 30;
-		izquierda.x = distance;
+		izquierda.x = distance;*/
+		ActualizarHitboxes();
+
 	}
 
 	void SetY(float distance) {
 		position.y = distance;
-		pies.y = position.y + 30;
+		/*pies.y = position.y + 30;
 		cabeza.y = distance;
 		derecha.y = distance + 4;
-		izquierda.y = distance + 4;
+		izquierda.y = distance + 4;*/
+		ActualizarHitboxes();
 	}
 
 	void MoveX(float distance) {
 		position.x += distance;
-		pies.x += distance;
-		cabeza.x += distance;
-		derecha.x += distance;
-		izquierda.x += distance;
+		//pies.x += distance;
+		//cabeza.x += distance;
+		//derecha.x += distance;
+		//izquierda.x += distance;*/
+		 ActualizarHitboxes();
 	}
 
 	void MoveY(float distance) {
 		position.y += distance;
-		pies.y += distance;
+	/*	pies.y += distance;
 		cabeza.y += distance;
 		derecha.y += distance;
-		izquierda.y += distance;
+		izquierda.y += distance;*/
+		 ActualizarHitboxes();
 	}
+
+	void ActualizarHitboxes() {
+		pies = { position.x + 4, position.y + position.height - 4, position.width - 8, 4 };
+		cabeza = { position.x + 4, position.y, position.width - 8, 4 };
+		izquierda = { position.x, position.y + 4, 4, position.height - 8 };
+		derecha = { position.x + position.width - 4, position.y + 4, 4, position.height - 8 };
+	}
+
+
 };
 #endif
