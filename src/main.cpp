@@ -48,7 +48,8 @@ enum Powers {
 enum BlockType {
     BLOQUE = 0,
     BLOQUEMONEDA = 1,
-    TUBERIA = 2
+    TUBERIA = 2,
+    BANDERA = 3
 };
 
 #pragma endregion
@@ -356,7 +357,10 @@ void InitGrid(vector<Hitbox>* lista_hitboxes) {
                 lista_hitboxes->push_back(Hitbox(rec, TUBERIA));
             }
             else if (colors[index].r == 0 && colors[index].g == 0 && colors[index].b == 255) {
-                lista_hitboxes->push_back(Hitbox(rec));
+                if (rec.x >= 6300) {  // Solo marcar como bandera si está cerca del mástil real
+                    lista_hitboxes->push_back(Hitbox(rec, BANDERA));
+                }
+            
             }
         }
     }
@@ -502,14 +506,14 @@ void InitGame(void)
    
     
     //sonidos
-     Pause = LoadSound("resources/Super Mario Bros Efects/Pause.wav");
-     Die = LoadSound("resources/Super Mario Bros Efects/Die.wav");
-     JumpSound = LoadSound("resources/Super Mario Bros Efects/Jump.wav");
-     UpSound = LoadSound("resources/Super Mario Bros Efects/1 up.wav");
-     BeepSound = LoadSound("resources/Super Mario Bros Efects/Beep.wav");
-     BigJumpSound = LoadSound("resources/Super Mario Bros Efects/Big Jump.wav");
-     Break = LoadSound("resources/Super Mario Bros Efects/Break.wav");
-     Bump = LoadSound("resources/Super Mario Bros Efects/Bump.wav");
+     Pause = LoadSound("../../resources/Super Mario Bros Efects/Pause.wav");
+     Die = LoadSound("../../Super Mario Bros Efects/Die.wav");
+     JumpSound = LoadSound("../../resources/Super Mario Bros Efects/Jump.wav");
+     UpSound = LoadSound("../../resources/Super Mario Bros Efects/1 up.wav");
+     BeepSound = LoadSound("../../resources/Super Mario Bros Efects/Beep.wav");
+     BigJumpSound = LoadSound("../../resources/Super Mario Bros Efects/Big Jump.wav");
+     Break = LoadSound("../../resources/Super Mario Bros Efects/Break.wav");
+     Bump = LoadSound("../../resources/Super Mario Bros Efects/Bump.wav");
      Coin = LoadSound("resources/Super Mario Bros Efects/Coin.wav");
      FireBall = LoadSound("resources/Super Mario Bros Efects/Fire Ball.wav");
      Flagpole = LoadSound("resources/Super Mario Bros Efects/Flagpole.wav");
@@ -517,11 +521,11 @@ void InitGame(void)
      kick = LoadSound("resources/Super Mario Bros Efects/Kick.wav");
      Powerup = LoadSound("resources/Super Mario Bros Efects/Powerup.wav");
      Skid = LoadSound("resources/Super Mario Bros Efects/Skid.wav");
-     Squish = LoadSound("resources/Super Mario Bros Efects/Squish.wav");
-     Thwomp = LoadSound("resources/Super Mario Bros Efects/Tjwomp.wav");
-     Vine = LoadSound("resources/Super Mario Bros Efects/Vine.wav");
-     Warp = LoadSound("resources/Super Mario Bros Efects/Wa`rp.wav");
-     Enemyfire = LoadSound("resources/Super Mario Bros Efects/Enemy Fire.wav");
+     Squish = LoadSound("../../resources/Super Mario Bros Efects/Squish.wav");
+     Thwomp = LoadSound("../../resources/Super Mario Bros Efects/Tjwomp.wav");
+     Vine = LoadSound("../../resources/Super Mario Bros Efects/Vine.wav");
+     Warp = LoadSound("../../resources/Super Mario Bros Efects/Wa`rp.wav");
+     Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
 
    /* PlayMusicStream(music);*/
 
@@ -636,7 +640,7 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
     Rectangle final_position = { 0, screenHeight / 2, background.width * 2, background.height * 2 };
     DrawTexturePro(background, initial_position, final_position, { 0, (float)(background.height / 2) }, 0, WHITE);
 
-
+   
     /***************************/
 
     /* Dibujado de Mario */
@@ -707,8 +711,11 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
     DrawText(TextFormat("%i - %i", world, level), screenWidth / 2 - 25, 30, 20, WHITE);
 
     //Dibujado de Game Over
+    for (Hitbox& h : hitboxes) {
+        if (h.type == BANDERA) DrawRectangleLinesEx(h.rect, 2, PURPLE); // ZONA MOARADA A TOCAR AL FINAL
+    }
 
-
+    DrawText(TextFormat("Estado Mario: %d", mario->estado), 10, 60, 20, RED); // DESCOMENTAR PARA MIRAR ESTADO DE MARIO
 
     EndDrawing();
 
@@ -773,6 +780,44 @@ void UpdateGameState(float delta) {
 
 void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hitbox* hitboxes, float delta, int envItems)
 {
+
+    //// Lógica para bandera: bajando mástil
+    //if (mario->estado == Mario::TOCANDO_BANDERA || mario->estado == Mario::BAJANDO_BANDERA) {
+    //    mario->estado = Mario::BAJANDO_BANDERA;
+    //    mario->SetY(mario->position.y + 60 * delta); // Velocidad de bajada
+
+    //    if (mario->position.y >= 382) {  // Ha tocado el suelo
+    //        mario->SetY(382);
+    //        mario->estado = Mario::CAMINANDO_CASTILLO;
+    //        mario->sprite_status = 0;  // Sprite de caminar
+    //    }
+
+    //    return; // Evitamos que se procese el resto del update
+    //}
+    
+    if (mario->estado == Mario::TOCANDO_BANDERA) {
+        mario->MoveY(60 * delta); // Baja lentamente
+        mario->sprite_status = 96; // Sprite quieto o de bajada
+
+        if (mario->position.y >= 382) {  // Punto donde termina de bajar
+            mario->position.y = 382;
+            mario->estado = Mario::CAMINANDO_CASTILLO;
+        }
+        return;
+    }
+
+    // --- CAMINANDO HACIA EL CASTILLO ---
+    if (mario->estado == Mario::CAMINANDO_CASTILLO) {
+        mario->MoveX(60 * delta);  // velocidad caminando
+        mario->sprite_status = 20; // sprite de caminar
+
+        if (mario->position.x > 6400) { // ajuste según posición real del castillo
+            gameState = GAME_OVER;
+        }
+
+        return;
+    }
+     
     if (waitingforgameover) {
         gameoverwaitimer += delta;
 
@@ -785,8 +830,20 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             waitingforgameover = false;
         }
 
-        return;
-    }
+        // --- BAJADA POR LA BANDERA ---
+        if (mario->estado == Mario::TOCANDO_BANDERA) {
+            mario->MoveY(60 * delta); // Baja lentamente
+            mario->sprite_status = 96; // Sprite quieto o de bajada
+
+            if (mario->position.y >= 382) {  // Punto donde termina de bajar
+                mario->position.y = 382;
+                mario->estado = Mario::CAMINANDO_CASTILLO;
+            }
+
+            return; // IMPORTANTE: no procesar nada más mientras baja
+        }
+
+     }
 
     if (!gameOver)
 
@@ -821,37 +878,81 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
         {
             Hitbox* ei = hitboxes + i;
 
+            // Ignora la bandera en colisiones físicas
+            if (ei->type == BANDERA) continue;
+
             if (CheckCollisionRecs(ei->rect, mario->pies)) {
                 hitGround = true;
                 mario->velocidad = 0.0f;
                 mario->SetY(ei->rect.y - mario->position.height + 2);
             }
+
             if (CheckCollisionRecs(ei->rect, mario->cabeza) && !hitGround) {
                 mario->velocidad = 0.0f;
                 mario->SetY(ei->rect.y + ei->rect.height + 2);
                 if (ei->type == BLOQUE) {
                     if (mario->poder == BASE) {
                         PlaySound(Bump);
-
                     }
                     else {
                         PlaySound(Break);
                         lista_hitboxes.erase(lista_hitboxes.begin() + i);
                     }
                 }
-
             }
+
             if (CheckCollisionRecs(ei->rect, mario->derecha)) {
                 mario->SetX(ei->rect.x - mario->position.width - 2);
             }
+
             if (CheckCollisionRecs(ei->rect, mario->izquierda)) {
                 mario->SetX(ei->rect.x + ei->rect.width + 2);
             }
         }
+       
+        // DETECCIÓN DE COLISIÓN CON LA BANDERA
+        //for (Hitbox& ei : lista_hitboxes) {
+        //    if (ei.type == BANDERA && CheckCollisionRecs(mario->position, ei.rect) && mario->estado == Mario::NORMAL) {
+        //        mario->estado = Mario::TOCANDO_BANDERA;
+        //        mario->velocidadX = 0;
+        //        mario->velocidad = 0;
+        //        mario->canJump = false;
+        //        mario->isJumping = false;
+        //        mario->sprite_status = 96;
+
+        //        PlaySound(Flagpole);
+        //        break; // ya ha tocado una vez
+        //    }
+        //}
+
+        for (Hitbox& ei : lista_hitboxes) {
+            if (ei.type != BANDERA || mario->estado != Mario::NORMAL) continue;
+
+            // Sub-hitbox más precisa centrada en Mario para evitar falsos positivos
+            Rectangle centroMario = {
+                mario->position.x + 8,  // 8 px de margen lateral
+                mario->position.y,
+                mario->position.width - 16, // reducir 16 px total (8+8)
+                mario->position.height
+            };
+
+            if (CheckCollisionRecs(centroMario, ei.rect)) {
+                mario->estado = Mario::TOCANDO_BANDERA;
+                mario->velocidadX = 0;
+                mario->velocidad = 0;
+                mario->canJump = false;
+                mario->isJumping = false;
+                mario->sprite_status = 96;
+
+                PlaySound(Flagpole);
+                break;
+            }
+        }
+        
 
         /* Colision con enemigos */
-        
-        for (Goomba& goomba : goombas) 
+
+        for (Goomba& goomba : goombas)
         {
             if (!goomba.activo) continue;
 
@@ -872,7 +973,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             }
 
             // Si Mario pisa al Goomba (solo si viene cayendo)
-            if (!mario->isDead && CheckCollisionRecs(mario->pies, goomba.cabeza) && mario->velocidad > 0) 
+            if (!mario->isDead && CheckCollisionRecs(mario->pies, goomba.cabeza) && mario->velocidad > 0)
             {
                 goomba.activo = false;
                 PlaySound(Squish);  // sonido al aplastar
@@ -896,17 +997,17 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
 
                 return;
             }
-           
+
         }
         // Si Mario ha muerto, procesamos la animación de muerte
         if (mario->isDead && mario->deathAnimationInProgress) {
             mario->deathAnimTimer += delta;
 
-            if (mario->deathAnimTimer >= 2.0f) 
+            if (mario->deathAnimTimer >= 2.0f)
             {
                 vidas--;
 
-                if (vidas <= 0) 
+                if (vidas <= 0)
                 { //Esperamos a que termine die
                     waitingforgameover = true;
                     gameoverwaitimer = 0.0f;
@@ -914,9 +1015,9 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     StopMusicStream(music);
 
                     return;
-                   
+
                 }
-                else 
+                else
                 {
                     Reset(mario);  // Reinicia nivel y reposiciona a Mario
                     gameOver = false;
@@ -952,7 +1053,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             }
             return;
         }
-       
+
         for (Koopa& koopa : koopas)
         {
             if (!koopa.activo) continue;
@@ -1040,43 +1141,20 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
         }
 
         /* Movimiento de Mario */
-        const float ANIM_FRAME_TIME = 0.05f; // tiempo entre frames de animación (0.1s = 10 FPS)
-        if (IsKeyDown(KEY_RIGHT)) {
-            mario->animTimer += delta;
+        if (mario->estado == Mario::NORMAL) {
+            const float ANIM_FRAME_TIME = 0.05f; // tiempo entre frames de animación (0.1s = 10 FPS)
 
-            mario->mirando_derecha = true;
-            mario->velocidadX += ACELERACION;
-            if (mario->velocidadX > VELOCIDAD_MAXIMA)
-                mario->velocidadX = VELOCIDAD_MAXIMA;
+            if (IsKeyDown(KEY_RIGHT)) {
+                mario->animTimer += delta;
 
-            float velocidadActual = fabsf(mario->velocidadX);
-            float proporciónVel = velocidadActual / VELOCIDAD_MAXIMA;
-            float animSpeed = Lerp(ANIM_FRAME_MAX, ANIM_FRAME_MIN, proporciónVel); // inverso: más rápido → menor tiempo
-
-            if (mario->canJump && velocidadActual > 0.0f && mario->sprite_status < 20) {
-                mario->sprite_status = 20;
-            }
-
-            if (mario->canJump && mario->animTimer >= animSpeed) {
-                mario->sprite_status += 18;
-                if (mario->sprite_status > 56)
-                    mario->sprite_status = 20;
-                mario->animTimer = 0.0f;
-            }
-        }
-        else if (IsKeyDown(KEY_LEFT)) {
-            mario->animTimer += delta;
-
-            mario->mirando_derecha = false;
-
-            if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
-                mario->velocidadX -= ACELERACION;
-                if (mario->velocidadX < -VELOCIDAD_MAXIMA)
-                    mario->velocidadX = -VELOCIDAD_MAXIMA;
+                mario->mirando_derecha = true;
+                mario->velocidadX += ACELERACION;
+                if (mario->velocidadX > VELOCIDAD_MAXIMA)
+                    mario->velocidadX = VELOCIDAD_MAXIMA;
 
                 float velocidadActual = fabsf(mario->velocidadX);
                 float proporciónVel = velocidadActual / VELOCIDAD_MAXIMA;
-                float animSpeed = Lerp(ANIM_FRAME_MAX, ANIM_FRAME_MIN, proporciónVel);
+                float animSpeed = Lerp(ANIM_FRAME_MAX, ANIM_FRAME_MIN, proporciónVel); // inverso: más rápido → menor tiempo
 
                 if (mario->canJump && velocidadActual > 0.0f && mario->sprite_status < 20) {
                     mario->sprite_status = 20;
@@ -1086,82 +1164,109 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     mario->sprite_status += 18;
                     if (mario->sprite_status > 56)
                         mario->sprite_status = 20;
-
                     mario->animTimer = 0.0f;
                 }
+            }
+            else if (IsKeyDown(KEY_LEFT)) {
+                mario->animTimer += delta;
 
-                if (mario->position.x >= (screenWidth / 2) - 12) {
-                    worldPosition = mario->position.x;
+                mario->mirando_derecha = false;
+
+                if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
+                    mario->velocidadX -= ACELERACION;
+                    if (mario->velocidadX < -VELOCIDAD_MAXIMA)
+                        mario->velocidadX = -VELOCIDAD_MAXIMA;
+
+                    float velocidadActual = fabsf(mario->velocidadX);
+                    float proporciónVel = velocidadActual / VELOCIDAD_MAXIMA;
+                    float animSpeed = Lerp(ANIM_FRAME_MAX, ANIM_FRAME_MIN, proporciónVel);
+
+                    if (mario->canJump && velocidadActual > 0.0f && mario->sprite_status < 20) {
+                        mario->sprite_status = 20;
+                    }
+
+                    if (mario->canJump && mario->animTimer >= animSpeed) {
+                        mario->sprite_status += 18;
+                        if (mario->sprite_status > 56)
+                            mario->sprite_status = 20;
+
+                        mario->animTimer = 0.0f;
+                    }
+
+                    if (mario->position.x >= (screenWidth / 2) - 12) {
+                        worldPosition = mario->position.x;
+                    }
+                }
+                else {
+                    mario->velocidadX = 0;
                 }
             }
             else {
-                mario->velocidadX = 0;
+                // Si no se mueve, aplicar fricción y reiniciar timer
+                mario->animTimer = 0.0f;
+
+                if (mario->velocidadX > 0) {
+                    mario->velocidadX -= ACELERACION;
+                    if (mario->velocidadX < 0) mario->velocidadX = 0;
+                }
+                else if (mario->velocidadX < 0) {
+                    mario->velocidadX += ACELERACION;
+                    if (mario->velocidadX > 0) mario->velocidadX = 0;
+                }
             }
-        }
-        else {
-            // Si no se mueve, aplicar fricción y reiniciar timer
-            mario->animTimer = 0.0f;
 
-            if (mario->velocidadX > 0) {
-                mario->velocidadX -= ACELERACION;
-                if (mario->velocidadX < 0) mario->velocidadX = 0;
-            }
-            else if (mario->velocidadX < 0) {
-                mario->velocidadX += ACELERACION;
-                if (mario->velocidadX > 0) mario->velocidadX = 0;
-            }
-        }
+            // Aplicar movimiento horizontal 
+            mario->MoveX(mario->velocidadX);
 
-        // Aplicar movimiento horizontal 
-        mario->MoveX(mario->velocidadX);
-       
-        cout << mario->position.x << endl;
+            cout << mario->position.x << endl;
 
-        /* Salto */
-        float jumpTime = 0.2f;
+            /* Salto */
+            float jumpTime = 0.2f;
 
-        // Inicio del salto
-        if (IsKeyPressed(KEY_SPACE) && mario->canJump) {
-            mario->isJumping = true;
-            mario->canJump = false;
-            mario->jumpTime = 0.0f;
-            mario->velocidad = -PLAYER_JUMP_SPD;
-            mario->sprite_status = 96;
-            PlaySound(JumpSound);
-            hitGround = false;
-        }
-
-        // Mientras se mantenga pulsado, se sigue aplicando fuerza hacia arriba
-        if (mario->isJumping && IsKeyDown(KEY_SPACE)) {
-            mario->jumpTime += delta;
-            if (mario->jumpTime < mario->maxjumptime) {
+            // Inicio del salto
+            if (IsKeyPressed(KEY_SPACE) && mario->canJump) {
+                mario->isJumping = true;
+                mario->canJump = false;
+                mario->jumpTime = 0.0f;
                 mario->velocidad = -PLAYER_JUMP_SPD;
+                mario->sprite_status = 96;
+                PlaySound(JumpSound);
+                hitGround = false;
+            }
+
+            // Mientras se mantenga pulsado, se sigue aplicando fuerza hacia arriba
+            if (mario->isJumping && IsKeyDown(KEY_SPACE)) {
+                mario->jumpTime += delta;
+                if (mario->jumpTime < mario->maxjumptime) {
+                    mario->velocidad = -PLAYER_JUMP_SPD;
+                }
+                else {
+                    mario->isJumping = false;  // se agota el tiempo máximo
+                }
+            }
+
+            // Si se suelta la tecla antes, se corta el salto
+            if (IsKeyReleased(KEY_SPACE)) {
+                mario->isJumping = false;
+            }
+
+
+            UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
+
+            if (!hitGround)
+            {
+                mario->MoveY(mario->velocidad * delta);
+                mario->velocidad += GRAVEDAD * delta;
+                mario->canJump = false;
             }
             else {
-                mario->isJumping = false;  // se agota el tiempo máximo
+                mario->canJump = true;
             }
+
+            if (mario->canJump && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT))
+                mario->sprite_status = 0;
+
         }
-
-        // Si se suelta la tecla antes, se corta el salto
-        if (IsKeyReleased(KEY_SPACE)) {
-            mario->isJumping = false;
-        }
-
-        UpdateCameraCenter(&camera, mario, hitboxes, 1, delta, screenWidth, screenHeight);
-
-        if (!hitGround)
-        {
-            mario->MoveY(mario->velocidad * delta);
-            mario->velocidad += GRAVEDAD * delta;
-            mario->canJump = false;
-        }
-        else {
-            mario->canJump = true;
-        }
-
-        if (mario->canJump && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT))
-            mario->sprite_status = 0;
-
     }
     else 
     {
@@ -1199,7 +1304,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
 
 
     /* Si Mario llega al final o se cae */
-    if (mario->position.y > 580 || mario->position.x >= 6336) {
+    if ((mario->position.y > 580 || mario->position.x >= 6336) && mario->estado != Mario::CAMINANDO_CASTILLO && mario->estado != Mario::TOCANDO_BANDERA && mario->estado != Mario::BAJANDO_BANDERA) {
         gameOver = true;
         StopMusicStream(music);  //hugo
 
