@@ -488,7 +488,7 @@ void InitGame(void)
     //{{5984,192,64,32},1,0},
     //{{6016,160,64,32},1,0},
     //{{6336,382,32,32},1,0},
-    {{6348,80,8,302}}
+    {{6348,80,8,302}} // Teoricamente posicion de BANDERA
     //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
     
@@ -784,20 +784,6 @@ void UpdateGameState(float delta) {
 
 void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hitbox* hitboxes, float delta, int envItems)
 {
-
-    //// Lógica para bandera: bajando mástil
-    //if (mario->estado == Mario::TOCANDO_BANDERA || mario->estado == Mario::BAJANDO_BANDERA) {
-    //    mario->estado = Mario::BAJANDO_BANDERA;
-    //    mario->SetY(mario->position.y + 60 * delta); // Velocidad de bajada
-
-    //    if (mario->position.y >= 382) {  // Ha tocado el suelo
-    //        mario->SetY(382);
-    //        mario->estado = Mario::CAMINANDO_CASTILLO;
-    //        mario->sprite_status = 0;  // Sprite de caminar
-    //    }
-
-    //    return; // Evitamos que se procese el resto del update
-    //}
     
     if (mario->estado == Mario::TOCANDO_BANDERA) {
         mario->MoveY(60 * delta); // Baja lentamente
@@ -914,20 +900,6 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             }
         }
        
-        // DETECCIÓN DE COLISIÓN CON LA BANDERA
-        //for (Hitbox& ei : lista_hitboxes) {
-        //    if (ei.type == BANDERA && CheckCollisionRecs(mario->position, ei.rect) && mario->estado == Mario::NORMAL) {
-        //        mario->estado = Mario::TOCANDO_BANDERA;
-        //        mario->velocidadX = 0;
-        //        mario->velocidad = 0;
-        //        mario->canJump = false;
-        //        mario->isJumping = false;
-        //        mario->sprite_status = 96;
-
-        //        PlaySound(Flagpole);
-        //        break; // ya ha tocado una vez
-        //    }
-        //}
 
         for (Hitbox& ei : lista_hitboxes) {
             if (ei.type != BANDERA || mario->estado != Mario::NORMAL) continue;
