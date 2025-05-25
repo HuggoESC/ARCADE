@@ -126,16 +126,16 @@ public:
         if (!mirando_derecha) source.width = -16;
 
         Rectangle dest = position;
-        dest.y -= 32;
+       ///* dest.y -= 32;*/
 
         DrawTexturePro(enemyTexture, source, dest, { 0, 0 }, 0.0f, WHITE);
 
         // 🔧 OPCIONAL: Dibujar sub-hitboxes para depuración visual
         // (coméntalo si no lo necesitas)
-        // DrawRectangleLinesEx(cabeza, 1, BLUE);
-        // DrawRectangleLinesEx(pies, 1, RED);
-        // DrawRectangleLinesEx(izquierda, 1, GREEN);
-        // DrawRectangleLinesEx(derecha, 1, YELLOW);
+         DrawRectangleLinesEx(cabeza, 1, BLUE);
+         DrawRectangleLinesEx(pies, 1, RED);
+         DrawRectangleLinesEx(izquierda, 1, GREEN);
+         DrawRectangleLinesEx(derecha, 1, YELLOW);
     }
 };
 
@@ -419,6 +419,7 @@ void Reset(Mario* mario) {
     gameState = INTRO;
     StopMusicStream(music); 
     PlayMusicStream(music); 
+    playDeathSound = false;
     mario->SetX(316);
     mario->SetY(382);
     mario->velocidad = 0;
@@ -428,6 +429,9 @@ void Reset(Mario* mario) {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
     tiempo = 400;
+    mario->isDead = false;
+    mario->deathAnimationInProgress = false;
+    mario->deathAnimTimer = 0.0f;
 
     introTimer = 3.5f; 
 }
@@ -647,7 +651,28 @@ void UpdateGameState(float delta) {
 void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float delta, int envItems)
 {
     if (!gameOver)
+
     {
+        if (mario->deathAnimationInProgress) {
+            mario->deathAnimTimer += delta;
+            mario->MoveY(mario->velocidad * delta);
+            mario->velocidad += GRAVEDAD * delta;
+
+            if (mario->deathAnimTimer >= 1.5f) {
+                vidas--;
+                mario->deathAnimationInProgress = false;
+                mario->isDead = false;
+                mario->deathAnimTimer = 0.0f;
+                gameOver = true;  // Esto activa el reinicio desde el bloque inferior
+                for (Goomba& g : goombas) g.reset();
+
+                // Reiniciar enemigos
+                for (Goomba& g : goombas) g.reset();
+            }
+
+            return; // IMPORTANTE: Evita que se ejecute el resto del código durante la animación
+        }
+
         //colisions
 
         bool hitGround = false;
@@ -687,11 +712,13 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
 
         /* Colision con enemigos */
         
-        for (Goomba& goomba : goombas) {
+        for (Goomba& goomba : goombas) 
+        {
             if (!goomba.activo) continue;
 
             // Si Mario pisa al Goomba (solo si viene cayendo)
-            if (!mario->isDead && CheckCollisionRecs(mario->pies, goomba.cabeza) && mario->velocidad > 0) {
+            if (!mario->isDead && CheckCollisionRecs(mario->pies, goomba.cabeza) && mario->velocidad > 0) 
+            {
                 goomba.activo = false;
                 PlaySound(Squish);  // sonido al aplastar
                 mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;  // rebota un poco hacia arriba
@@ -699,18 +726,49 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             }
 
             // Si Mario colisiona por cualquier otro lado
-            if (!mario->isDead && CheckCollisionRecs(mario->position, goomba.position)) {
+            if (!mario->isDead && CheckCollisionRecs(mario->position, goomba.position))
+            {
                 mario->isDead = true;
                 mario->deathAnimationInProgress = true;
                 mario->velocidad = mario->deathVelocity;
                 StopMusicStream(music);
-                PlaySound(Die);
 
-                // Reiniciar enemigos
-                for (Goomba& g : goombas) g.reset();
+                if (!playDeathSound)
+                {
+                    PlaySound(Die);           // 🔊 solo se reproduce una vez
+                    playDeathSound = true;    // ✅ marca que ya sonó
+                }
 
                 return;
             }
+           
+        }
+        // Si Mario ha muerto, procesamos la animación de muerte
+        if (mario->isDead && mario->deathAnimationInProgress) {
+            mario->deathAnimTimer += delta;
+
+            if (mario->deathAnimTimer >= 2.0f) {
+                vidas--;
+
+                if (vidas <= 0) {
+                    gameState = GAME_OVER;
+                    StopMusicStream(music);
+                    PlayMusicStream(Gameover);
+                    gameovermusicplayed = true;
+                }
+                else {
+                    Reset(mario);  // Reinicia nivel y reposiciona a Mario
+                    gameOver = false;
+                    musicRestarted = false;
+                    playDeathSound = false;
+                }
+            }
+
+            // Aplicar movimiento de caída
+            mario->MoveY(mario->velocidad * delta);
+            mario->velocidad += GRAVEDAD * delta;
+
+            return; // Salir del UpdateGame mientras Mario está muriendo
         }
        
 
@@ -919,10 +977,10 @@ int main(void)
     Mario mario(316, 382); //Creo el objeto de Mario
     vector<Goomba> goombas = {
     
-    Goomba(500, 416),
-    Goomba(700, 416),
-    Goomba(1100, 416),
-    Goomba(1800, 416)
+    Goomba(500, 384),
+    Goomba(700, 384),
+    Goomba(1100, 384),
+    Goomba(1800, 384)
 
     };
 
@@ -983,12 +1041,26 @@ int main(void)
          
         }
         else {
+
+            if (gameOver) 
+            {
+                // Detiene música, reinicia estado y muestra pantalla de intro
+                gameState = INTRO;
+                StopMusicStream(music);
+                PlayMusicStream(music);  // Reinicia música desde el principio
+                Reset(&mario);           // Recoloca a Mario, reinicia cámaras y estados
+                gameOver = false;
+                musicPlaying = false;    // Para permitir reproducirla de nuevo en el estado INTRO
+               
+            }
+
             for (Goomba& goomba : goombas) goomba.Update(deltaTime);
             UpdateGame(&mario, goombas, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
             DrawGame(&mario, goombas, lista_hitboxes);
         }
 
-        if (vidas <= 0) {
+        if (vidas <= 0) 
+        {
             Drawgameintoscreen();
         }
     }
