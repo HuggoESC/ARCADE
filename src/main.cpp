@@ -993,9 +993,24 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             }
             else if (!mario->isDead && CheckCollisionRecs(mario->position, koopa.position))
             {
-                if (koopa.estado == CONCHA_MOVIENDOSE) {
-                    // Verificamos si NO es una pisada desde arriba
+                if (koopa.estado == CONCHA_QUIETA) {
+                    // ACTIVAR concha desde un lado
+                    if (CheckCollisionRecs(mario->derecha, koopa.izquierda)) {
+                        koopa.estado = CONCHA_MOVIENDOSE;
+                        koopa.mirando_derecha = true; // Se mueve a la derecha
+                        PlaySound(kick);
+                    }
+                    else if (CheckCollisionRecs(mario->izquierda, koopa.derecha)) {
+                        koopa.estado = CONCHA_MOVIENDOSE;
+                        koopa.mirando_derecha = false; // Se mueve a la izquierda
+                        PlaySound(kick);
+                    }
+
+                    mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;  // Pequeño rebote opcional
+                }
+                else if (koopa.estado == CONCHA_MOVIENDOSE) {
                     if (!CheckCollisionRecs(mario->pies, koopa.cabeza) || mario->velocidad <= 0) {
+                        // Mario muere si le da una concha rodando desde un lado
                         mario->isDead = true;
                         mario->deathAnimationInProgress = true;
                         mario->velocidad = mario->deathVelocity;
@@ -1009,7 +1024,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                         return;
                     }
                     else {
-                        // Pisa una concha en movimiento: la detiene
+                        // Pisa concha en movimiento → se detiene
                         koopa.estado = CONCHA_QUIETA;
                         koopa.velocidad = 0;
                         mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;
@@ -1017,7 +1032,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     }
                 }
                 else if (koopa.estado == CAMINANDO) {
-                    // Colisión con un Koopa caminando mata
+                    // Mueres al tocar Koopa caminando
                     mario->isDead = true;
                     mario->deathAnimationInProgress = true;
                     mario->velocidad = mario->deathVelocity;
@@ -1030,9 +1045,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
 
                     return;
                 }
-                // else if koopa.concha_quieta → no pasa nada
             }
-
 
         }
         // Si Mario ha muerto, procesamos la animación de muerte
