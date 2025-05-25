@@ -545,14 +545,6 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector<Hitbox> hitboxes)
 
     //Goomba
 
-
-    //Vector2 PosGoomba1 = { goomba1->position.x,goomba1->position.y };
-    //Rectangle Goomba1Recorte = { goomba1->sprite_status, 17, 16,16 };
-
-    //Rectangle Goomba1Resized = { PosGoomba1.x, PosGoomba1.y - 32, 16 * 2, 16 * 2 }; // Escalado
-    //Vector2 GoombaOrigen = { 0,0 };
-    //DrawTexturePro(EnemySpriteSheet, Goomba1Recorte, Goomba1Resized, GoombaOrigen, 0, WHITE);
-    
     for (Goomba& goomba : goombas) 
     {
         goomba.Draw(EnemySpriteSheet);
