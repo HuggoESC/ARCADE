@@ -530,7 +530,7 @@ void InitGame(void)
 
 }
 
-void Reset(Mario* mario) {
+void Reset(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas) {
     gameState = INTRO;
 
     StopMusicStream(music);          // Detiene la música actual
@@ -552,6 +552,10 @@ void Reset(Mario* mario) {
 
     tiempo = 400;
     introTimer = 3.5f;               // Se muestra pantalla de vidas durante 3.5 segundos
+
+    //ENEMIGOS RESET
+    for (Goomba& g : goombas) g.reset();
+    for (Koopa& g : koopas) g.reset();
 }
 
 
@@ -918,7 +922,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                 }
                 else 
                 {
-                    Reset(mario);  // Reinicia nivel y reposiciona a Mario
+                    Reset(mario, goombas, koopas);  // Reinicia nivel y reposiciona a Mario
                     gameOver = false;
                     musicRestarted = false;
                     playDeathSound = false;
@@ -1062,7 +1066,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     gameovermusicplayed = true;
                 }
                 else {
-                    Reset(mario);  // Reinicia nivel y reposiciona a Mario
+                    Reset(mario, goombas, koopas);  // Reinicia nivel y reposiciona a Mario
                     gameOver = false;
                     musicRestarted = false;
                     playDeathSound = false;
@@ -1221,7 +1225,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             }
             else
             {
-                Reset(mario);
+                Reset(mario, goombas, koopas);
                 gameOver = false;
                 if (!musicRestarted) {
                     StopMusicStream(music);
@@ -1363,7 +1367,7 @@ int main(void)
                 gameState = INTRO;
                 StopMusicStream(music);
                 PlayMusicStream(music);  // Reinicia música desde el principio
-                Reset(&mario);           // Recoloca a Mario, reinicia cámaras y estados
+                Reset(&mario, goombas, koopas);           // Recoloca a Mario, reinicia cámaras y estados
                 gameOver = false;
                 musicPlaying = false;    // Para permitir reproducirla de nuevo en el estado INTRO
                
