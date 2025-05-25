@@ -508,7 +508,7 @@ void InitGame(void)
     //{{5984,192,64,32},1,0},
     //{{6016,160,64,32},1,0},
     //{{6336,382,32,32},1,0},
-    {{6348,80,8,302}} // Teoricamente posicion de BANDERA
+    //{{6348,80,8,302}} // Teoricamente posicion de BANDERA
     //CREO QUE NO HAY MAS HITBOXES (SOLO EL BLOQUE INVISIBLE)
     };
     
