@@ -139,6 +139,112 @@ public:
     }
 };
 
+enum KoopaState {
+    CAMINANDO,
+    CONCHA_QUIETA,
+    CONCHA_MOVIENDOSE
+};
+
+class Koopa {
+public:
+    int CurrentFrame = 0;
+    float animationTimer = 0.0f;
+    float framespeed = 0.2f;
+    bool mirando_derecha;
+    bool activo;
+
+    Rectangle position;
+
+    // Sub-hitboxes para detección de colisiones con Mario
+    Rectangle pies;
+    Rectangle cabeza;
+    Rectangle derecha;
+    Rectangle izquierda;
+
+    float velocidad;
+    Rectangle posicion_inicial;
+
+    KoopaState estado;
+
+    Koopa() {}
+
+    Koopa(float x, float y) {
+        position = { x, y, 32, 32 };
+        posicion_inicial = position;
+        velocidad = 30.0f;
+        mirando_derecha = false;
+        activo = true;
+        estado = CAMINANDO;
+    }
+
+    // Método reset para restaurar estado inicial
+    void reset() {
+        position = posicion_inicial;
+        velocidad = 30.0f;
+        mirando_derecha = false;
+        activo = true;
+        CurrentFrame = 0;
+        animationTimer = 0.0f;
+        estado = CAMINANDO;
+    }
+
+    void Update(float delta) {
+        if (!activo) return;
+
+        switch (estado) {
+        case CAMINANDO:
+            position.x += (mirando_derecha ? velocidad : -velocidad) * delta;
+
+            if (position.x < 0) mirando_derecha = true;
+            if (position.x > 6000) mirando_derecha = false;
+
+            animationTimer += delta;
+            if (animationTimer >= framespeed) {
+                CurrentFrame = (CurrentFrame + 1) % 2;
+                animationTimer = 0.0f;
+            }
+            break;
+
+        case CONCHA_QUIETA:
+            // No se mueve, pero igual puedes animar si quieres
+            break;
+
+        case CONCHA_MOVIENDOSE:
+            position.x += (mirando_derecha ? 200 : -200) * delta * 1.5f;  // más rápido
+            break;
+        }
+
+        pies = { position.x + 6, position.y + position.height - 6, position.width - 12, 6 };
+        cabeza = { position.x + 6, position.y, position.width - 12, 6 };
+        izquierda = { position.x, position.y + 6, 6, position.height - 12 };
+        derecha = { position.x + position.width - 6, position.y + 6, 6, position.height - 12 };
+    }
+
+    void Draw(Texture2D enemyTexture) {
+        if (!activo) return;
+
+        Rectangle source;
+        Rectangle dest;
+
+        if (estado == CAMINANDO) {
+            source = { 18.0f * (float)CurrentFrame, 112, 16, 24 };
+            dest = { position.x, position.y - 16, 32, 48 };
+            if (mirando_derecha) source.width = -16;
+        }
+        else {
+            source = { 73, 120, 16, 14 }; // concha sprite (ajusta coordenadas según tu spritesheet)
+            dest = { position.x, position.y+6, 32, 28 };
+        }
+
+        DrawTexturePro(enemyTexture, source, dest, { 0, 0 }, 0.0f, WHITE);
+
+        DrawRectangleLinesEx(cabeza, 1, BLUE);
+        DrawRectangleLinesEx(pies, 1, RED);
+        DrawRectangleLinesEx(izquierda, 1, GREEN);
+        DrawRectangleLinesEx(derecha, 1, YELLOW);
+    }
+};
+
 struct Hitbox {
     Rectangle rect;
     int blocking;
@@ -382,31 +488,31 @@ void InitGame(void)
 
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
     //MUSICA
-    music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
-    Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
+    music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
+    Gameover = LoadMusicStream("resources/Super Mario Bros Music/Game Over.wav");
    
     
     //sonidos
-     Pause = LoadSound("../../resources/Super Mario Bros Efects/Pause.wav");
-     Die = LoadSound("../../resources/Super Mario Bros Efects/Die.wav");
-     JumpSound = LoadSound("../../resources/Super Mario Bros Efects/Jump.wav");
-     UpSound = LoadSound("../../resources/Super Mario Bros Efects/1 up.wav");
-     BeepSound = LoadSound("../../resources/Super Mario Bros Efects/Beep.wav");
-     BigJumpSound = LoadSound("../../resources/Super Mario Bros Efects/Big Jump.wav");
-     Break = LoadSound("../../resources/Super Mario Bros Efects/Break.wav");
-     Bump = LoadSound("../../resources/Super Mario Bros Efects/Bump.wav");
-     Coin = LoadSound("../../resources/Super Mario Bros Efects/Coin.wav");
-     FireBall = LoadSound("../../resources/Super Mario Bros Efects/Fire Ball.wav");
-     Flagpole = LoadSound("../../resources/Super Mario Bros Efects/Flagpole.wav");
-     item = LoadSound("../../resources/Super Mario Bros Efects/Item.wav");
-     kick = LoadSound("../../resources/Super Mario Bros Efects/Kick.wav");
-     Powerup = LoadSound("../../resources/Super Mario Bros Efects/Powerup.wav");
-     Skid = LoadSound("../../resources/Super Mario Bros Efects/Skid.wav");
-     Squish = LoadSound("../../resources/Super Mario Bros Efects/Squish.wav");
-     Thwomp = LoadSound("../../resources/Super Mario Bros Efects/Tjwomp.wav");
-     Vine = LoadSound("../../resources/Super Mario Bros Efects/Vine.wav");
-     Warp = LoadSound("../../resources/Super Mario Bros Efects/Wa`rp.wav");
-     Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
+     Pause = LoadSound("resources/Super Mario Bros Efects/Pause.wav");
+     Die = LoadSound("resources/Super Mario Bros Efects/Die.wav");
+     JumpSound = LoadSound("resources/Super Mario Bros Efects/Jump.wav");
+     UpSound = LoadSound("resources/Super Mario Bros Efects/1 up.wav");
+     BeepSound = LoadSound("resources/Super Mario Bros Efects/Beep.wav");
+     BigJumpSound = LoadSound("resources/Super Mario Bros Efects/Big Jump.wav");
+     Break = LoadSound("resources/Super Mario Bros Efects/Break.wav");
+     Bump = LoadSound("resources/Super Mario Bros Efects/Bump.wav");
+     Coin = LoadSound("resources/Super Mario Bros Efects/Coin.wav");
+     FireBall = LoadSound("resources/Super Mario Bros Efects/Fire Ball.wav");
+     Flagpole = LoadSound("resources/Super Mario Bros Efects/Flagpole.wav");
+     item = LoadSound("resources/Super Mario Bros Efects/Item.wav");
+     kick = LoadSound("resources/Super Mario Bros Efects/Kick.wav");
+     Powerup = LoadSound("resources/Super Mario Bros Efects/Powerup.wav");
+     Skid = LoadSound("resources/Super Mario Bros Efects/Skid.wav");
+     Squish = LoadSound("resources/Super Mario Bros Efects/Squish.wav");
+     Thwomp = LoadSound("resources/Super Mario Bros Efects/Tjwomp.wav");
+     Vine = LoadSound("resources/Super Mario Bros Efects/Vine.wav");
+     Warp = LoadSound("resources/Super Mario Bros Efects/Wa`rp.wav");
+     Enemyfire = LoadSound("resources/Super Mario Bros Efects/Enemy Fire.wav");
 
    /* PlayMusicStream(music);*/
 
@@ -505,7 +611,7 @@ void DrawIntroScreen() {
     EndDrawing();
 }
 
-void DrawGame(Mario* mario, vector<Goomba>& goombas, vector<Hitbox> hitboxes)
+void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vector<Hitbox> hitboxes)
 {
     BeginDrawing();
 
@@ -552,6 +658,11 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector<Hitbox> hitboxes)
     for (Goomba& goomba : goombas) 
     {
         goomba.Draw(EnemySpriteSheet);
+    }
+
+    for (Koopa& koopa : koopas)
+    {
+        koopa.Draw(EnemySpriteSheet);
     }
 
     //DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
@@ -648,7 +759,7 @@ void UpdateGameState(float delta) {
     }
 }
 
-void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float delta, int envItems)
+void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hitbox* hitboxes, float delta, int envItems)
 {
     if (!gameOver)
 
@@ -665,9 +776,10 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
                 mario->deathAnimTimer = 0.0f;
                 gameOver = true;  // Esto activa el reinicio desde el bloque inferior
                 for (Goomba& g : goombas) g.reset();
-
+                for (Koopa& g : koopas) g.reset();
                 // Reiniciar enemigos
                 for (Goomba& g : goombas) g.reset();
+                for (Koopa& g : koopas) g.reset();
             }
 
             return; // IMPORTANTE: Evita que se ejecute el resto del código durante la animación
@@ -715,6 +827,22 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         for (Goomba& goomba : goombas) 
         {
             if (!goomba.activo) continue;
+
+            for (int i = 0; i < envItems; i++) {
+                Hitbox* block = &hitboxes[i];
+
+                // Si choca con la parte derecha de un bloque (esquina izquierda del Goomba)
+                if (CheckCollisionRecs(goomba.izquierda, block->rect)) {
+                    goomba.mirando_derecha = true;
+                    goomba.position.x = block->rect.x + block->rect.width + 1; // separarlo
+                }
+
+                // Si choca con la parte izquierda de un bloque (esquina derecha del Goomba)
+                if (CheckCollisionRecs(goomba.derecha, block->rect)) {
+                    goomba.mirando_derecha = false;
+                    goomba.position.x = block->rect.x - goomba.position.width - 1; // separarlo
+                }
+            }
 
             // Si Mario pisa al Goomba (solo si viene cayendo)
             if (!mario->isDead && CheckCollisionRecs(mario->pies, goomba.cabeza) && mario->velocidad > 0) 
@@ -771,6 +899,91 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             return; // Salir del UpdateGame mientras Mario está muriendo
         }
        
+        for (Koopa& koopa : koopas)
+        {
+            if (!koopa.activo) continue;
+
+            for (int i = 0; i < envItems; i++) {
+                Hitbox* block = &hitboxes[i];
+
+                // Si choca con la parte derecha de un bloque (esquina izquierda del Koopa)
+                if (CheckCollisionRecs(koopa.izquierda, block->rect)) {
+                    koopa.mirando_derecha = true;
+                    koopa.position.x = block->rect.x + block->rect.width + 1; // separarlo
+                }
+
+                // Si choca con la parte izquierda de un bloque (esquina derecha del Koopa)
+                if (CheckCollisionRecs(koopa.derecha, block->rect)) {
+                    koopa.mirando_derecha = false;
+                    koopa.position.x = block->rect.x - koopa.position.width - 1; // separarlo
+                }
+            }
+
+            // Si Mario pisa al Koopa (solo si viene cayendo)
+            if (!mario->isDead && CheckCollisionRecs(mario->pies, koopa.cabeza) && mario->velocidad > 0)
+            {
+                if (koopa.estado == CAMINANDO) {
+                    koopa.estado = CONCHA_QUIETA;
+                    koopa.velocidad = 0;
+                }
+                else if (koopa.estado == CONCHA_QUIETA) {
+                    koopa.estado = CONCHA_MOVIENDOSE;
+                    koopa.mirando_derecha = mario->mirando_derecha; // se mueve en dirección contraria a Mario
+                }
+                else if (koopa.estado == CONCHA_MOVIENDOSE) {
+                    koopa.estado = CONCHA_QUIETA;
+                }
+
+                PlaySound(Squish);
+                mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;
+                continue;
+            }
+
+            // Si Mario colisiona por cualquier otro lado
+            if (!mario->isDead && CheckCollisionRecs(mario->position, koopa.position))
+            {
+                mario->isDead = true;
+                mario->deathAnimationInProgress = true;
+                mario->velocidad = mario->deathVelocity;
+                StopMusicStream(music);
+
+                if (!playDeathSound)
+                {
+                    PlaySound(Die);           // 🔊 solo se reproduce una vez
+                    playDeathSound = true;    // ✅ marca que ya sonó
+                }
+
+                return;
+            }
+
+        }
+        // Si Mario ha muerto, procesamos la animación de muerte
+        if (mario->isDead && mario->deathAnimationInProgress) {
+            mario->deathAnimTimer += delta;
+
+            if (mario->deathAnimTimer >= 2.0f) {
+                vidas--;
+
+                if (vidas <= 0) {
+                    gameState = GAME_OVER;
+                    StopMusicStream(music);
+                    PlayMusicStream(Gameover);
+                    gameovermusicplayed = true;
+                }
+                else {
+                    Reset(mario);  // Reinicia nivel y reposiciona a Mario
+                    gameOver = false;
+                    musicRestarted = false;
+                    playDeathSound = false;
+                }
+            }
+
+            // Aplicar movimiento de caída
+            mario->MoveY(mario->velocidad * delta);
+            mario->velocidad += GRAVEDAD * delta;
+
+            return; // Salir del UpdateGame mientras Mario está muriendo
+        }
 
         /* Movimiento de Mario */
         const float ANIM_FRAME_TIME = 0.05f; // tiempo entre frames de animación (0.1s = 10 FPS)
@@ -984,6 +1197,10 @@ int main(void)
 
     };
 
+    vector<Koopa> koopas = {
+    Koopa(1300, 384)
+    };
+
     camera.target = { mario.position.x + 20.0f, mario.position.y };
     camera.offset = { mario.position.x, mario.position.y };
     camera.rotation = 0.0f;
@@ -1055,8 +1272,9 @@ int main(void)
             }
 
             for (Goomba& goomba : goombas) goomba.Update(deltaTime);
-            UpdateGame(&mario, goombas, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
-            DrawGame(&mario, goombas, lista_hitboxes);
+            for (Koopa& koopa : koopas) koopa.Update(deltaTime);
+            UpdateGame(&mario, goombas,koopas, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
+            DrawGame(&mario, goombas,koopas, lista_hitboxes);
         }
 
         if (vidas <= 0) 
