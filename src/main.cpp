@@ -15,19 +15,20 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND  "../../resources/world/Empty_World_1_1.png"
-#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES     "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define BLOCKS     "../../resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
-#define SOUNDS      "../../resources/Super Mario Bros Efects"
-#define MUSICS      "../../resources/Super Mario Bros Music"
-#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define BACKGROUND  "resources/world/Empty_World_1_1.png"
+#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES     "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define BLOCKS     "resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
+#define SOUNDS      "resources/Super Mario Bros Efects"
+#define MUSICS      "resources/Super Mario Bros Music"
+#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
 
 #define PLAYER_JUMP_SPD 420.0f
 #define GRAVEDAD 1000
 #define ACELERACION 0.5f
 #define VELOCIDAD_MAXIMA 5.0f
-
+#define ANIM_FRAME_MIN 0.03f
+#define ANIM_FRAME_MAX 1.8f
 
 enum GameState {
     INICIAL,
@@ -724,40 +725,54 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
         }
 
         /* Movimiento de Mario */
+        const float ANIM_FRAME_TIME = 0.05f; // tiempo entre frames de animación (0.1s = 10 FPS)
         if (IsKeyDown(KEY_RIGHT)) {
-            if (mario->animTimer >= 0.01) //el 0.01f cambia la vel
-            {
-                mario->animTimer += delta;
-                mario->mirando_derecha = true;
-                
-                mario->velocidadX += ACELERACION;
-                if (mario->velocidadX > VELOCIDAD_MAXIMA)
-                    mario->velocidadX = VELOCIDAD_MAXIMA;
-                
-                if (mario->canJump) {
-                    if (mario->sprite_status >= 56)
-                        mario->sprite_status = 20;
-                    else
-                        mario->sprite_status += 18;
-                }
+            mario->animTimer += delta;
+
+            mario->mirando_derecha = true;
+            mario->velocidadX += ACELERACION;
+            if (mario->velocidadX > VELOCIDAD_MAXIMA)
+                mario->velocidadX = VELOCIDAD_MAXIMA;
+
+            float velocidadActual = fabsf(mario->velocidadX);
+            float proporciónVel = velocidadActual / VELOCIDAD_MAXIMA;
+            float animSpeed = Lerp(ANIM_FRAME_MAX, ANIM_FRAME_MIN, proporciónVel); // inverso: más rápido → menor tiempo
+
+            if (mario->canJump && velocidadActual > 0.0f && mario->sprite_status < 20) {
+                mario->sprite_status = 20;
+            }
+
+            if (mario->canJump && mario->animTimer >= animSpeed) {
+                mario->sprite_status += 18;
+                if (mario->sprite_status > 56)
+                    mario->sprite_status = 20;
                 mario->animTimer = 0.0f;
             }
-            mario->animTimer += delta;
         }
         else if (IsKeyDown(KEY_LEFT)) {
-           
-            if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325 && mario->animTimer >= 0.01f) {
-                mario->animTimer = delta;
-                mario->mirando_derecha = false;
-                
+            mario->animTimer += delta;
+
+            mario->mirando_derecha = false;
+
+            if (mario->position.x >= (GetScreenToWorld2D({ (1 - 0.16f) * 0.5f * screenWidth, (1 - 0.16f) * 0.5f * screenHeight }, camera).x) - 325) {
                 mario->velocidadX -= ACELERACION;
                 if (mario->velocidadX < -VELOCIDAD_MAXIMA)
                     mario->velocidadX = -VELOCIDAD_MAXIMA;
-                if (mario->canJump) {
-                    if (mario->sprite_status >= 56)
+
+                float velocidadActual = fabsf(mario->velocidadX);
+                float proporciónVel = velocidadActual / VELOCIDAD_MAXIMA;
+                float animSpeed = Lerp(ANIM_FRAME_MAX, ANIM_FRAME_MIN, proporciónVel);
+
+                if (mario->canJump && velocidadActual > 0.0f && mario->sprite_status < 20) {
+                    mario->sprite_status = 20;
+                }
+
+                if (mario->canJump && mario->animTimer >= animSpeed) {
+                    mario->sprite_status += 18;
+                    if (mario->sprite_status > 56)
                         mario->sprite_status = 20;
-                    else
-                        mario->sprite_status += 18;
+
+                    mario->animTimer = 0.0f;
                 }
 
                 if (mario->position.x >= (screenWidth / 2) - 12) {
@@ -767,11 +782,11 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, Hitbox* hitboxes, float d
             else {
                 mario->velocidadX = 0;
             }
-
-            mario->animTimer += delta;
         }
         else {
-            // fricción
+            // Si no se mueve, aplicar fricción y reiniciar timer
+            mario->animTimer = 0.0f;
+
             if (mario->velocidadX > 0) {
                 mario->velocidadX -= ACELERACION;
                 if (mario->velocidadX < 0) mario->velocidadX = 0;
