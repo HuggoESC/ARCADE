@@ -15,14 +15,14 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND  "../../resources/world/Empty_World_1_1.png"
-#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES     "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define BLOCKS     "../../resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
-#define SOUNDS      "../../resources/Super Mario Bros Efects"
-#define MUSICS      "../../resources/Super Mario Bros Music"
-#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
-#define TILEMAP "../../resources/world/Tile_Map.png"
+#define BACKGROUND  "resources/world/Empty_World_1_1.png"
+#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES     "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define BLOCKS     "resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
+#define SOUNDS      "resources/Super Mario Bros Efects"
+#define MUSICS      "resources/Super Mario Bros Music"
+#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define TILEMAP "resources/world/Tile_Map.png"
 
 #define PLAYER_JUMP_SPD 420.0f
 #define GRAVEDAD 1000
@@ -217,8 +217,8 @@ public:
 
         pies = { position.x + 6, position.y + position.height - 6, position.width - 12, 6 };
         cabeza = { position.x + 6, position.y, position.width - 12, 6 };
-        izquierda = { position.x, position.y + 6, 6, position.height - 12 };
-        derecha = { position.x + position.width - 6, position.y + 6, 6, position.height - 12 };
+        izquierda = { position.x, position.y + 6, 4, position.height - 12 };
+        derecha = { position.x + position.width - 6, position.y + 6, 4, position.height - 12 };
     }
 
     void Draw(Texture2D enemyTexture) {
@@ -233,7 +233,7 @@ public:
             if (mirando_derecha) source.width = -16;
         }
         else {
-            source = { 73, 120, 16, 14 }; // concha sprite (ajusta coordenadas según tu spritesheet)
+            source = { 72, 120, 16, 14 }; // concha sprite (ajusta coordenadas según tu spritesheet)
             dest = { position.x, position.y+6, 32, 28 };
         }
 
@@ -497,8 +497,8 @@ void InitGame(void)
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
     //MUSICA
     
-    music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
-    Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
+    music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
+    Gameover = LoadMusicStream("resources/Super Mario Bros Music/Game Over.wav");
     Gameover.looping = false;
 
     music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
@@ -534,7 +534,7 @@ void InitGame(void)
 
 }
 
-void Reset(Mario* mario) {
+void Reset(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas) {
     gameState = INTRO;
 
     StopMusicStream(music);          // Detiene la música actual
@@ -556,6 +556,10 @@ void Reset(Mario* mario) {
 
     tiempo = 400;
     introTimer = 3.5f;               // Se muestra pantalla de vidas durante 3.5 segundos
+
+    //ENEMIGOS RESET
+    for (Goomba& g : goombas) g.reset();
+    for (Koopa& g : koopas) g.reset();
 }
 
 
@@ -1019,7 +1023,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                 }
                 else
                 {
-                    Reset(mario);  // Reinicia nivel y reposiciona a Mario
+                    Reset(mario, goombas, koopas);  // Reinicia nivel y reposiciona a Mario
                     gameOver = false;
                     musicRestarted = false;
                     playDeathSound = false;
@@ -1083,7 +1087,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                 }
                 else if (koopa.estado == CONCHA_QUIETA) {
                     koopa.estado = CONCHA_MOVIENDOSE;
-                    koopa.mirando_derecha = mario->mirando_derecha; // se mueve en dirección contraria a Mario
+                    koopa.mirando_derecha = mario->mirando_derecha;
                 }
                 else if (koopa.estado == CONCHA_MOVIENDOSE) {
                     koopa.estado = CONCHA_QUIETA;
@@ -1091,24 +1095,61 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
 
                 PlaySound(Squish);
                 mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;
-                continue;
             }
-
-            // Si Mario colisiona por cualquier otro lado
-            if (!mario->isDead && CheckCollisionRecs(mario->position, koopa.position))
+            else if (!mario->isDead && CheckCollisionRecs(mario->position, koopa.position))
             {
-                mario->isDead = true;
-                mario->deathAnimationInProgress = true;
-                mario->velocidad = mario->deathVelocity;
-                StopMusicStream(music);
+                if (koopa.estado == CONCHA_QUIETA) {
+                    // ACTIVAR concha desde un lado
+                    if (CheckCollisionRecs(mario->derecha, koopa.izquierda)) {
+                        koopa.estado = CONCHA_MOVIENDOSE;
+                        koopa.mirando_derecha = true; // Se mueve a la derecha
+                        PlaySound(kick);
+                    }
+                    else if (CheckCollisionRecs(mario->izquierda, koopa.derecha)) {
+                        koopa.estado = CONCHA_MOVIENDOSE;
+                        koopa.mirando_derecha = false; // Se mueve a la izquierda
+                        PlaySound(kick);
+                    }
 
-                if (!playDeathSound)
-                {
-                    PlaySound(Die);           // 🔊 solo se reproduce una vez
-                    playDeathSound = true;    // ✅ marca que ya sonó
+                    mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;  // Pequeño rebote opcional
                 }
+                else if (koopa.estado == CONCHA_MOVIENDOSE) {
+                    if (!CheckCollisionRecs(mario->pies, koopa.cabeza) || mario->velocidad <= 0) {
+                        // Mario muere si le da una concha rodando desde un lado
+                        mario->isDead = true;
+                        mario->deathAnimationInProgress = true;
+                        mario->velocidad = mario->deathVelocity;
+                        StopMusicStream(music);
 
-                return;
+                        if (!playDeathSound) {
+                            PlaySound(Die);
+                            playDeathSound = true;
+                        }
+
+                        return;
+                    }
+                    else {
+                        // Pisa concha en movimiento → se detiene
+                        koopa.estado = CONCHA_QUIETA;
+                        koopa.velocidad = 0;
+                        mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;
+                        PlaySound(Squish);
+                    }
+                }
+                else if (koopa.estado == CAMINANDO) {
+                    // Mueres al tocar Koopa caminando
+                    mario->isDead = true;
+                    mario->deathAnimationInProgress = true;
+                    mario->velocidad = mario->deathVelocity;
+                    StopMusicStream(music);
+
+                    if (!playDeathSound) {
+                        PlaySound(Die);
+                        playDeathSound = true;
+                    }
+
+                    return;
+                }
             }
 
         }
@@ -1126,7 +1167,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     gameovermusicplayed = true;
                 }
                 else {
-                    Reset(mario);  // Reinicia nivel y reposiciona a Mario
+                    Reset(mario, goombas, koopas);  // Reinicia nivel y reposiciona a Mario
                     gameOver = false;
                     musicRestarted = false;
                     playDeathSound = false;
@@ -1289,7 +1330,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             }
             else
             {
-                Reset(mario);
+                Reset(mario, goombas, koopas);
                 gameOver = false;
                 if (!musicRestarted) {
                     StopMusicStream(music);
@@ -1431,7 +1472,7 @@ int main(void)
                 gameState = INTRO;
                 StopMusicStream(music);
                 PlayMusicStream(music);  // Reinicia música desde el principio
-                Reset(&mario);           // Recoloca a Mario, reinicia cámaras y estados
+                Reset(&mario, goombas, koopas);           // Recoloca a Mario, reinicia cámaras y estados
                 gameOver = false;
                 musicPlaying = false;    // Para permitir reproducirla de nuevo en el estado INTRO
                
