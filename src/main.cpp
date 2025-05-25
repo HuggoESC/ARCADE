@@ -15,14 +15,14 @@ namespace fs = filesystem;
 
 #pragma region DEFINES y ENUMS
 
-#define BACKGROUND  "resources/world/Empty_World_1_1.png"
-#define SPRITESHEET "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
-#define ENEMIES     "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
-#define BLOCKS     "resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
-#define SOUNDS      "resources/Super Mario Bros Efects"
-#define MUSICS      "resources/Super Mario Bros Music"
-#define INICIALPAGE "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
-#define TILEMAP "resources/world/Tile_Map.png"
+#define BACKGROUND  "../../resources/world/Empty_World_1_1.png"
+#define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
+#define ENEMIES     "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
+#define BLOCKS     "../../resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
+#define SOUNDS      "../../resources/Super Mario Bros Efects"
+#define MUSICS      "../../resources/Super Mario Bros Music"
+#define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
+#define TILEMAP "../../resources/world/Tile_Map.png"
 
 #define PLAYER_JUMP_SPD 420.0f
 #define GRAVEDAD 1000
