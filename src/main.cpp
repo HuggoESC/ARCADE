@@ -893,8 +893,29 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
         {
             if (!goomba.activo) continue;
 
+            for (Goomba& otro : goombas) {
+                if (&goomba == &otro || !otro.activo) continue; // No comparar consigo mismo
+
+                if (CheckCollisionRecs(goomba.izquierda, otro.derecha)) {
+                    goomba.mirando_derecha = true;
+                    goomba.position.x += 2;  // separarlos un poco
+                }
+
+                if (CheckCollisionRecs(goomba.derecha, otro.izquierda)) {
+                    goomba.mirando_derecha = false;
+                    goomba.position.x -= 2;  // separarlos un poco
+                }
+            }
+
+            goomba.hitGround = false;
+
             for (int i = 0; i < envItems; i++) {
                 Hitbox* block = &hitboxes[i];
+               
+                if (CheckCollisionRecs(goomba.pies, block->rect)) {
+                    goomba.hitGround = true;
+                    goomba.velocidadY = 0;
+                }
 
                 // Si choca con la parte derecha de un bloque (esquina izquierda del Goomba)
                 if (CheckCollisionRecs(goomba.izquierda, block->rect)) {
@@ -907,6 +928,10 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     goomba.mirando_derecha = false;
                     goomba.position.x = block->rect.x - goomba.position.width - 1; // separarlo
                 }
+            }
+
+            if (!goomba.hitGround) {
+                goomba.velocidadY += GRAVEDAD * delta;
             }
 
             // Si Mario pisa al Goomba (solo si viene cayendo)
@@ -1001,12 +1026,21 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             return;
         }
 
+
+
         for (Koopa& koopa : koopas)
         {
+
+            koopa.hitGround = false;
             if (!koopa.activo) continue;
 
             for (int i = 0; i < envItems; i++) {
                 Hitbox* block = &hitboxes[i];
+
+                if (CheckCollisionRecs(koopa.pies, block->rect)) {
+                    koopa.hitGround = true;
+                    koopa.velocidadY = 0;
+                }
 
                 // Si choca con la parte derecha de un bloque (esquina izquierda del Koopa)
                 if (CheckCollisionRecs(koopa.izquierda, block->rect)) {
@@ -1019,6 +1053,10 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     koopa.mirando_derecha = false;
                     koopa.position.x = block->rect.x - koopa.position.width - 1; // separarlo
                 }
+            }
+
+            if (!koopa.hitGround) {
+                koopa.velocidadY += GRAVEDAD * delta;
             }
 
             // Si Mario pisa al Koopa (solo si viene cayendo)
@@ -1268,7 +1306,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                 }
             }
 
-            cout << mario->velocidadX << endl;
+            cout << mario->position.x << endl;
 
             // Aplicar movimiento horizontal 
             mario->MoveX(mario->velocidadX);
@@ -1403,16 +1441,32 @@ int main(void)
 
     Mario mario(316, 382); //Creo el objeto de Mario
     vector<Goomba> goombas = {
-    
-    Goomba(500, 384),
-    Goomba(700, 384),
-    Goomba(1100, 384),
-    Goomba(1800, 384)
+    Goomba(720, 382),
+    Goomba(1300, 382),
+    Goomba(1800, 382),
+    Goomba(1730, 382),
+    Goomba(2600, 382),
+    Goomba(2700, 382),
 
+    Goomba(3200, 382),
+    Goomba(3250, 382),
+
+    Goomba(3600, 382),
+    Goomba(3650, 382),
+
+    Goomba(4000, 382),
+    Goomba(4050, 382),
+
+    Goomba(4200, 382),
+    Goomba(4250, 382),
+
+    Goomba(6000, 382),
+    Goomba(6050, 382),
     };
 
     vector<Koopa> koopas = {
-    Koopa(1300, 384)
+        Koopa(950,382),
+        Koopa(3800,382)
     };
 
     camera.target = { mario.position.x + 20.0f, mario.position.y };

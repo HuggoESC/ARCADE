@@ -15,6 +15,7 @@ public:
     float framespeed = 0.2f;
     bool mirando_derecha;
     bool activo;
+    bool hitGround = false;
 
     Rectangle position;
 
@@ -25,6 +26,8 @@ public:
     Rectangle izquierda;
 
     float velocidad;
+    float velocidadY;
+
     Rectangle posicion_inicial;
 
     KoopaState estado;
@@ -36,6 +39,7 @@ public:
         posicion_inicial = position;
         velocidad = 30.0f;
         mirando_derecha = false;
+        velocidadY = 0;
         activo = true;
         estado = CAMINANDO;
     }
@@ -46,6 +50,7 @@ public:
         velocidad = 30.0f;
         mirando_derecha = false;
         activo = true;
+        velocidadY = 0;
         CurrentFrame = 0;
         animationTimer = 0.0f;
         estado = CAMINANDO;
@@ -57,6 +62,7 @@ public:
         switch (estado) {
         case CAMINANDO:
             position.x += (mirando_derecha ? velocidad : -velocidad) * delta;
+            position.y += velocidadY * delta;
 
             if (position.x < 0) mirando_derecha = true;
             if (position.x > 6000) mirando_derecha = false;
