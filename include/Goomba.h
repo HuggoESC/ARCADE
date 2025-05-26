@@ -9,7 +9,7 @@ public:
     float framespeed = 0.2f;
     bool mirando_derecha;
     bool activo;
-
+    bool hitGround = false;
     Rectangle position;
 
     // Sub-hitboxes para detección de colisiones con Mario
@@ -19,6 +19,7 @@ public:
     Rectangle izquierda;
 
     float velocidad;
+    float velocidadY;
     Rectangle posicion_inicial;
 
     Goomba() {}
@@ -27,6 +28,7 @@ public:
         position = { x, y, 32, 32 };
         posicion_inicial = position;
         velocidad = 30.0f;
+        velocidadY = 0;
         mirando_derecha = false;
         activo = true;
     }
@@ -37,15 +39,17 @@ public:
         velocidad = 30.0f;
         mirando_derecha = false;
         activo = true;
+        velocidadY = 0;
         CurrentFrame = 0;
         animationTimer = 0.0f;
     }
 
     void Update(float delta) {
-        if (!activo) return;
+        if(!activo) return;
 
         // Movimiento horizontal
         position.x += (mirando_derecha ? velocidad : -velocidad) * delta;
+        position.y += velocidadY * delta;
 
         if (position.x < 0) mirando_derecha = true;
         if (position.x > 6000) mirando_derecha = false;
@@ -57,8 +61,8 @@ public:
             animationTimer = 0.0f;
         }
 
-        pies = { position.x, position.y + position.height - 4, position.width, 4 };
-        cabeza = { position.x, position.y, position.width, 4 };
+        pies = { position.x + 6, position.y + position.height - 6, position.width - 12, 6 };
+        cabeza = { position.x + 6, position.y, position.width - 12, 6 };
         izquierda = { position.x, position.y + 6, 6, position.height - 12 };
         derecha = { position.x + position.width - 6, position.y + 6, 6, position.height - 12 };
     }
