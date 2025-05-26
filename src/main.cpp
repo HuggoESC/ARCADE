@@ -322,6 +322,8 @@ void Reset(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas) {
 
     mario->SetX(316);
     mario->SetY(382);
+    mario->poder = Mario::BASE;
+    mario->position.height = 32;
     mario->velocidad = 0;
     mario->velocidadX = 0;
     mario->isDead = false;
@@ -340,6 +342,17 @@ void Reset(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas) {
     //ENEMIGOS RESET
     for (Goomba& g : goombas) g.reset();
     for (Koopa& g : koopas) g.reset();
+
+    lista_hitboxes.clear();
+
+    lista_hitboxes = {
+        {{0,414,2208,400}},
+        {{2272,414,500,400}},
+        {{2848,414,2048,400}},
+        {{4960,414,2000,400}}
+    };
+
+    InitGrid(&lista_hitboxes);
 }
 
 
@@ -445,40 +458,74 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
 
         if (mario->transform_timer == 0) {
             
-
-            float x = mario->transform_secuence[mario->transform_status];
-
+            float x;
             float y;
             float height;
+            if (mario->poder == Mario::BASE) {
+                x = mario->transform_secuence[mario->transform_status];
 
-            if (x == 0) {
-                y = 8;
-                height = 16;
-            }
-            else if (x == 18) {
-                y = 80;
-                height = 24;
-                marioIni.y = mario->position.y - 16;
-            }
-            else if (x == 36) {
-                y = 72;
-                height = 32;
-                marioIni.y = mario->position.y - 32;
-            }
+                if (x == 0) {
+                    y = 8;
+                    height = 16;
+                }
+                else if (x == 18) {
+                    y = 80;
+                    height = 24;
+                    marioIni.y = mario->position.y - 16;
+                }
+                else if (x == 36) {
+                    y = 72;
+                    height = 32;
+                    marioIni.y = mario->position.y - 32;
+                }
 
-            marioRecorte = { x, y, 16, height };
+                marioRecorte = { x, y, 16, height };
 
-            if (mario->transform_status < 9) {
-                mario->transform_status++;
+                if (mario->transform_status < 9) {
+                    mario->transform_status++;
+                }
+                else {
+                    mario->transform_status = 0;
+                    mario->poder = Mario::SETA;
+                    mario->position.height = 64;
+                    mario->velocidad = 0;
+                    mario->estado = Mario::NORMAL;
+                    mario->SetY(marioIni.y);
+                    mario->transform_timer--;
+                }
             }
             else {
-                mario->transform_status = 0;
-                mario->poder = Mario::SETA;
-                mario->position.height = 64;
-                mario->velocidad = 0;
-                mario->estado = Mario::NORMAL;
-                mario->SetY(marioIni.y);
-                mario->transform_timer--;
+                x = mario->inverse_transform_secuence[mario->transform_status];
+
+                if (x == 0) {
+                    y = 8;
+                    height = 16;
+                }
+                else if (x == 18) {
+                    y = 80;
+                    height = 24;
+                    marioIni.y = mario->position.y - 16;
+                }
+                else if (x == 36) {
+                    y = 72;
+                    height = 32;
+                    marioIni.y = mario->position.y - 32;
+                }
+
+                marioRecorte = { x, y, 16, height };
+
+                if (mario->transform_status < 9) {
+                    mario->transform_status++;
+                }
+                else {
+                    mario->transform_status = 0;
+                    mario->poder = Mario::BASE;
+                    mario->position.height = 32;
+                    mario->velocidad = 0;
+                    mario->estado = Mario::NORMAL;
+                    mario->SetY(marioIni.y);
+                    mario->transform_timer--;
+                }
             }
         }
 
@@ -880,18 +927,25 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             // Si Mario colisiona por cualquier otro lado
             if (!mario->isDead && CheckCollisionRecs(mario->position, goomba.position))
             {
-                mario->isDead = true;
-                mario->sprite_status = 116;
+                if (mario->poder == Mario::BASE) {
+                    mario->isDead = true;
+                    mario->sprite_status = 116;
 
-                mario->deathAnimationInProgress = true;
-                mario->velocidad = mario->deathVelocity;
-                StopMusicStream(music);
+                    mario->deathAnimationInProgress = true;
+                    mario->velocidad = mario->deathVelocity;
+                    StopMusicStream(music);
 
-                if (!playDeathSound)
-                {
-                    PlaySound(Die);           
-                    playDeathSound = true;   
+                    if (!playDeathSound)
+                    {
+                        PlaySound(Die);           
+                        playDeathSound = true;   
+                    }
                 }
+                else{
+                    PlaySound(Warp);
+                    mario->estado = Mario::TRANSFORMANDOSE;
+                }
+
 
                 return;
             }
@@ -1011,17 +1065,25 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                 else if (koopa.estado == Koopa::CONCHA_MOVIENDOSE) {
                     if (!CheckCollisionRecs(mario->pies, koopa.cabeza) || mario->velocidad <= 0) {
                         // Mario muere si le da una concha rodando desde un lado
-                        mario->isDead = true;
-                        mario->sprite_status = 116;
-                        mario->deathAnimationInProgress = true;
-                        mario->velocidad = mario->deathVelocity;
-                        StopMusicStream(music);
+                        
+                        if (mario->poder == Mario::BASE) {
+                            mario->isDead = true;
+                            mario->sprite_status = 116;
+                            mario->deathAnimationInProgress = true;
+                            mario->velocidad = mario->deathVelocity;
+                            StopMusicStream(music);
 
-                        if (!playDeathSound) {
-                            PlaySound(Die);
-                            playDeathSound = true;
+                            if (!playDeathSound) {
+                                PlaySound(Die);
+                                playDeathSound = true;
+                            }
+
                         }
-
+                        else {
+                            PlaySound(Warp);
+                            mario->estado = Mario::TRANSFORMANDOSE;
+                        }
+                        
                         return;
                     }
                     else {
@@ -1034,15 +1096,22 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                 }
                 else if (koopa.estado == Koopa::CAMINANDO) {
                     // Mueres al tocar Koopa caminando
-                    mario->isDead = true;
-                    mario->sprite_status = 116;
-                    mario->deathAnimationInProgress = true;
-                    mario->velocidad = mario->deathVelocity;
-                    StopMusicStream(music);
+                    if (mario->poder == Mario::BASE) {
+                        mario->isDead = true;
+                        mario->sprite_status = 116;
+                        mario->deathAnimationInProgress = true;
+                        mario->velocidad = mario->deathVelocity;
+                        StopMusicStream(music);
 
-                    if (!playDeathSound) {
-                        PlaySound(Die);
-                        playDeathSound = true;
+                        if (!playDeathSound) {
+                            PlaySound(Die);
+                            playDeathSound = true;
+                        }
+
+                    }
+                    else {
+                        PlaySound(Warp);
+                        mario->estado = Mario::TRANSFORMANDOSE;
                     }
 
                     return;
