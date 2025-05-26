@@ -76,9 +76,9 @@ public:
 
         // 🔧 OPCIONAL: Dibujar sub-hitboxes para depuración visual
         // (coméntalo si no lo necesitas)
-        DrawRectangleLinesEx(cabeza, 1, BLUE);
-        DrawRectangleLinesEx(pies, 1, RED);
-        DrawRectangleLinesEx(izquierda, 1, GREEN);
-        DrawRectangleLinesEx(derecha, 1, YELLOW);
+        //DrawRectangleLinesEx(cabeza, 1, BLUE);
+        //DrawRectangleLinesEx(pies, 1, RED);
+        //DrawRectangleLinesEx(izquierda, 1, GREEN);
+        //DrawRectangleLinesEx(derecha, 1, YELLOW);
     }
 };
