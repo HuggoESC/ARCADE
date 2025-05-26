@@ -632,7 +632,7 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
         if (h.type == BANDERA) DrawRectangleLinesEx(h.rect, 2, PURPLE); // ZONA MOARADA A TOCAR AL FINAL
     }
 
-    DrawText(TextFormat("Estado Mario: %d", mario->estado), 10, 60, 20, RED); // DESCOMENTAR PARA MIRAR ESTADO DE MARIO
+    //DrawText(TextFormat("Estado Mario: %d", mario->estado), 10, 60, 20, RED); // DESCOMENTAR PARA MIRAR ESTADO DE MARIO
 
     EndDrawing();
 
@@ -1639,6 +1639,7 @@ int main(void)
             for (Mushroom& seta : lista_setas) seta.Update(deltaTime);
 
             UpdateGame(&mario, goombas,koopas, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
+            UpdateTimer(deltaTime);
             DrawGame(&mario, goombas,koopas, lista_hitboxes);
         }
 
