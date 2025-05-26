@@ -44,7 +44,8 @@ enum GameState {
     INICIAL,
     INTRO,
     PLAYING,
-    GAME_OVER, 
+    GAME_OVER,
+    LEVEL_COMPLETED
 };
 
 enum Powers {
@@ -276,6 +277,9 @@ struct Hitbox {
 
 static Music music; //HUGO 
 static Music Gameover;
+static Music Outoftime;
+static Music StageClear;
+
 
 bool playDeathSound = false;
 bool musicRestarted = false;
@@ -284,6 +288,10 @@ bool waitingforgameover = false;
 bool diesoundplayed = false;
 
 float gameoverwaitimer = 0.0f;
+bool flagpoleSoundPlayed = false;
+bool stageClearMusicStarted = false;
+bool stageClearMusicFinished = false;
+float stageClearTimer = 0.0f;
 
 static Sound Die;
 static Sound Pause;
@@ -440,6 +448,9 @@ void InitGame(void)
         Warp = LoadSound("../../resources/Super Mario Bros Efects/Warp.wav");
         Enemyfire = LoadSound("../../resources/Super Mario Bros Efects/Enemy Fire.wav");
         Gameover = LoadMusicStream("../../resources/Super Mario Bros Music/Game Over.wav");
+        StageClear = LoadMusicStream("../../resources/Super Mario Bros Music/Stage-Clear.wav");
+        StageClear.looping = false;
+        Outoftime = LoadMusicStream("../../resources/Super Mario Bros Music/Out-of-time.wav");
         Gameover.looping = false;
     }
     else {
@@ -464,6 +475,9 @@ void InitGame(void)
         Warp = LoadSound("resources/Super Mario Bros Efects/Warp.wav");
         Enemyfire = LoadSound("resources/Super Mario Bros Efects/Enemy Fire.wav");
         Gameover = LoadMusicStream("resources/Super Mario Bros Music/Game Over.wav");
+        StageClear = LoadMusicStream("../../resources/Super Mario Bros Music/Stage-Clear.wav");
+        StageClear.looping = false;
+        Outoftime = LoadMusicStream("../../resources/Super Mario Bros Music/Out-of-time.wav");
         Gameover.looping = false;
     }
 
@@ -480,9 +494,13 @@ void InitGame(void)
 void Reset(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas) {
     gameState = INTRO;
 
-    StopMusicStream(music);          // Detiene la música actual
-    musicPlaying = false;            // Marca que aún NO se debe reproducir
-    playDeathSound = false;          // Permite reproducir "Die" la próxima vez
+    StopMusicStream(music);              // Detiene la música actual
+    musicPlaying = false;               // Marca que aún NO se debe reproducir
+    playDeathSound = false;              // Permite reproducir "Die" la próxima vez
+    flagpoleSoundPlayed = false;        // 🔁 Reinicio de sistema de bandera
+    stageClearMusicStarted = false;
+    stageClearMusicFinished = false;
+    stageClearTimer = 0.0f;
 
     mario->SetX(316);
     mario->SetY(382);
@@ -539,6 +557,14 @@ void UnloadGame(void)
 #pragma endregion
 
 #pragma region FUNCIONES DE DRAW
+
+void DrawLevelCompletedScreen() {
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawText("LEVEL COMPLETED!", screenWidth / 2 - 120, screenHeight / 2 - 20, 30, GREEN);
+    DrawText("Pulsa ENTER para volver al inicio", screenWidth / 2 - 150, screenHeight / 2 + 30, 20, WHITE);
+    EndDrawing();
+}
 
 void DrawIntro() {
 
@@ -729,27 +755,31 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
 {
     
     if (mario->estado == Mario::TOCANDO_BANDERA) {
-        mario->MoveY(60 * delta); // Baja lentamente
-        mario->sprite_status = 96; // Sprite quieto o de bajada
+            mario->MoveY(60 * delta);            // Mario baja lentamente
+            mario->sprite_status = 96;           // Sprite de bajada
 
-        if (mario->position.y >= 382) {  // Punto donde termina de bajar
-            mario->position.y = 382;
-            mario->estado = Mario::CAMINANDO_CASTILLO;
-        }
-        return;
+            if (mario->position.y >= 382) {
+                mario->position.y = 382;
+                mario->estado = Mario::CAMINANDO_CASTILLO;
+            }
+
+            return;
+        
     }
-
-    // --- CAMINANDO HACIA EL CASTILLO ---
     if (mario->estado == Mario::CAMINANDO_CASTILLO) {
-        mario->MoveX(60 * delta);  // velocidad caminando
-        mario->sprite_status = 20; // sprite de caminar
+        mario->MoveX(60 * delta);               // Mario camina hacia el castillo
+        mario->sprite_status = 20;              // Sprite de caminar
 
-        if (mario->position.x > 6400) { // ajuste según posición real del castillo
-            gameState = GAME_OVER;
+        // Inicia Stage Clear solo una vez
+        if (!stageClearMusicStarted) {
+            StopMusicStream(music);
+            PlayMusicStream(StageClear);
+            stageClearMusicStarted = true;
         }
 
         return;
     }
+    
      
     if (waitingforgameover) {
         gameoverwaitimer += delta;
@@ -1328,6 +1358,14 @@ int main(void)
 
         UpdateMusicStream(music); //HUGO
         UpdateMusicStream(Gameover);
+        if (stageClearMusicStarted && !stageClearMusicFinished) {
+            UpdateMusicStream(StageClear);
+            if (GetMusicTimePlayed(StageClear) >= GetMusicTimeLength(StageClear) - 0.1f) {
+                StopMusicStream(StageClear);
+                stageClearMusicFinished = true;
+                gameState = LEVEL_COMPLETED;
+            }
+        }
 
         float deltaTime = GetFrameTime();
 
@@ -1371,6 +1409,29 @@ int main(void)
                 waitingforgameover = false;
                 gameoverwaitimer = 0.0f;
                 diesoundplayed = false;
+            }
+        }
+        else if (gameState == LEVEL_COMPLETED) {
+            DrawLevelCompletedScreen();
+
+            if (IsKeyPressed(KEY_ENTER)) {
+                // 🔁 Reset de todo al inicio
+                vidas = 3;
+                score = 0;
+                monedas = 0;
+                worldPosition = 0;
+                gameState = INICIAL;
+
+                mario = Mario(316, 414);
+
+                playDeathSound = false;
+                musicRestarted = false;
+                gameovermusicplayed = false;
+                waitingforgameover = false;
+                gameoverwaitimer = 0.0f;
+                diesoundplayed = false;
+
+                StopMusicStream(StageClear);
             }
         }
         
