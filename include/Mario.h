@@ -28,6 +28,8 @@ public:
 	int transform_status = 0;
 	int transform_timer = 0;
 	int transform_secuence[10] = {0, 18, 0, 18, 0, 18, 36, 0, 18, 36 };
+	int inverse_transform_secuence[10] = {36, 18, 0, 36, 18, 0, 18, 0, 18, 0 };
+
 	Rectangle position;
 
 	Rectangle pies;
@@ -109,9 +111,5 @@ public:
 			izquierda = { position.x, position.y + 4, 4, position.height - 8 };
 			derecha = { position.x + position.width - 4, position.y + 4, 4, position.height - 8 };
 		}
-	}
-
-	void Transform(int poder) {
-
 	}
 };
