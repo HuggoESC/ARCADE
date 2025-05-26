@@ -101,6 +101,7 @@ bool musicRestarted = false;
 bool musicPlaying = false;
 bool waitingforgameover = false;
 bool diesoundplayed = false;
+bool Marioentraenelcastillo = false;
 
 float gameoverwaitimer = 0.0f;
 bool flagpoleSoundPlayed = false;
@@ -673,20 +674,24 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             return;
     }
     if (mario->estado == Mario::CAMINANDO_CASTILLO) {
-        mario->MoveX(60 * delta); 
-        // Mario camina hacia el castillo
+        mario->MoveX(60 * delta);
         mario->animTimer += delta;
-        if (mario->animTimer >= 0.15f) { // Aumenta este valor para hacer más lenta la animación
+
+        if (mario->animTimer >= 0.15f) {
             mario->sprite_status += 18;
-            if (mario->sprite_status > 56)
-                mario->sprite_status = 20;
+            if (mario->sprite_status > 56) mario->sprite_status = 20;
             mario->animTimer = 0.0f;
         }
 
-        // Inicia Stage Clear solo una vez
         if (!stageClearMusicStarted) {
             PlayMusicStream(StageClear);
             stageClearMusicStarted = true;
+        }
+
+        // ✅ Cuando Mario entra en el castillo (por ejemplo, x > 6300)
+        if (mario->position.x > 6400 && !Marioentraenelcastillo) {
+            Marioentraenelcastillo = true;
+            stageClearTimer = 0.0f; // Reinicia temporizador para transición
         }
 
         return;
@@ -1322,6 +1327,8 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             musicRestarted = false;
         }
     }
+   
+    if (gameState == LEVEL_COMPLETED) return;
 }
 
 #pragma endregion
@@ -1356,19 +1363,24 @@ int main(void)
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-
+        float deltaTime = GetFrameTime();
         UpdateMusicStream(music); //HUGO
         UpdateMusicStream(Gameover);
+
         if (stageClearMusicStarted && !stageClearMusicFinished) {
             UpdateMusicStream(StageClear);
-            if (GetMusicTimePlayed(StageClear) >= GetMusicTimeLength(StageClear) - 0.1f) {
-                StopMusicStream(StageClear);
-                stageClearMusicFinished = true;
-                gameState = LEVEL_COMPLETED;
-            }
         }
 
-        float deltaTime = GetFrameTime();
+        if (Marioentraenelcastillo) {
+            stageClearTimer += deltaTime;
+
+            if (stageClearTimer > 2.0f) {
+                gameState = LEVEL_COMPLETED;
+                Marioentraenelcastillo = false;
+                std::cout << "Transición a LEVEL_COMPLETED\n";
+            }
+        }
+      
 
         UpdateGameState(deltaTime);
 
@@ -1416,25 +1428,71 @@ int main(void)
             DrawLevelCompletedScreen();
 
             if (IsKeyPressed(KEY_ENTER)) {
-                // 🔁 Reset de todo al inicio
+                StopMusicStream(StageClear);
+                StopMusicStream(music);
+                StopMusicStream(Gameover);
+                StopMusicStream(Outoftime);
+
+                // Reinicio completo
                 vidas = 3;
                 score = 0;
                 monedas = 0;
                 worldPosition = 0;
-                gameState = INICIAL;
+                gameState = INTRO;  // directamente a la pantalla con número de vidas
 
-                mario = Mario(316, 414);
+                // Reset de enemigos y objetos
+                lista_setas.clear();
+                lista_monedas.clear();
 
+                // Reset de hitboxes
+                lista_hitboxes.clear();
+                lista_hitboxes = {
+                    {{0,414,2208,400}},
+                    {{2272,414,500,400}},
+                    {{2848,414,2048,400}},
+                    {{4960,414,2000,400}}
+                };
+                InitGrid(&lista_hitboxes);
+
+                // Reset de banderas y estado
                 playDeathSound = false;
                 musicRestarted = false;
                 gameovermusicplayed = false;
                 waitingforgameover = false;
                 gameoverwaitimer = 0.0f;
                 diesoundplayed = false;
+                Marioentraenelcastillo = false;
+                stageClearMusicStarted = false;
+                stageClearMusicFinished = false;
+                stageClearTimer = 0.0f;
 
-                StopMusicStream(StageClear);
+                // Reset de Mario y enemigos
+                mario = Mario(316, 382);  // si lo usas así, recuerda que es distinto del usado en Reset()
+
+                vector<Goomba> newGoombas = {
+                    Goomba(500, 384),
+                    Goomba(700, 384),
+                    Goomba(1100, 384),
+                    Goomba(1800, 384)
+                };
+                goombas = newGoombas;
+
+                vector<Koopa> newKoopas = {
+                    Koopa(1300, 384)
+                };
+                koopas = newKoopas;
+
+                // Reaplicar posición de cámara
+                camera.target = { mario.position.x + 20.0f, mario.position.y };
+                camera.offset = { mario.position.x, mario.position.y };
+
+                // Llamada final a Reset para asegurar TODO
+                Reset(&mario, goombas, koopas);
             }
+            
+           
         }
+      
         else if (gameState == INICIAL) {
             DrawIntro();
          
