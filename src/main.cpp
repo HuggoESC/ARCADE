@@ -757,23 +757,28 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
     
     if (mario->estado == Mario::TOCANDO_BANDERA) {
             mario->MoveY(60 * delta);            // Mario baja lentamente
-            mario->sprite_status = 96;           // Sprite de bajada
+            mario->sprite_status = 136;           // Sprite de bajada
+            StopMusicStream(music);
 
-            if (mario->position.y >= 382) {
-                mario->position.y = 382;
+            if (mario->position.y >= 384) {
+                mario->position.y = 384;
                 mario->estado = Mario::CAMINANDO_CASTILLO;
             }
-
             return;
-        
     }
     if (mario->estado == Mario::CAMINANDO_CASTILLO) {
-        mario->MoveX(60 * delta);               // Mario camina hacia el castillo
-        mario->sprite_status = 20;              // Sprite de caminar
+        mario->MoveX(60 * delta); 
+        // Mario camina hacia el castillo
+        mario->animTimer += delta;
+        if (mario->animTimer >= 0.15f) { // Aumenta este valor para hacer más lenta la animación
+            mario->sprite_status += 18;
+            if (mario->sprite_status > 56)
+                mario->sprite_status = 20;
+            mario->animTimer = 0.0f;
+        }
 
         // Inicia Stage Clear solo una vez
         if (!stageClearMusicStarted) {
-            StopMusicStream(music);
             PlayMusicStream(StageClear);
             stageClearMusicStarted = true;
         }
@@ -797,10 +802,10 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
         // --- BAJADA POR LA BANDERA ---
         if (mario->estado == Mario::TOCANDO_BANDERA) {
             mario->MoveY(60 * delta); // Baja lentamente
-            mario->sprite_status = 96; // Sprite quieto o de bajada
+            mario->sprite_status = 136; // Sprite quieto o de bajada
 
-            if (mario->position.y >= 382) {  // Punto donde termina de bajar
-                mario->position.y = 382;
+            if (mario->position.y >= 384) {  // Punto donde termina de bajar
+                mario->position.y = 384;
                 mario->estado = Mario::CAMINANDO_CASTILLO;
             }
 
@@ -887,6 +892,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
 
             if (CheckCollisionRecs(centroMario, ei.rect)) {
                 mario->estado = Mario::TOCANDO_BANDERA;
+                mario->position.x += 8;
                 mario->velocidadX = 0;
                 mario->velocidad = 0;
                 mario->canJump = false;
