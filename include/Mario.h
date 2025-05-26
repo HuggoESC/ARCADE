@@ -1,6 +1,4 @@
 #pragma once
-#ifndef A2DD_H
-#define A2DD_H
 #include "raylib.h"
 
 class Mario
@@ -15,6 +13,7 @@ public:
 
 	enum EstadoMario {
 		NORMAL,
+		TRANSFORMANDOSE,
 		TOCANDO_BANDERA,
 		BAJANDO_BANDERA,
 		CAMINANDO_CASTILLO,
@@ -26,6 +25,9 @@ public:
 	bool hasPlayedDieSound = false;
 	bool mirando_derecha/* = true*/;
 	int sprite_status /*= 0*/;
+	int transform_status = 0;
+	int transform_timer = 0;
+	int transform_secuence[10] = {0, 18, 0, 18, 0, 18, 36, 0, 18, 36 };
 	Rectangle position;
 
 	Rectangle pies;
@@ -74,48 +76,42 @@ public:
 	/* Funciones */
 	void SetX(float distance) {
 		position.x = distance;
-		/*pies.x = position.x + 4;
-		cabeza.x = position.x + 4;
-		derecha.x = position.x + 30;
-		izquierda.x = distance;*/
 		ActualizarHitboxes();
 
 	}
 
 	void SetY(float distance) {
 		position.y = distance;
-		/*pies.y = position.y + 30;
-		cabeza.y = distance;
-		derecha.y = distance + 4;
-		izquierda.y = distance + 4;*/
 		ActualizarHitboxes();
 	}
 
+	
 	void MoveX(float distance) {
 		position.x += distance;
-		//pies.x += distance;
-		//cabeza.x += distance;
-		//derecha.x += distance;
-		//izquierda.x += distance;*/
-		 ActualizarHitboxes();
+		ActualizarHitboxes();
 	}
 
 	void MoveY(float distance) {
 		position.y += distance;
-	/*	pies.y += distance;
-		cabeza.y += distance;
-		derecha.y += distance;
-		izquierda.y += distance;*/
-		 ActualizarHitboxes();
+		ActualizarHitboxes();
 	}
 
 	void ActualizarHitboxes() {
 		pies = { position.x + 4, position.y + position.height - 4, position.width - 8, 4 };
 		cabeza = { position.x + 4, position.y, position.width - 8, 4 };
-		izquierda = { position.x, position.y + 4, 4, position.height - 8 };
-		derecha = { position.x + position.width - 4, position.y + 4, 4, position.height - 8 };
+
+		if (poder == SETA) {
+			izquierda = { position.x, position.y + 6, 4, position.height - 12 };
+			derecha = { position.x + position.width - 4, position.y + 6, 4, position.height - 12 };
+		}
+		else {
+			
+			izquierda = { position.x, position.y + 4, 4, position.height - 8 };
+			derecha = { position.x + position.width - 4, position.y + 4, 4, position.height - 8 };
+		}
 	}
 
+	void Transform(int poder) {
 
+	}
 };
-#endif

@@ -529,8 +529,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\AABB.h" />
+    <ClInclude Include="..\..\include\Flower.h" />
+    <ClInclude Include="..\..\include\Koopa.h" />
     <ClInclude Include="..\..\include\Mario.h" />
+    <ClInclude Include="..\..\include\Moneda.h" />
+    <ClInclude Include="..\..\include\Mushroom.h" />
     <ClInclude Include="..\..\include\resource_dir.h" />
+    <ClInclude Include="Goomba.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\AABB.cpp" />

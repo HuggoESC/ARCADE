@@ -9,6 +9,10 @@
 #include <vector>
 #include <filesystem>
 #include "Mario.h"
+#include "Goomba.h"
+#include "Koopa.h"
+#include "Mushroom.h"
+#include "Moneda.h"
 
 using namespace std;
 namespace fs = filesystem;
@@ -19,6 +23,7 @@ namespace fs = filesystem;
 #define SPRITESHEET "../../resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES     "../../resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
 #define BLOCKS      "../../resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
+#define ITEMS       "../../resources/sprites/NES - Super Mario Bros - Items Objects and NPCs.png"
 #define SOUNDS      "../../resources/Super Mario Bros Efects"
 #define MUSICS      "../../resources/Super Mario Bros Music"
 #define INICIALPAGE "../../resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
@@ -28,6 +33,7 @@ namespace fs = filesystem;
 #define SPRITESHEET2 "resources/sprites/NES - Super Mario Bros - Mario & Luigi.png"
 #define ENEMIES2     "resources/sprites/NES - Super Mario Bros - Enemies & Bosses.png"
 #define BLOCKS2      "resources/sprites/NES - Super Mario Bros - Item and Brick Blocks.png"
+#define ITEMS2       "resources/sprites/NES - Super Mario Bros - Items Objects and NPCs.png"
 #define SOUNDS2      "resources/Super Mario Bros Efects"
 #define MUSICS2      "resources/Super Mario Bros Music"
 #define INICIALPAGE2 "resources/NES - Super Mario Bros - Title Screen HUD and Miscellaneous (1).png"
@@ -65,202 +71,12 @@ enum BlockType {
 
 #pragma endregion
 
-//----------------------------------------------------------------------------------
-// Class Definition
-//----------------------------------------------------------------------------------
-
-class Goomba {
-public:
-    int CurrentFrame = 0;
-    float animationTimer = 0.0f;
-    float framespeed = 0.2f;
-    bool mirando_derecha;
-    bool activo;
-
-    Rectangle position;
-
-    // Sub-hitboxes para detección de colisiones con Mario
-    Rectangle pies;
-    Rectangle cabeza;
-    Rectangle derecha;
-    Rectangle izquierda;
-
-    float velocidad;
-    Rectangle posicion_inicial;
-
-    Goomba() {}
-
-    Goomba(float x, float y) {
-        position = { x, y, 32, 32 };
-        posicion_inicial = position;
-        velocidad = 30.0f;
-        mirando_derecha = false;
-        activo = true;
-    }
-
-    // Método reset para restaurar estado inicial
-    void reset() {
-        position = posicion_inicial;
-        velocidad = 30.0f;
-        mirando_derecha = false;
-        activo = true;
-        CurrentFrame = 0;
-        animationTimer = 0.0f;
-    }
-
-    void Update(float delta) {
-        if (!activo) return;
-
-        // Movimiento horizontal
-        position.x += (mirando_derecha ? velocidad : -velocidad) * delta;
-
-        if (position.x < 0) mirando_derecha = true;
-        if (position.x > 6000) mirando_derecha = false;
-
-        // Animación
-        animationTimer += delta;
-        if (animationTimer >= framespeed) {
-            CurrentFrame = (CurrentFrame + 1) % 2;
-            animationTimer = 0.0f;
-        }
-
-        // 💡 ACTUALIZACIÓN de sub-hitboxes
-        pies = { position.x + 6, position.y + position.height - 6, position.width - 12, 6 };
-        cabeza = { position.x + 6, position.y, position.width - 12, 6 };
-        izquierda = { position.x, position.y + 6, 6, position.height - 12 };
-        derecha = { position.x + position.width - 6, position.y + 6, 6, position.height - 12 };
-    }
-
-    void Draw(Texture2D enemyTexture) {
-        if (!activo) return;
-
-        Rectangle source = { 18.0f * CurrentFrame, 16, 16, 16 };
-        if (!mirando_derecha) source.width = -16;
-
-        Rectangle dest = position;
-       ///* dest.y -= 32;*/
-
-        DrawTexturePro(enemyTexture, source, dest, { 0, 0 }, 0.0f, WHITE);
-
-        // 🔧 OPCIONAL: Dibujar sub-hitboxes para depuración visual
-        // (coméntalo si no lo necesitas)
-         DrawRectangleLinesEx(cabeza, 1, BLUE);
-         DrawRectangleLinesEx(pies, 1, RED);
-         DrawRectangleLinesEx(izquierda, 1, GREEN);
-         DrawRectangleLinesEx(derecha, 1, YELLOW);
-    }
-};
-
-enum KoopaState {
-    CAMINANDO,
-    CONCHA_QUIETA,
-    CONCHA_MOVIENDOSE
-};
-
-class Koopa {
-public:
-    int CurrentFrame = 0;
-    float animationTimer = 0.0f;
-    float framespeed = 0.2f;
-    bool mirando_derecha;
-    bool activo;
-
-    Rectangle position;
-
-    // Sub-hitboxes para detección de colisiones con Mario
-    Rectangle pies;
-    Rectangle cabeza;
-    Rectangle derecha;
-    Rectangle izquierda;
-
-    float velocidad;
-    Rectangle posicion_inicial;
-
-    KoopaState estado;
-
-    Koopa() {}
-
-    Koopa(float x, float y) {
-        position = { x, y, 32, 32 };
-        posicion_inicial = position;
-        velocidad = 30.0f;
-        mirando_derecha = false;
-        activo = true;
-        estado = CAMINANDO;
-    }
-
-    // Método reset para restaurar estado inicial
-    void reset() {
-        position = posicion_inicial;
-        velocidad = 30.0f;
-        mirando_derecha = false;
-        activo = true;
-        CurrentFrame = 0;
-        animationTimer = 0.0f;
-        estado = CAMINANDO;
-    }
-
-    void Update(float delta) {
-        if (!activo) return;
-
-        switch (estado) {
-        case CAMINANDO:
-            position.x += (mirando_derecha ? velocidad : -velocidad) * delta;
-
-            if (position.x < 0) mirando_derecha = true;
-            if (position.x > 6000) mirando_derecha = false;
-
-            animationTimer += delta;
-            if (animationTimer >= framespeed) {
-                CurrentFrame = (CurrentFrame + 1) % 2;
-                animationTimer = 0.0f;
-            }
-            break;
-
-        case CONCHA_QUIETA:
-            // No se mueve, pero igual puedes animar si quieres
-            break;
-
-        case CONCHA_MOVIENDOSE:
-            position.x += (mirando_derecha ? 200 : -200) * delta * 1.5f;  // más rápido
-            break;
-        }
-
-        pies = { position.x + 6, position.y + position.height - 6, position.width - 12, 6 };
-        cabeza = { position.x + 6, position.y, position.width - 12, 6 };
-        izquierda = { position.x, position.y + 6, 4, position.height - 12 };
-        derecha = { position.x + position.width - 6, position.y + 6, 4, position.height - 12 };
-    }
-
-    void Draw(Texture2D enemyTexture) {
-        if (!activo) return;
-
-        Rectangle source;
-        Rectangle dest;
-
-        if (estado == CAMINANDO) {
-            source = { 18.0f * (float)CurrentFrame, 112, 16, 24 };
-            dest = { position.x, position.y - 16, 32, 48 };
-            if (mirando_derecha) source.width = -16;
-        }
-        else {
-            source = { 72, 120, 16, 14 }; // concha sprite (ajusta coordenadas según tu spritesheet)
-            dest = { position.x, position.y+6, 32, 28 };
-        }
-
-        DrawTexturePro(enemyTexture, source, dest, { 0, 0 }, 0.0f, WHITE);
-
-        DrawRectangleLinesEx(cabeza, 1, BLUE);
-        DrawRectangleLinesEx(pies, 1, RED);
-        DrawRectangleLinesEx(izquierda, 1, GREEN);
-        DrawRectangleLinesEx(derecha, 1, YELLOW);
-    }
-};
 
 struct Hitbox {
     Rectangle rect;
     BlockType type;
-    
+    int sprite_status = 0;
+
     Hitbox(Rectangle r) {
         rect = r;
         type = VACIO;
@@ -270,7 +86,6 @@ struct Hitbox {
         rect = r;
         type = t;
     }
-
 };
 
 #pragma region VARIABLES GLOBALES
@@ -318,6 +133,7 @@ static const int screenWidth = 800;
 static const int screenHeight = 480;
 static GameState gameState = INICIAL;
 static float introTimer = 2.0f;
+static float monedaTimer = 0.0f;
 
 static bool gameOver = false;
 static bool gameovermusicplayed = false;
@@ -329,6 +145,7 @@ Camera2D camera = { 0 };
 Texture2D background;
 Texture2D spriteSheet;
 Texture2D blocksheet;
+Texture2D itemsheet;
 Texture2D EnemySpriteSheet;
 Texture2D backgroundInicial;
 
@@ -338,6 +155,8 @@ static int vidas = 3;      // N�mero de vidas de Mario
 static int world = 1;
 static int level = 1;
 vector <Hitbox> lista_hitboxes;
+vector <Mushroom> lista_setas;
+vector <Moneda> lista_monedas;
 
 //CONTADOR FRAMES
 
@@ -399,12 +218,14 @@ void InitGame(void)
         background = LoadTexture(BACKGROUND2); 
         spriteSheet = LoadTexture(SPRITESHEET2);
         blocksheet = LoadTexture(BLOCKS2);
+        itemsheet = LoadTexture(ITEMS2);
         EnemySpriteSheet = LoadTexture(ENEMIES2);
         backgroundInicial = LoadTexture(INICIALPAGE2);
     }
     else {
         spriteSheet = LoadTexture(SPRITESHEET);
         blocksheet = LoadTexture(BLOCKS);
+        itemsheet = LoadTexture(ITEMS);
         EnemySpriteSheet = LoadTexture(ENEMIES);
         backgroundInicial = LoadTexture(INICIALPAGE);
     }
@@ -419,14 +240,15 @@ void InitGame(void)
         {{4960,414,2000,400}}
     };
     
+    //Crea los bloques
     InitGrid(&lista_hitboxes);
 
+    //Musica
     InitAudioDevice(); // https://www.raylib.com/examples/audio/loader.html?name=audio_music_stream
-    //MUSICA
     
-    music = LoadMusicStream("resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
+    music = LoadMusicStream("resources/Super Mario Bros Music/01. Ground Theme.mp3");
     if (music.stream.buffer == 0) {
-        music = LoadMusicStream("../../resources/Super Mario Bros Music/overworld-theme-super-mario-world-made-with-Voicemod.wav");
+        music = LoadMusicStream("../../resources/Super Mario Bros Music/01. Ground Theme.mp3");
         Pause = LoadSound("../../resources/Super Mario Bros Efects/Pause.wav");
         Die = LoadSound("../../resources/Super Mario Bros Efects/Die.wav");
         JumpSound = LoadSound("../../resources/Super Mario Bros Efects/Jump.wav");
@@ -480,12 +302,7 @@ void InitGame(void)
         Outoftime = LoadMusicStream("../../resources/Super Mario Bros Music/Out-of-time.wav");
         Gameover.looping = false;
     }
-
-    //sonidos
      
-
-   /* PlayMusicStream(music);*/
-
     float timePlayed = 0.0f;
     bool pause = false;
 
@@ -620,7 +437,54 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
     /* Dibujado de Mario */
     Vector2 marioIni = { mario->position.x, mario->position.y };
     Rectangle marioRecorte = { mario->sprite_status, 8, 16, 16 };
-  
+    
+    if (mario->estado == Mario::TRANSFORMANDOSE) {
+        if (mario->transform_timer == 4)
+            mario->transform_timer = 0;
+
+        if (mario->transform_timer == 0) {
+            
+
+            float x = mario->transform_secuence[mario->transform_status];
+
+            float y;
+            float height;
+
+            if (x == 0) {
+                y = 8;
+                height = 16;
+            }
+            else if (x == 18) {
+                y = 80;
+                height = 24;
+                marioIni.y = mario->position.y - 16;
+            }
+            else if (x == 36) {
+                y = 72;
+                height = 32;
+                marioIni.y = mario->position.y - 32;
+            }
+
+            marioRecorte = { x, y, 16, height };
+
+            if (mario->transform_status < 9) {
+                mario->transform_status++;
+            }
+            else {
+                mario->transform_status = 0;
+                mario->poder = Mario::SETA;
+                mario->position.height = 64;
+                mario->velocidad = 0;
+                mario->estado = Mario::NORMAL;
+                mario->SetY(marioIni.y);
+                mario->transform_timer--;
+            }
+        }
+
+        mario->transform_timer++;
+
+    }
+
     //*Cambio de derecha a izquierda
     if (mario->mirando_derecha)
     {
@@ -631,17 +495,27 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
         marioRecorte.width = -16;
     }
 
-    Rectangle marioResized = { marioIni.x, marioIni.y, 16 * 2, 16 * 2 }; // Escalado
+    Rectangle marioResized = { marioIni.x, marioIni.y, 32, 32 }; // Escalado
+    
+    if (mario->poder == Mario::SETA) {
+        marioRecorte.y = 32;
+        marioRecorte.height = 32;
+
+        marioResized.height = 64;
+        //mario->SetY(marioIni.y - 32);
+
+    }
+
     Vector2 MarioOrigen = { 0,0 };
 
     DrawTexturePro(spriteSheet, marioRecorte, marioResized, MarioOrigen, 0, WHITE);
 
     //Hitbox de mario
-    DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
-    DrawRectangleLines(mario->pies.x, mario->pies.y, mario->pies.width, mario->pies.height, RED);
-    DrawRectangleLines(mario->cabeza.x, mario->cabeza.y, mario->cabeza.width, mario->cabeza.height, BLUE);
-    DrawRectangleLines(mario->derecha.x, mario->derecha.y, mario->derecha.width, mario->derecha.height, GREEN);
-    DrawRectangleLines(mario->izquierda.x, mario->izquierda.y, mario->izquierda.width, mario->izquierda.height, YELLOW);
+    //DrawRectangleLines(marioResized.x, marioResized.y, marioResized.width, marioResized.height, WHITE);
+    //DrawRectangleLines(mario->pies.x, mario->pies.y, mario->pies.width, mario->pies.height, RED);
+    //DrawRectangleLines(mario->cabeza.x, mario->cabeza.y, mario->cabeza.width, mario->cabeza.height, BLUE);
+    //DrawRectangleLines(mario->derecha.x, mario->derecha.y, mario->derecha.width, mario->derecha.height, GREEN);
+    //DrawRectangleLines(mario->izquierda.x, mario->izquierda.y, mario->izquierda.width, mario->izquierda.height, YELLOW);
 
     //Goomba
 
@@ -655,6 +529,25 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
         koopa.Draw(EnemySpriteSheet);
     }
 
+    for (Mushroom& seta : lista_setas)
+    {
+        seta.Draw(itemsheet);
+    }
+
+    for (Moneda& coin : lista_monedas)
+    {
+        coin.Draw(itemsheet);
+    }
+
+    for (int i = 0; i < lista_monedas.size(); i++)
+    {
+        Moneda coin = lista_monedas[i];
+        if (lista_monedas[i].transform_status >= 3) {
+            lista_monedas.erase(lista_monedas.begin() + i);
+        }
+    }
+
+
     //DrawRectangleLines(Goomba1Resized.x, Goomba1Resized.y, Goomba1Resized.width, Goomba1Resized.height, WHITE);
 
     /* Dibujado de Hitbox */
@@ -663,10 +556,12 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
             DrawTexturePro(blocksheet, { 272, 112, 16, 16 }, { hitboxes[i].rect.x, hitboxes[i].rect.y, 32, 32 }, {0,0}, 0, WHITE);
         }
         else if (hitboxes[i].type == BLOQUEMONEDA) {
-            DrawTexturePro(blocksheet, { 80, 112, 16, 16 }, { hitboxes[i].rect.x, hitboxes[i].rect.y, 32, 32 }, { 0,0 }, 0, WHITE);
-        }
+            if (hitboxes[i].sprite_status == 0)
+                DrawTexturePro(blocksheet, { 80, 112, 16, 16 }, { hitboxes[i].rect.x, hitboxes[i].rect.y, 32, 32 }, { 0,0 }, 0, WHITE);
+            else
+                DrawTexturePro(blocksheet, { 128, 112, 16, 16 }, { hitboxes[i].rect.x, hitboxes[i].rect.y, 32, 32 }, { 0,0 }, 0, WHITE);
 
-        //DrawRectangleRec(hitboxes[i].rect, hitboxes[i].color);
+        }
     }
 
     EndMode2D();
@@ -694,6 +589,7 @@ void DrawGame(Mario* mario, vector<Goomba>& goombas, vector <Koopa>& koopas, vec
     EndDrawing();
 
 }
+
 
 void Drawgameintoscreen() {
     BeginDrawing();
@@ -759,10 +655,19 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             mario->MoveY(60 * delta);            // Mario baja lentamente
             mario->sprite_status = 96;           // Sprite de bajada
 
-            if (mario->position.y >= 382) {
-                mario->position.y = 382;
-                mario->estado = Mario::CAMINANDO_CASTILLO;
+            if (mario->poder == BASE) {
+                if (mario->position.y >= 382) {
+                    mario->position.y = 382;
+                    mario->estado = Mario::CAMINANDO_CASTILLO;
+                }
             }
+            else {
+                if (mario->position.y >= 350) {
+                    mario->position.y = 350;
+                    mario->estado = Mario::CAMINANDO_CASTILLO;
+                }
+            }
+
 
             return;
         
@@ -780,7 +685,10 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
 
         return;
     }
-    
+    if (mario->estado == Mario::TRANSFORMANDOSE) {
+        return;
+    }
+
      
     if (waitingforgameover) {
         gameoverwaitimer += delta;
@@ -837,16 +745,41 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
         bool hitGround = false;
         bool isJumping = false;
 
+        /* Colisiones con bloques */
         for (int i = 0; i < envItems; i++)
         {
             Hitbox* ei = hitboxes + i;
 
-            // Ignora la bandera en colisiones físicas
-            if (ei->type == BANDERA) continue;
+            //Bandera
+            if (ei->type == BANDERA) {
+                // Sub-hitbox más precisa centrada en Mario para evitar falsos positivos
+                Rectangle centroMario = {
+                    mario->position.x + 8,  // 8 px de margen lateral
+                    mario->position.y,
+                    mario->position.width - 16, // reducir 16 px total (8+8)
+                    mario->position.height
+                };
+
+                if (CheckCollisionRecs(centroMario, ei->rect)) {
+                    mario->estado = Mario::TOCANDO_BANDERA;
+                    mario->velocidadX = 0;
+                    mario->velocidad = 0;
+                    mario->canJump = false;
+                    mario->isJumping = false;
+                    mario->sprite_status = 96;
+
+                    PlaySound(Flagpole);
+                    break;
+                }
+            }
 
             if (CheckCollisionRecs(ei->rect, mario->pies)) {
                 hitGround = true;
                 mario->velocidad = 0.0f;
+
+                if (mario->poder == Mario::SETA)
+                    cout << endl;
+
                 mario->SetY(ei->rect.y - mario->position.height + 2);
             }
 
@@ -862,44 +795,46 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                         lista_hitboxes.erase(lista_hitboxes.begin() + i);
                     }
                 }
+                else if (ei->type == BLOQUEMONEDA) {
+                    if (ei->rect.x / 32 == 21) {
+                        if (ei->sprite_status != 1) {
+                            PlaySound(item);
+                            ei->sprite_status = 1;
+                            score += 1000;
+                            lista_setas.push_back(Mushroom(ei->rect.x, ei->rect.y - 32));
+                        }
+                        else {
+                            PlaySound(Bump);
+                        }
+                    }
+                    else {
+                        if (ei->sprite_status != 1) {
+                            PlaySound(Coin);
+                            score += 200;
+                            ei->sprite_status = 1;
+                            lista_monedas.push_back(Moneda(ei->rect.x, ei->rect.y - 32));
+                        }
+                        else {
+                            PlaySound(Bump);
+                        }
+
+                    }
+                }
             }
 
             if (CheckCollisionRecs(ei->rect, mario->derecha)) {
-                mario->SetX(ei->rect.x - mario->position.width - 2);
+
+                if (ei->type != BANDERA)
+                    mario->SetX(ei->rect.x - mario->position.width - 2);
             }
 
             if (CheckCollisionRecs(ei->rect, mario->izquierda)) {
-                mario->SetX(ei->rect.x + ei->rect.width + 2);
+                if (ei->type != BANDERA)
+                    mario->SetX(ei->rect.x + ei->rect.width + 2);
             }
-        }
-       
+        }     
 
-        for (Hitbox& ei : lista_hitboxes) {
-            if (ei.type != BANDERA || mario->estado != Mario::NORMAL) continue;
-
-            // Sub-hitbox más precisa centrada en Mario para evitar falsos positivos
-            Rectangle centroMario = {
-                mario->position.x + 8,  // 8 px de margen lateral
-                mario->position.y,
-                mario->position.width - 16, // reducir 16 px total (8+8)
-                mario->position.height
-            };
-
-            if (CheckCollisionRecs(centroMario, ei.rect)) {
-                mario->estado = Mario::TOCANDO_BANDERA;
-                mario->velocidadX = 0;
-                mario->velocidad = 0;
-                mario->canJump = false;
-                mario->isJumping = false;
-                mario->sprite_status = 96;
-
-                PlaySound(Flagpole);
-                break;
-            }
-        }
-        
-
-        /* Colision con enemigos */
+        /* Colisiones con enemigos */
 
         for (Goomba& goomba : goombas)
         {
@@ -926,6 +861,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             {
                 goomba.activo = false;
                 PlaySound(Squish);  // sonido al aplastar
+                score += 200;
                 mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;  // rebota un poco hacia arriba
                 continue;
             }
@@ -934,19 +870,21 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             if (!mario->isDead && CheckCollisionRecs(mario->position, goomba.position))
             {
                 mario->isDead = true;
+                mario->sprite_status = 116;
+
                 mario->deathAnimationInProgress = true;
                 mario->velocidad = mario->deathVelocity;
                 StopMusicStream(music);
 
                 if (!playDeathSound)
                 {
-                    PlaySound(Die);           // 🔊 solo se reproduce una vez
-                    playDeathSound = true;    // ✅ marca que ya sonó
+                    PlaySound(Die);           
+                    playDeathSound = true;   
                 }
 
                 return;
             }
-
+            
         }
         // Si Mario ha muerto, procesamos la animación de muerte
         if (mario->isDead && mario->deathAnimationInProgress) {
@@ -1026,16 +964,17 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             // Si Mario pisa al Koopa (solo si viene cayendo)
             if (!mario->isDead && CheckCollisionRecs(mario->pies, koopa.cabeza) && mario->velocidad > 0)
             {
-                if (koopa.estado == CAMINANDO) {
-                    koopa.estado = CONCHA_QUIETA;
+                if (koopa.estado == Koopa::CAMINANDO) {
+                    score += 200;
+                    koopa.estado = Koopa::CONCHA_QUIETA;
                     koopa.velocidad = 0;
                 }
-                else if (koopa.estado == CONCHA_QUIETA) {
-                    koopa.estado = CONCHA_MOVIENDOSE;
+                else if (koopa.estado == Koopa::CONCHA_QUIETA) {
+                    koopa.estado = Koopa::CONCHA_MOVIENDOSE;
                     koopa.mirando_derecha = mario->mirando_derecha;
                 }
-                else if (koopa.estado == CONCHA_MOVIENDOSE) {
-                    koopa.estado = CONCHA_QUIETA;
+                else if (koopa.estado == Koopa::CONCHA_MOVIENDOSE) {
+                    koopa.estado = Koopa::CONCHA_QUIETA;
                 }
 
                 PlaySound(Squish);
@@ -1043,25 +982,26 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             }
             else if (!mario->isDead && CheckCollisionRecs(mario->position, koopa.position))
             {
-                if (koopa.estado == CONCHA_QUIETA) {
+                if (koopa.estado == Koopa::CONCHA_QUIETA) {
                     // ACTIVAR concha desde un lado
                     if (CheckCollisionRecs(mario->derecha, koopa.izquierda)) {
-                        koopa.estado = CONCHA_MOVIENDOSE;
+                        koopa.estado = Koopa::CONCHA_MOVIENDOSE;
                         koopa.mirando_derecha = true; // Se mueve a la derecha
                         PlaySound(kick);
                     }
                     else if (CheckCollisionRecs(mario->izquierda, koopa.derecha)) {
-                        koopa.estado = CONCHA_MOVIENDOSE;
+                        koopa.estado = Koopa::CONCHA_MOVIENDOSE;
                         koopa.mirando_derecha = false; // Se mueve a la izquierda
                         PlaySound(kick);
                     }
 
                     mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;  // Pequeño rebote opcional
                 }
-                else if (koopa.estado == CONCHA_MOVIENDOSE) {
+                else if (koopa.estado == Koopa::CONCHA_MOVIENDOSE) {
                     if (!CheckCollisionRecs(mario->pies, koopa.cabeza) || mario->velocidad <= 0) {
                         // Mario muere si le da una concha rodando desde un lado
                         mario->isDead = true;
+                        mario->sprite_status = 116;
                         mario->deathAnimationInProgress = true;
                         mario->velocidad = mario->deathVelocity;
                         StopMusicStream(music);
@@ -1075,15 +1015,16 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     }
                     else {
                         // Pisa concha en movimiento → se detiene
-                        koopa.estado = CONCHA_QUIETA;
+                        koopa.estado = Koopa::CONCHA_QUIETA;
                         koopa.velocidad = 0;
                         mario->velocidad = -PLAYER_JUMP_SPD / 1.5f;
                         PlaySound(Squish);
                     }
                 }
-                else if (koopa.estado == CAMINANDO) {
+                else if (koopa.estado == Koopa::CAMINANDO) {
                     // Mueres al tocar Koopa caminando
                     mario->isDead = true;
+                    mario->sprite_status = 116;
                     mario->deathAnimationInProgress = true;
                     mario->velocidad = mario->deathVelocity;
                     StopMusicStream(music);
@@ -1126,6 +1067,44 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
             return; // Salir del UpdateGame mientras Mario está muriendo
         }
 
+        /* movimiento setas */
+        for (int i = 0; i < lista_setas.size(); i++)
+        {
+            Mushroom* seta = &lista_setas[i];
+            seta->hitGround = false;
+
+            for (int i = 0; i < envItems; i++) {
+                Hitbox* block = &hitboxes[i];
+
+                //gravedad de la seta
+                if (CheckCollisionRecs(seta->pies, block->rect)) {
+                    seta->hitGround = true;
+                    seta->velocidadY = 0;
+                }
+               
+                if (CheckCollisionRecs(seta->izquierda, block->rect)) {
+                    seta->mirando_derecha = true;
+                    seta->position.x = block->rect.x + block->rect.width + 1;
+                }
+
+                if (CheckCollisionRecs(seta->derecha, block->rect)) {
+                    seta->mirando_derecha = false;
+                    seta->position.x = block->rect.x - seta->position.width - 1;
+                }
+            }
+
+            if (CheckCollisionRecs(mario->position, seta->position)) {
+                mario->estado = Mario::TRANSFORMANDOSE;
+                PlaySound(Powerup);
+                lista_setas.erase(lista_setas.begin() + i);
+            }
+
+            if (!seta->hitGround) {
+                seta->velocidadY += GRAVEDAD * delta;
+            }
+        }
+
+
         /* Movimiento de Mario */
         if (mario->estado == Mario::NORMAL) {
             const float ANIM_FRAME_TIME = 0.05f; // tiempo entre frames de animación (0.1s = 10 FPS)
@@ -1142,6 +1121,7 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                 float proporciónVel = velocidadActual / VELOCIDAD_MAXIMA;
                 float animSpeed = Lerp(ANIM_FRAME_MAX, ANIM_FRAME_MIN, proporciónVel); // inverso: más rápido → menor tiempo
 
+
                 if (mario->canJump && velocidadActual > 0.0f && mario->sprite_status < 20) {
                     mario->sprite_status = 20;
                 }
@@ -1150,8 +1130,15 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     mario->sprite_status += 18;
                     if (mario->sprite_status > 56)
                         mario->sprite_status = 20;
+
+                   
+
                     mario->animTimer = 0.0f;
                 }
+
+                if (mario->velocidadX < 0 && mario->canJump)
+                    mario->sprite_status = 76;
+
             }
             else if (IsKeyDown(KEY_LEFT)) {
                 mario->animTimer += delta;
@@ -1176,8 +1163,13 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                         if (mario->sprite_status > 56)
                             mario->sprite_status = 20;
 
+                       
+
                         mario->animTimer = 0.0f;
                     }
+
+                    if (mario->velocidadX > 0 && mario->canJump)
+                        mario->sprite_status = 76;
 
                     if (mario->position.x >= (screenWidth / 2) - 12) {
                         worldPosition = mario->position.x;
@@ -1200,6 +1192,8 @@ void UpdateGame(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas, Hi
                     if (mario->velocidadX > 0) mario->velocidadX = 0;
                 }
             }
+
+            cout << mario->velocidadX << endl;
 
             // Aplicar movimiento horizontal 
             mario->MoveX(mario->velocidadX);
@@ -1435,7 +1429,6 @@ int main(void)
                 StopMusicStream(StageClear);
             }
         }
-        
         else if (gameState == INICIAL) {
             DrawIntro();
          
@@ -1456,6 +1449,8 @@ int main(void)
 
             for (Goomba& goomba : goombas) goomba.Update(deltaTime);
             for (Koopa& koopa : koopas) koopa.Update(deltaTime);
+            for (Mushroom& seta : lista_setas) seta.Update(deltaTime);
+
             UpdateGame(&mario, goombas,koopas, &lista_hitboxes[0], deltaTime, lista_hitboxes.size());
             DrawGame(&mario, goombas,koopas, lista_hitboxes);
         }
