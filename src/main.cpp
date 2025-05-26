@@ -491,6 +491,7 @@ void Reset(Mario* mario, vector<Goomba>& goombas, vector<Koopa>& koopas) {
     mario->isDead = false;
     mario->deathAnimationInProgress = false;
     mario->deathAnimTimer = 0.0f;
+    mario->estado = Mario::NORMAL;
 
     camera.target = { mario->position.x + 20.0f, mario->position.y };
     camera.offset = { mario->position.x, mario->position.y };
