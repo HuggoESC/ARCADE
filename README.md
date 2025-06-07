@@ -65,8 +65,11 @@ FEATURES IMPLEMENTED:
 
 
 Link SUper mario: https://www.youtube.com/watch?v=7D4uoSoQsjw 
+
 Link sprites: https://www.spriters-resource.com/nes/supermariobros/
+
 Link to the project: https://github.com/HuggoESC/ARCADE.git
+
 Link to the Video Project: https://www.youtube.com/watch?v=wtYIUS55WBo
 
 <!DOCTYPE html>
