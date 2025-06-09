@@ -177,7 +177,7 @@ Link to the Video Project: https://www.youtube.com/watch?v=wtYIUS55WBo
 
   <section>
     <h2>Vídeo del Gameplay</h2>
-    <iframe src="https://drive.google.com/file/d/1pMvYLT1JNgv6fJ6MZVJLZEzinsRCrzrV/view?resourcekey" allowfullscreen></iframe>
+    <iframe src="https://youtu.be/GGaUZn2DgUs" allowfullscreen></iframe>
     <p>Incluye:</p>
     <ul>
       <li>Intro con logo de UPC y miembros del equipo</li>
