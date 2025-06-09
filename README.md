@@ -176,17 +176,25 @@ Link to the Video Project: https://www.youtube.com/watch?v=wtYIUS55WBo
   </section>
 
   <section>
-    <h2>Vídeo del Gameplay</h2>
-    <iframe src="https://youtu.be/GGaUZn2DgUs" allowfullscreen></iframe>
-    <p>Incluye:</p>
-    <ul>
-      <li>Intro con logo de UPC y miembros del equipo</li>
-      <li>Gameplay con subtítulos explicativos</li>
-      <li>Mecánicas de victoria y derrota</li>
-      <li>Interacción con enemigos e ítems</li>
-      <li>Depuración en tiempo real</li>
-    </ul>
-  </section>
+  <h2>Vídeo del Gameplay</h2>
+  <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
+    <iframe 
+      src="https://www.youtube.com/embed/GGaUZn2DgUs" 
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+      frameborder="0" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+      allowfullscreen>
+    </iframe>
+  </div>
+  <p>Incluye:</p>
+  <ul>
+    <li>Intro con logo de UPC y miembros del equipo</li>
+    <li>Gameplay con subtítulos explicativos</li>
+    <li>Mecánicas de victoria y derrota</li>
+    <li>Interacción con enemigos e ítems</li>
+    <li>Depuración en tiempo real</li>
+  </ul>
+</section>
 
   <section>
     <h2>Descarga</h2>
